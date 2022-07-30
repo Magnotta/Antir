@@ -1,0 +1,15 @@
+savePath
+_ gameState
+_ player1inventory
+__ item1
+__ item2
+__ container1
+___ item3
+___ item4
+_ player2inventory
+_ player3inventory
+_ player4inventory
+_ player5inventory
+_ player6inventory
+_ gameLog
+_ gameInfo
