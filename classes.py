@@ -7,6 +7,9 @@ Created on Thu Jun  9 16:31:15 2022
 
 from math import exp, sqrt
 from uuid import uuid1, UUID
+import tkinter as tk
+import tkinter.ttk as ttk
+import refs
 
 class Entity:
     def __init__(self, id=None):
@@ -188,6 +191,7 @@ class Player(Entity):
         self.pneuma += self.pdr
 
 
+
 class Time:
     def __init__(self, tm:int=0):
         self.tm = tm
@@ -200,31 +204,61 @@ class Time:
         self.mon = self.tm // 43200 % 12
         self.y = self.tm // 518400
 
-    def advance(self, m):
+    def advance_min(self, m):
         self.tm += m
         self._update()
 
-    def fTimeStr(self) -> str:
+    def get_ftimestr(self) -> str:
         wkDay = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado']
         return f'{wkDay[self.d%7]} {self.d}/{self.mon}/{self.y} {self.h}:{self.min}'
 
-
-
-class TimeEngine:
-    def __init__(self, players, tm=0):
+class Game:
+    def __init__(self, save_path=None, players=None, game_time=0) -> None:
+        self.save_path = save_path
         self.players = players
-        self.time = Time(tm)
+        self.time = Time(game_time)
+        self.state = 1
 
-    def advHours(self, h):
+    def adv_hours(self, h):
         self.time.advance(h*60)
 
     def hunger(self):
-        if(self.time.h == 12):
+        if self.time.h == 12:
             for player in self.players:
                 player.addHunger()
-        elif(self.time.h == 18):
+        elif self.time.h == 18:
             for player in self.players:
                 player.addHunger()
-        elif(self.time.h == 0):
+        elif self.time.h == 0:
             for player in self.players:
                 player.addHunger()
+
+
+class GUI:
+    def __init__(self, game: Game) -> None:
+        self.root = tk.Tk()
+        self.root.title(refs.win_name)
+        self.root.resizable(False, False)
+        self.dark_mode()
+
+        self.game = game
+
+
+    def dark_mode(self):
+        ''' Return a dark style to the window'''
+        
+        self.style = ttk.Style(self.root)
+        self.root.tk.call('source', './Azure/azure.tcl')
+        self.root.tk.call("set_theme", "dark")
+
+    def begin(self):
+        self.root.mainloop()
+
+    def set_label(self, event):
+        self.label.config(text=str(event.x))
+
+    def draw_screen(self):
+        self.root.geometry(str(refs.org_width) + "x" + str(refs.org_height))
+        self.root.bind("<Key-k>", self.set_label)
+        self.label = tk.Label(self.root, text="0")
+        self.label.pack(padx=10, pady=10)

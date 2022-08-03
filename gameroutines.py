@@ -2,21 +2,21 @@ import os
 from classes import *
 
 def newGameRoutine() -> tuple[str, list]:
-    playerNames = []
+    player_names = []
     players = []
-    savePath = "./saves/"
+    save_path = "./saves/"
     ans = input("Enter a name for the new save:")
 
     while(True):
         try:
-            os.mkdir(savePath+ans)
+            os.mkdir(save_path+ans)
         except FileExistsError:
             print("A game with that name already exists!")
             ans = input("Enter a name for the new save:")
             continue
         break
-    savePath += ans
-    savePath += '/'
+    save_path += ans
+    save_path += '/'
 
     while(True):
         ans = input("How many players are there? ")
@@ -26,30 +26,30 @@ def newGameRoutine() -> tuple[str, list]:
                 continue
             break
         print("That's not a number!")
-    playerCount = int(ans)
+    player_count = int(ans)
     
-    for i in range(playerCount):
+    for i in range(player_count):
         ordinal = lambda n: "%d%s" % (n,"tsnrhtdd"[(n//10%10!=1)*(n%10<4)*n%10::4])
         name = input(f"Enter the {ordinal(i+1)} player's name:")
-        playerNames.append(name)
+        player_names.append(name)
         players.append(Player(name))
 
-    with open(savePath+"gameinfo.txt", 'w') as f:
+    with open(save_path+"gameinfo.txt", 'w') as f:
         for player in players:
             f.write(f'player {player.name} {player.id.hex}\n')
 
-    saveGameRoutine(savePath, players, 0)
+    save_game_routine(save_path, players, 0)
 
-    return savePath, players
+    return save_path, players
 
 
-def loadGameRoutine() -> tuple[str, list, int] :
+def load_game_routine() -> tuple[str, list, int] :
     players = []
-    savePath = ""
+    save_path = ""
     games = []
 
-    for(_, dirNames, _) in os.walk("./saves/"):
-        games.extend(dirNames)
+    for(_, dir_names, _) in os.walk("./saves/"):
+        games.extend(dir_names)
         break
 
     if(not games):
@@ -70,53 +70,49 @@ def loadGameRoutine() -> tuple[str, list, int] :
         print("That's not a number!")
 
     players = []
-    savePath += "./saves/" + games[int(ans)-1] + "/"
+    save_path += "./saves/" + games[int(ans)-1] + "/"
 
-    with open(savePath+"gameinfo.txt", 'r') as f:
+    with open(save_path+"gameinfo.txt", 'r') as f:
         for line in f:
             words = line.split()
             if(words[0] == "player"):
                 players.append(Player(words[1], id=words[2]))
 
-    with open(savePath+"gamestate.txt", 'r') as f:
+    with open(save_path+"gamestate.txt", 'r') as f:
         gameTime = int(f.readline())
         for line in f:
             words = line.split()
             if(len(words) == 1):
-                curPlayer = next(x for x in players if x.id.hex == words[0])
+                cur_player = next(x for x in players if x.id.hex == words[0])
                 continue
             elif(len(words) == 2):
                 match words[0]:
                     case 'blood':
-                        curPlayer.blood = int(words[1])
+                        cur_player.blood = int(words[1])
                     case 'bloodLoss':
-                        curPlayer.bloodLoss = int(words[1])
+                        cur_player.bloodLoss = int(words[1])
                     case 'pneuma':
-                        curPlayer.pneuma = int(words[1])
+                        cur_player.pneuma = int(words[1])
                     case 'pdr':
-                        curPlayer.pdr = int(words[1])
+                        cur_player.pdr = int(words[1])
                     case 'stamina':
-                        curPlayer.stamina = int(words[1])
+                        cur_player.stamina = int(words[1])
                     case 'tiredLvl':
-                        curPlayer.tiredLvl = int(words[1])
+                        cur_player.tiredLvl = int(words[1])
                     case 'hungerPts':
-                        curPlayer.hungerPts = int(words[1])
+                        cur_player.hungerPts = int(words[1])
                     case _:
                         raise NameError(f'Unrecognized word during loading: {words[0]}')
 
-    return savePath, players, gameTime
+    return save_path, players, gameTime
 
-def saveGameRoutine(savePath, players, gameTime) -> None:
-    with open(savePath+"gamestate.txt", 'w') as f:
-        f.write(str(gameTime)+'\n')
+def save_game_routine(save_path, players, game_time) -> None:
+    with open(save_path+"gamestate.txt", 'w') as f:
+        f.write(str(game_time)+'\n')
         for player in players:
             f.write(f'{player.id.hex}\n')
             f.write(player.printState())
 
     for player in players:
-        with open(savePath+player.id.hex+'.txt', 'w') as f:    # Player inventories ###
+        with open(save_path+player.id.hex+'.txt', 'w') as f:    # Player inventories ###
             f.write('carrying\n')
-
-def startEngine(players, tm) -> TimeEngine:
-    eng = TimeEngine(players, tm)
-    return eng
