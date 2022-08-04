@@ -239,7 +239,6 @@ class GUI:
         self.root = tk.Tk()
         self.root.title(refs.win_name)
         self.root.resizable(False, False)
-        self.dark_mode()
 
         self.game = game
 
@@ -254,11 +253,26 @@ class GUI:
     def begin(self):
         self.root.mainloop()
 
-    def set_label(self, event):
-        self.label.config(text=str(event.x))
+    def _t_callback(self, event):
+        self.label.config(text="Advance time.")
+
+    def _q_callback(self, event):
+        self.label.config(text="Q clicked")
+
+    def _esc_callback(self, event):
+        self.entry.delete(0, 'end')
+
+    def bind_keys(self):
+        self.root.bind("<Key-t>", self._t_callback)
+        self.root.bind("<Key-Escape>", self._esc_callback)
 
     def draw_screen(self):
         self.root.geometry(str(refs.org_width) + "x" + str(refs.org_height))
-        self.root.bind("<Key-k>", self.set_label)
         self.label = tk.Label(self.root, text="0")
         self.label.pack(padx=10, pady=10)
+
+        self.entry = tk.Entry(self.root)
+        self.entry.bind("<Key-q>", self._q_callback)
+        self.entry.pack()
+
+    
