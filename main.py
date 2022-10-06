@@ -12,12 +12,6 @@ def main():
     game = Game()
     gui = GUI(game)
 
-    gui.dark_mode()
-
-    gui.bind_keys()
-
-    gui.draw_screen()
-
     gui.begin()
 
 
