@@ -5,13 +5,12 @@ Created on Thu Jun  9 16:31:15 2022
 @author: ndd2
 """
 
-from hashlib import new
 from math import exp, sqrt
-from tkinter.font import BOLD
 from uuid import uuid1, UUID
 import tkinter as tk
 import tkinter.ttk as ttk
 import tkinter.scrolledtext as st
+
 import refs
 
 class Entity:
@@ -20,6 +19,12 @@ class Entity:
             self.id = UUID(uuid1().hex)
         else:
             self.id = UUID(id)
+    
+    def __eq__(self, __o: object) -> bool:
+        if isinstance(__o, type(self)):
+            return self.id == __o.id
+
+        return False
 
 
 
@@ -86,12 +91,6 @@ class Player(Entity):
         self.wpn: Weapon = None
         self.invtry = []
         self.sleeping: bool = False
-
-    def __eq__(self, other):
-        if isinstance(other, type(self)):
-            return self.id == other.id
-
-        return False
          
     def setCdim(self, cdimName, cdimVal):
         if(cdimVal < self.cdimsRsvd[cdimName]):
@@ -190,53 +189,66 @@ class Player(Entity):
         self.pneuma += self.pdr
 
 
-
 class Time:
-    def __init__(self, tm:int=0):
-        self.tm = tm
-        self._update()
+    def __init__(self, tm = (0, 0, 0)) -> None:
+        self.d = tm[0]
+        self.h = tm[1]
+        self.m = tm[2]
+        self.mins = self.d*1440 + self.h*60 + self.m
 
-    def _update(self):
-        self.min = self.tm % 60
-        self.h = self.tm // 60 % 24
-        self.d = self.tm // 1440 % 30
-        self.mon = self.tm // 43200 % 12
-        self.y = self.tm // 518400
+    def __add__(self, __o):
+        if isinstance(__o, Time):
+            __r =  (self.d + __o.d, self.h + __o.h, self.m + __o.m)
+        elif isinstance(__o, tuple):
+            __r = (self.d + __o[0], self.h + __o[1], self.m + __o[2])
+        else:
+            raise TypeError(f"unsupported operand types for +: {type(self)} and {type(__o)}")
 
-    def advance_min(self, m):
-        self.tm += m
-        self._update()
+        if __r[2] >= 60:
+            __r = (__r[0], __r[1] + (__r[2]//60), __r[2] % 60)
+        if __r[1] >= 24:
+            __r = (__r[0] + (__r[1]//24), __r[1] % 24, __r[2])
+            
+        return Time(__r)
 
-    def get_ftimestr(self) -> str:
-        wkDay = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado']
-        return f'{wkDay[self.d%7]} {self.d}/{self.mon}/{self.y} {self.h}:{self.min}'
+    def __repr__(self) -> str:
+        return f"{self.d}, {self.h}:{self.m}"
+
+    def __eq__(self, __o: object) -> bool:
+        if isinstance(__o, type(self)):
+            return self.mins == __o.mins
+        elif isinstance(__o, tuple):
+            return self.time == __o
+        return False
+
 
 class Game:
-    def __init__(self, save_path=None, players=None, game_time=0) -> None:
+    def __init__(self, save_path=None, players=None, game_time=(0,0,0)) -> None:
         self.save_path = save_path
         self.players = players
         self.time = Time(game_time)
         self.state = 1
 
-    def adv_hours(self, h):
-        self.time.advance(h*60)
+    def advance(self, adv: tuple):
+        old_time = self.time
+        new_time = old_time + adv
 
-    def hunger(self):
-        if self.time.h == 12:
-            for player in self.players:
-                player.addHunger()
-        elif self.time.h == 18:
-            for player in self.players:
-                player.addHunger()
-        elif self.time.h == 0:
-            for player in self.players:
-                player.addHunger()
+        if new_time.d != old_time.d:
+            # day change, update PDR, third hungerpt
+            pass
+        if new_time.h != old_time.h:
+            # hour change, update hunger
+            pass
+        if new_time.m != old_time.m:
+            # minute change, update bloodloss, stamina
+            pass
 
 
 class GUI:
     def __init__(self, game: Game) -> None:
         self.container = tk.Tk()
         self.game = game
+        self.parser = Parser()
         self.undo = None
 
 ##### FRAMES IN THE MAIN WINDOW #####
@@ -381,11 +393,36 @@ class GUI:
         if self.undo:
             self.cmd_line.insert(0, self.undo)
 
+    def enter_callback(self, event):
+        print("Enter detected")
+        if self.valid_cmd and self.complete_cmd:
+            cmd_words = []
+            cmd_nums = []
+            for char in self.cmd_line.get():
+                if char.isdigit():
+                    cmd_nums.append(char)
+                else:
+                    cmd_words.append(char)
+            print(cmd_words)
+            print(cmd_nums)
+            
+
+    def keypress_callback(self, event):
+        if cmd := self.cmd_line.get():
+            self.parser.parse(cmd)
+
+        self.description.config(state=tk.NORMAL)
+        self.description.delete("1.0", tk.END)
+
+        self.description.insert("1.0", self.parser.description)
+
 
 
     def bind_keys(self):
         self.container.bind("<Key-Escape>", self._esc_callback)
         self.container.bind("<Control-z>", self._undo_callback)
+        self.container.bind("<Key>", self.keypress_callback)
+        self.container.bind("<KeyPress-Return>", self.enter_callback)
 
 
 
@@ -411,8 +448,7 @@ class GUI:
         self.info.pack()
         self.description_lframe.grid(row=2, column=1)
         self.description.pack()
-        self.description.insert("1.5", "bando de pau no cu lixos filhos da puta")
-        self.description.insert("1.5", "bando")
+        self.description.insert("1.0", "Bem-vindo ao Antir, seu otário!")
         self.description.config(state=tk.DISABLED)
         self.cmdbrowser.grid(row=0, column=1)
         self.playerinfo_lframe.grid(row=0, rowspan=3, column=2)
@@ -485,8 +521,35 @@ class GUI:
 ##### PLACEDATETIME FRAME WIDGETS #####
         
         self.place_lframe.grid(column=0, row=0, columnspan=5)
-        self.datetime_lframe.grid(column=5, row=0)
+        self.datetime_lframe.grid(column=5, row=0, columnspan=2)
         self.place.pack()
         self.datetime.pack()
 
 ##### END PLACEDATETIME FRAME WIDGETS #####
+
+##### string parser pros comandos #####
+
+class Parser:
+    def __init__(self) -> None:
+        self.description = ""
+        self.ans = ""
+
+    def parse(self, chars: str):
+        cmd = chars.lower()
+        depth = len(cmd)
+
+        if cmd[0] == 't':
+            self.description = "Menu de tempo"
+        elif cmd[0] == 'p':
+            self.description = "Menu de personagem"
+        elif cmd[0] == 'k':
+            self.description = "Menu de combate"
+        elif cmd[0] == 'e':
+            self.description = "Menu de cena"
+        elif cmd[0] == 'l':
+            self.description = "Menu de local"
+
+        if depth == 1:
+            return
+
+        
