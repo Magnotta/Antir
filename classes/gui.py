@@ -6,250 +6,24 @@ Created on Thu Jun  9 16:31:15 2022
 """
 
 from math import exp, sqrt
-from uuid import uuid1, UUID
+from .game import Game
+from .parser import Parser
+
 import tkinter as tk
+import tkinter.messagebox as messageBox
 import tkinter.ttk as ttk
 import tkinter.scrolledtext as st
 
 import refs
 
-class Entity:
-    def __init__(self, id=None):
-        if(id is None):
-            self.id = UUID(uuid1().hex)
-        else:
-            self.id = UUID(id)
-    
-    def __eq__(self, __o: object) -> bool:
-        if isinstance(__o, type(self)):
-            return self.id == __o.id
-
-        return False
-
-
-
-class Item(Entity):
-    def __init__(self, name, qty=1, isContainer=False):
-        super().__init__()
-        self.drblt: int = 100
-        self.kgs: float = 0.0
-        self.name: str = name
-        self.qty: int = qty
-        self.isContainer = isContainer
-        self.storedItems = []
-        
-    def storeItem(self, item):
-        if(not self.isContainer):
-            print('Non container items cannot store other items!')
-            return
-        
-        if(item.isContainer):
-            print('Cannot store container item inside another container!')
-            return
-        
-        self.storedItems.append(item)
-
-
-
-class Cover(Item):
-    def __init__(self):
-        super().__init__()
-        self.mat: str = None
-
-
-
-class Weapon(Item):
-    def __init__(self):
-        super().__init__()
-        self.mat: str = None
-        self.mode: str = 'blunt'
-
-
-
-class BodyPart:
-    def __init__(self):
-        self.health = 100
-        self.cover: Cover = None
-        self.status: str = 'normal'
-
-
-
-class Player(Entity):
-    def __init__(self, name, id=None):
-        super().__init__(id=id)
-        self.name: str = name
-        self.pneuma: int = 100
-        self.pdr: int = 0
-        self.blood: int = 100
-        self.bloodLoss: int = 0
-        self.stamina: int = 100
-        self.tiredLvl: int = 0
-        self.hungerPts: int = 0
-        self.cdims = {'ímpeto':0,'agilidade':0,'precisão':0,'defesa':0}
-        self.cdimsTot: int = 6
-        self.cdimsRsvd = {'ímpeto':0,'agilidade':0,'precisão':0,'defesa':0}
-        self.wpn: Weapon = None
-        self.invtry = []
-        self.sleeping: bool = False
-         
-    def setCdim(self, cdimName, cdimVal):
-        if(cdimVal < self.cdimsRsvd[cdimName]):
-            print(f'Failed to assign value {cdimVal} to {cdimName}: smaller than reserved. Min allowed is {self.cdimsRsvd[cdimName]}.')
-            return
-        
-        sum = cdimVal
-        for k,v in self.cdims.items():
-            if(k != cdimName):
-                sum += v
-        
-        if(sum > self.cdimsTot):
-            excess = sum - self.cdimsTot
-            print(f'Failed to assign value {cdimVal} to {cdimName}: total cdims overshoot. Max allowed is {cdimVal - excess}.')
-            return
-        
-        self.cdims[cdimName] = cdimVal
-        
-    def loadFromFile(self):
-        pass
-    
-    def massCurCarrying(self):
-        mass = 0.0
-        for item in self.invtry:
-            if(item.isContainer):
-                for subItem in item.storedItems:
-                    mass += subItem.kgs
-            mass += item.kgs
-        return mass
-     
-    def calcActDelay(self, act):
-        delay = 0.0
-        if(act == 'step'):
-            mass = self.massCurCarrying()
-            delay = mass*0.02 - 0.00004*self.cdims['precisão']*(mass**2) + 0.1/(self.cdims['agilidade']+1) + 0.3
-        
-        elif(act == 'roll'):
-            mass = self.massCurCarrying()
-            delay = 0.2/(self.cdims['precisão']+1)*mass - 0.000004*(self.cdims['precisão']**2)*(mass**2) + 1/(self.cdims['agilidade']**2+1) + 1.3
-        
-        elif(act == 'jump'):
-            mass = self.massCurCarrying()
-            delay = 0.02*mass - 0.000004*(self.cdims['precisão']**2)*(mass**2) + 0.1/(self.cdims['agilidade']+1) + 0.8
-        
-        elif(act == 'strike'):
-            if(self.wpn is None):
-                mass = 0.2
-            else:
-                mass = self.wpn.kgs
-            delay = exp(-1*self.cdims['agilidade']/mass) + 0.1*mass/(self.cdims['ímpeto']+1) + 1/sqrt(self.cdims['agilidade']*self.cdims['ímpeto']+1)
-        
-        elif(act == 'interact'):
-            print("Well, it's complicated. What are you interacting with?")
-        
-        elif(act == 'block'):
-            pass
-
-        else:
-            print(f'Action {act} not recognized.')
-        
-        return delay
-
-    def calcDmg(self, enemy, tgt):
-        pass
-    
-    def wearItem(self, item):
-        pass
-    
-    def takeBloodHit(self, dmg, tgt):
-        self.blood -= dmg
-    
-    def eatFood(self, food):
-        pass
-    
-    def printState(self):
-        ret = ''
-        ret += 'blood ' + str(self.blood) + '\n'
-        ret += 'bloodLoss ' + str(self.bloodLoss) + '\n'
-        ret += 'pneuma ' + str(self.pneuma) + '\n'
-        ret += 'pdr ' + str(self.pdr) + '\n'
-        ret += 'stamina ' + str(self.stamina) + '\n'
-        ret += 'tiredLvl ' + str(self.tiredLvl) + '\n'
-        ret += 'hungerPts ' + str(self.hungerPts) + '\n'
-        return ret
-
-    def addHunger(self):
-        self.hungerPts += 1
-    
-    def goToSleep(self):
-        self.sleeping = True
-        self.pdr += 3
-        self.pdr -= self.hungerPts
-
-    def wakeUp(self):
-        self.sleeping = False
-        self.pneuma += self.pdr
-
-
-class Time:
-    def __init__(self, tm = (0, 0, 0)) -> None:
-        self.d = tm[0]
-        self.h = tm[1]
-        self.m = tm[2]
-        self.mins = self.d*1440 + self.h*60 + self.m
-
-    def __add__(self, __o):
-        if isinstance(__o, Time):
-            __r =  (self.d + __o.d, self.h + __o.h, self.m + __o.m)
-        elif isinstance(__o, tuple):
-            __r = (self.d + __o[0], self.h + __o[1], self.m + __o[2])
-        else:
-            raise TypeError(f"unsupported operand types for +: {type(self)} and {type(__o)}")
-
-        if __r[2] >= 60:
-            __r = (__r[0], __r[1] + (__r[2]//60), __r[2] % 60)
-        if __r[1] >= 24:
-            __r = (__r[0] + (__r[1]//24), __r[1] % 24, __r[2])
-            
-        return Time(__r)
-
-    def __repr__(self) -> str:
-        return f"{self.d}, {self.h}:{self.m}"
-
-    def __eq__(self, __o: object) -> bool:
-        if isinstance(__o, type(self)):
-            return self.mins == __o.mins
-        elif isinstance(__o, tuple):
-            return self.time == __o
-        return False
-
-
-class Game:
-    def __init__(self, save_path=None, players=None, game_time=(0,0,0)) -> None:
-        self.save_path = save_path
-        self.players = players
-        self.time = Time(game_time)
-        self.state = 1
-
-    def advance(self, adv: tuple):
-        old_time = self.time
-        new_time = old_time + adv
-
-        if new_time.d != old_time.d:
-            # day change, update PDR, third hungerpt
-            pass
-        if new_time.h != old_time.h:
-            # hour change, update hunger
-            pass
-        if new_time.m != old_time.m:
-            # minute change, update bloodloss, stamina
-            pass
-
 
 class GUI:
-    def __init__(self, game: Game) -> None:
+    def __init__(self) -> None:
         self.container = tk.Tk()
-        self.game = game
-        self.parser = Parser()
         self.undo = None
+        self.quit = False
+        self.command = ''
+        self.runCommand = False
 
 ##### FRAMES IN THE MAIN WINDOW #####
 
@@ -363,22 +137,48 @@ class GUI:
 
 
 
-    def configure(self):
+    def configure(self, context: Game):
         self.container.title(refs.win_name)
         #self.container.geometry(str(refs.win_width) + "x" + str(refs.win_height))
         self.container.resizable(False, False)
+
+        self.container.protocol("WM_DELETE_WINDOW", self.on_closing)
 
         self.dark_mode()
 
         self.bind_keys()
 
+        self.datetime.config(text=str(context.time))
 
 
-    def begin(self):
-        self.configure()
+
+
+    def on_closing(self):
+        if messageBox.askokcancel("Quit", "Are you sure you want to quit?"):
+            self.container.destroy()
+        self.quit = True
+
+
+
+    def begin(self, game):
+        self.configure(game)
         self.draw_screen()
 
-        self.container.mainloop()
+    
+
+    def update_widgets(self, g: Game):
+        self.datetime.config(text=str(g.time))
+
+        self.container.update_idletasks()
+        self.container.update()
+
+
+
+    def reply(self, ans):
+        self.description.config(state=tk.NORMAL)
+        self.description.delete("1.0", tk.END)
+
+        self.description.insert("1.0", ans.description)
 
 
 
@@ -393,28 +193,15 @@ class GUI:
         if self.undo:
             self.cmd_line.insert(0, self.undo)
 
+
+
     def enter_callback(self, event):
-        print("Enter detected")
-        if self.valid_cmd and self.complete_cmd:
-            cmd_words = []
-            cmd_nums = []
-            for char in self.cmd_line.get():
-                if char.isdigit():
-                    cmd_nums.append(char)
-                else:
-                    cmd_words.append(char)
-            print(cmd_words)
-            print(cmd_nums)
+        self.runCommand = True
+
             
 
     def keypress_callback(self, event):
-        if cmd := self.cmd_line.get():
-            self.parser.parse(cmd)
-
-        self.description.config(state=tk.NORMAL)
-        self.description.delete("1.0", tk.END)
-
-        self.description.insert("1.0", self.parser.description)
+        self.command = self.cmd_line.get()
 
 
 
@@ -525,31 +312,4 @@ class GUI:
         self.place.pack()
         self.datetime.pack()
 
-##### END PLACEDATETIME FRAME WIDGETS #####
-
-##### string parser pros comandos #####
-
-class Parser:
-    def __init__(self) -> None:
-        self.description = ""
-        self.ans = ""
-
-    def parse(self, chars: str):
-        cmd = chars.lower()
-        depth = len(cmd)
-
-        if cmd[0] == 't':
-            self.description = "Menu de tempo"
-        elif cmd[0] == 'p':
-            self.description = "Menu de personagem"
-        elif cmd[0] == 'k':
-            self.description = "Menu de combate"
-        elif cmd[0] == 'e':
-            self.description = "Menu de cena"
-        elif cmd[0] == 'l':
-            self.description = "Menu de local"
-
-        if depth == 1:
-            return
-
-        
+##### END PLACEDATETIME FRAME WIDGETS ##### 

@@ -1,17 +1,19 @@
 import sys
 from os import path
-sys.path.append(path.dirname('.'))
 
-import classes
+SCRIPT_DIR = path.dirname(path.abspath(__file__))
+sys.path.append(path.dirname(SCRIPT_DIR))
+
+from classes.entity import Entity
 
 def test_unique():
-    a = classes.Entity()
-    b = classes.Entity()
+    a = Entity()
+    b = Entity()
     assert a != b, "Should be uniquely identified"
 
 def test_copy():
-    a = classes.Entity()
-    b = classes.Entity(a.id.hex)
+    a = Entity()
+    b = Entity(a.id.hex)
     assert a == b, "Should be equal"
 
 if __name__ == "__main__":
