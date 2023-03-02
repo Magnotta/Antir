@@ -6,26 +6,27 @@ Created on Sat Jun 11 15:53:14 2022
 """
 
 from classes.game import Game
-from classes.gui import GUI
-from classes.parser import Parser
+from gui.gui import GUI
 from classes.solver import Solver
+from classes.player import Player
+from classes.logger import Logger
 
 def main():
-    game_instance = Game()
-    display = GUI()
-    parser = Parser()
-    solver = Solver(game_instance)
+    test_players = [Player('joao'), Player('jose'), Player('seucu'), Player('miguel'), Player('sandino'), Player('castro')]
+    game_instance = Game(players=test_players)
+    display = GUI(game_instance)
+    solver = Solver()
+    logger = Logger()
     
     display.begin(game_instance)
 
     while not display.quit:
-        parser.parse(display.command)
+        display.read_input()
 
-        display.reply(parser)
-
-        if display.runCommand:
-            display.runCommand = False
-            solver.run_command(parser.command, game_instance)
+        if display.cmd_trigger:
+            display.cmd_trigger = False
+            solver.execute(display.parser.parsed)
+            logger.log(game_instance)
 
         display.update_widgets(game_instance)
 

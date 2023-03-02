@@ -6,8 +6,9 @@ Created on Thu Jun  9 16:31:15 2022
 """
 
 from math import exp, sqrt
-from .game import Game
-from .parser import Parser
+from classes.game import Game
+from .cmd_parser import Parser
+
 
 import tkinter as tk
 import tkinter.messagebox as messageBox
@@ -18,12 +19,13 @@ import refs
 
 
 class GUI:
-    def __init__(self) -> None:
+    def __init__(self, g: Game) -> None:
         self.container = tk.Tk()
         self.undo = None
         self.quit = False
-        self.command = ''
-        self.runCommand = False
+        self.cmd_trigger: bool = False
+        self.parser = Parser(g)
+        
 
 ##### FRAMES IN THE MAIN WINDOW #####
 
@@ -168,9 +170,22 @@ class GUI:
 
     def update_widgets(self, g: Game):
         self.datetime.config(text=str(g.time))
+        self.p1_hunger.config(text=str(g.players[0].hungerPts))
+        self.p2_hunger.config(text=str(g.players[1].hungerPts))
+        self.p3_hunger.config(text=str(g.players[2].hungerPts))
+        self.p4_hunger.config(text=str(g.players[3].hungerPts))
+        self.p5_hunger.config(text=str(g.players[4].hungerPts))
+        self.p6_hunger.config(text=str(g.players[5].hungerPts))
+        self.place.config(text=g.location)
 
         self.container.update_idletasks()
         self.container.update()
+
+
+
+    def read_input(self):
+        if cmd:=self.cmd_line.get():
+            self.parser.parse(cmd)
 
 
 
@@ -196,19 +211,15 @@ class GUI:
 
 
     def enter_callback(self, event):
-        self.runCommand = True
-
-            
-
-    def keypress_callback(self, event):
-        self.command = self.cmd_line.get()
+        if self.parser.command_is_complete:
+            self.cmd_trigger = True
+            self.cmd_line.delete(0, 'end')
 
 
 
     def bind_keys(self):
         self.container.bind("<Key-Escape>", self._esc_callback)
         self.container.bind("<Control-z>", self._undo_callback)
-        self.container.bind("<Key>", self.keypress_callback)
         self.container.bind("<KeyPress-Return>", self.enter_callback)
 
 

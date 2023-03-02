@@ -1,4 +1,7 @@
+from math import sqrt, exp
+
 from .entity import Entity
+from .weapon import Weapon
 
 class Player(Entity):
     def __init__(self, name, id=None):
@@ -102,8 +105,8 @@ class Player(Entity):
         ret += 'hungerPts ' + str(self.hungerPts) + '\n'
         return ret
 
-    def addHunger(self):
-        self.hungerPts += 1
+    def addHunger(self, points: int):
+        self.hungerPts += points
     
     def goToSleep(self):
         self.sleeping = True

@@ -1,13 +1,15 @@
 from .time import Time
+from .event import Event
+from .player import Player
 
 class Game:
-    def __init__(self, save_path=None, players=None, game_time=(0,0,0)) -> None:
+    def __init__(self, save_path=None, players: list[Player] =None, game_time=(0,0,0)) -> None:
         self.save_path = save_path
         self.players = players
         self.time = Time(game_time)
-        self.state = 1
-        self.game_events = []
+        self.game_events: list[Event] = []
         self.daily_events = []
+        self.location = ''
 
     def advance(self, adv: tuple):
         old_time = self.time
@@ -30,3 +32,14 @@ class Game:
         if new_time.m != old_time.m:
             # minute change, update bloodloss, stamina
             pass
+    
+    def hunger(self, target: str, points: int):
+        if target == '*':
+            for p in self.players:
+                p.addHunger(points)
+        else:
+            player_id = int(target) - 1
+            self.players[player_id].addHunger(points)
+
+    def move_scene(self, location: str):
+        self.location = location
