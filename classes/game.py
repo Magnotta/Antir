@@ -1,6 +1,7 @@
 from .time import Time
 from .event import Event
-from .player import Player
+from player.player import Player
+from player.inventory import Inventory
 
 class Game:
     def __init__(self, save_path=None, players: list[Player] =None, game_time=(0,0,0)) -> None:
@@ -10,6 +11,7 @@ class Game:
         self.game_events: list[Event] = []
         self.daily_events = []
         self.location = ''
+        self.item_pool = Inventory()
 
     def advance(self, adv: tuple):
         old_time = self.time

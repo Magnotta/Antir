@@ -25,21 +25,13 @@ class Parser:
 
     def parse(self, chars: str):
         if len(chars) < 2:
+            self.command_is_recognized = False
             return
 
-        try:
-            top = chars[0]
-        except IndexError:
-            self.command_is_recognized = False
-        finally:
-            chars = chars[1:]
-
-        try:
-            low = chars[0]
-        except IndexError:
-            self.command_is_recognized = False
-        finally:
-            chars = chars[1:]
+        top = chars[0]
+        chars = chars[1:]
+        low = chars[0]
+        chars = chars[1:]
 
         try:
             func = self.top_dict[top][low][0]
@@ -72,7 +64,7 @@ class Parser:
                     arg_len = 0
                     buffer = ''
                     for char in chars:
-                        if char.isdigit():
+                        if char.isdigit() or char == '-':
                             buffer += char
                             arg_len += 1
                         else:

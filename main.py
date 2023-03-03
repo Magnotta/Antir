@@ -8,7 +8,7 @@ Created on Sat Jun 11 15:53:14 2022
 from classes.game import Game
 from gui.gui import GUI
 from classes.solver import Solver
-from classes.player import Player
+from player.player import Player
 from classes.logger import Logger
 
 def main():

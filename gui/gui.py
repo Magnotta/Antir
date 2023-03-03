@@ -178,9 +178,9 @@ class GUI:
 
         self.table_name.grid(row=0, column=0)
         self.table_blood.grid(row=0, column=1)
-        self.table_pneuma.grid(row=0, column=3)
-        self.table_hunger.grid(row=0, column=5)
-        self.table_stamina.grid(row=0, column=6)
+        self.table_pneuma.grid(row=0, column=2)
+        self.table_hunger.grid(row=0, column=3)
+        self.table_stamina.grid(row=0, column=4)
 
         for player_id in self.player_ids:
             for col_no, col in enumerate(self.table_columns):

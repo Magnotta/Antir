@@ -1,7 +1,8 @@
 from math import sqrt, exp
 
-from .entity import Entity
-from .weapon import Weapon
+from classes.entity import Entity
+from classes.weapon import Weapon
+from .inventory import Inventory
 
 class Player(Entity):
     def __init__(self, name, id=None):
@@ -17,9 +18,10 @@ class Player(Entity):
         self.cdims = {'ímpeto':0,'agilidade':0,'precisão':0,'defesa':0}
         self.cdimsTot: int = 6
         self.cdimsRsvd = {'ímpeto':0,'agilidade':0,'precisão':0,'defesa':0}
-        self.wpn: Weapon = None
-        self.invtry = []
+        self.weapon: Weapon = None
         self.sleeping: bool = False
+        
+        self.inventory = Inventory(self.id)
          
     def setCdim(self, cdimName, cdimVal):
         if(cdimVal < self.cdimsRsvd[cdimName]):
