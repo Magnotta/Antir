@@ -7,13 +7,13 @@ class Player(Entity):
     def __init__(self, name, id=None):
         super().__init__(id=id)
         self.name: str = name
-        self.pneuma: int = 100
-        self.pdr: int = 0
         self.blood: int = 100
-        self.bloodLoss: int = 0
+        self.pneuma: int = 100
+        self.hunger: int = 0
         self.stamina: int = 100
+        self.pdr: int = 0
+        self.bloodLoss: int = 0
         self.tiredLvl: int = 0
-        self.hungerPts: int = 0
         self.cdims = {'ímpeto':0,'agilidade':0,'precisão':0,'defesa':0}
         self.cdimsTot: int = 6
         self.cdimsRsvd = {'ímpeto':0,'agilidade':0,'precisão':0,'defesa':0}
@@ -88,9 +88,15 @@ class Player(Entity):
     def wearItem(self, item):
         pass
     
-    def takeBloodHit(self, dmg, tgt):
+    def takeBloodHit(self, dmg):
         self.blood -= dmg
     
+    def takePDRHit(self, dmg):
+        self.pdr -= dmg
+
+    def takeStmHit(self, dmg):
+        self.stamina -= dmg
+
     def eatFood(self, food):
         pass
     
@@ -102,16 +108,16 @@ class Player(Entity):
         ret += 'pdr ' + str(self.pdr) + '\n'
         ret += 'stamina ' + str(self.stamina) + '\n'
         ret += 'tiredLvl ' + str(self.tiredLvl) + '\n'
-        ret += 'hungerPts ' + str(self.hungerPts) + '\n'
+        ret += 'hungerPts ' + str(self.hunger) + '\n'
         return ret
 
     def addHunger(self, points: int):
-        self.hungerPts += points
+        self.hunger += points
     
     def goToSleep(self):
         self.sleeping = True
         self.pdr += 3
-        self.pdr -= self.hungerPts
+        self.pdr -= self.hunger
 
     def wakeUp(self):
         self.sleeping = False

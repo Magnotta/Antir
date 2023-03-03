@@ -19,12 +19,13 @@ import refs
 
 
 class GUI:
-    def __init__(self, g: Game) -> None:
+    def __init__(self, game_instance: Game) -> None:
         self.container = tk.Tk()
+        self.parser = Parser(game_instance)
         self.undo = None
         self.quit = False
         self.cmd_trigger: bool = False
-        self.parser = Parser(g)
+        self.player_ids = [p.id for p in game_instance.players]
         
 
 ##### FRAMES IN THE MAIN WINDOW #####
@@ -33,14 +34,10 @@ class GUI:
         self.main_frame = tk.Frame(self.container)
         self.placedatetime_frame = tk.Frame(self.container)
 
-##### END FRAMES IN THE MAIN WINDOW #####
-#####
 ##### WIDGETS IN THE LOGS FRAME #####
 
 
 
-##### END WIDGETS IN THE LOGS FRAME #####
-#####
 ##### WIDGETS IN THE MAIN FRAME #####
 
         self.info_lframe = ttk.Labelframe(self.main_frame, text="info adicional")
@@ -51,84 +48,25 @@ class GUI:
         self.playerinfo_lframe = ttk.Labelframe(self.main_frame, text="jogadores")
         self.cmd_line = tk.Entry(self.main_frame)
 
-##### END WIDGETS IN THE MAIN FRAME #####
-#####
 ##### VARIABLES IN THE PLAYERINFO TABLE #####
 
         self.table_name = tk.Label(self.playerinfo_lframe, text="Nome", font=("Arial", 10))
         self.table_blood = tk.Label(self.playerinfo_lframe, text="Sangue", font=("Arial", 10))
-        self.table_bloodloss = tk.Label(self.playerinfo_lframe, text="PDS", font=("Arial", 10))
         self.table_pneuma = tk.Label(self.playerinfo_lframe, text="Pneuma", font=("Arial", 10))
-        self.table_pdr = tk.Label(self.playerinfo_lframe, text="PDR", font=("Arial", 10))
         self.table_hunger = tk.Label(self.playerinfo_lframe, text="Fome", font=("Arial", 10))
         self.table_stamina = tk.Label(self.playerinfo_lframe, text="Stm", font=("Arial", 10))
-        self.table_tiredLvl = tk.Label(self.playerinfo_lframe, text="Cans", font=("Arial", 10))
 
-        self.p1_name = tk.Label(self.playerinfo_lframe, text="joao")
-        self.p1_blood = tk.Label(self.playerinfo_lframe, text="100")
-        self.p1_bloodloss = tk.Label(self.playerinfo_lframe, text="0")
-        self.p1_pneuma = tk.Label(self.playerinfo_lframe, text="100")
-        self.p1_pdr = tk.Label(self.playerinfo_lframe, text="3")
-        self.p1_hunger = tk.Label(self.playerinfo_lframe, text="0")
-        self.p1_stamina = tk.Label(self.playerinfo_lframe, text="100")
-        self.p1_tiredLvl = tk.Label(self.playerinfo_lframe, text="0")
-
-        self.p2_name = tk.Label(self.playerinfo_lframe, text="joao")
-        self.p2_blood = tk.Label(self.playerinfo_lframe, text="100")
-        self.p2_bloodloss = tk.Label(self.playerinfo_lframe, text="0")
-        self.p2_pneuma = tk.Label(self.playerinfo_lframe, text="100")
-        self.p2_pdr = tk.Label(self.playerinfo_lframe, text="3")
-        self.p2_hunger = tk.Label(self.playerinfo_lframe, text="0")
-        self.p2_stamina = tk.Label(self.playerinfo_lframe, text="100")
-        self.p2_tiredLvl = tk.Label(self.playerinfo_lframe, text="0")
-
-        self.p3_name = tk.Label(self.playerinfo_lframe, text="joao")
-        self.p3_blood = tk.Label(self.playerinfo_lframe, text="100")
-        self.p3_bloodloss = tk.Label(self.playerinfo_lframe, text="0")
-        self.p3_pneuma = tk.Label(self.playerinfo_lframe, text="100")
-        self.p3_pdr = tk.Label(self.playerinfo_lframe, text="3")
-        self.p3_hunger = tk.Label(self.playerinfo_lframe, text="0")
-        self.p3_stamina = tk.Label(self.playerinfo_lframe, text="100")
-        self.p3_tiredLvl = tk.Label(self.playerinfo_lframe, text="0")
-
-        self.p4_name = tk.Label(self.playerinfo_lframe, text="joao")
-        self.p4_blood = tk.Label(self.playerinfo_lframe, text="100")
-        self.p4_bloodloss = tk.Label(self.playerinfo_lframe, text="0")
-        self.p4_pneuma = tk.Label(self.playerinfo_lframe, text="100")
-        self.p4_pdr = tk.Label(self.playerinfo_lframe, text="3")
-        self.p4_hunger = tk.Label(self.playerinfo_lframe, text="0")
-        self.p4_stamina = tk.Label(self.playerinfo_lframe, text="100")
-        self.p4_tiredLvl = tk.Label(self.playerinfo_lframe, text="0")
-
-        self.p5_name = tk.Label(self.playerinfo_lframe, text="joao")
-        self.p5_blood = tk.Label(self.playerinfo_lframe, text="100")
-        self.p5_bloodloss = tk.Label(self.playerinfo_lframe, text="0")
-        self.p5_pneuma = tk.Label(self.playerinfo_lframe, text="100")
-        self.p5_pdr = tk.Label(self.playerinfo_lframe, text="3")
-        self.p5_hunger = tk.Label(self.playerinfo_lframe, text="0")
-        self.p5_stamina = tk.Label(self.playerinfo_lframe, text="100")
-        self.p5_tiredLvl = tk.Label(self.playerinfo_lframe, text="0")
-
-        self.p6_name = tk.Label(self.playerinfo_lframe, text="joao")
-        self.p6_blood = tk.Label(self.playerinfo_lframe, text="100")
-        self.p6_bloodloss = tk.Label(self.playerinfo_lframe, text="0")
-        self.p6_pneuma = tk.Label(self.playerinfo_lframe, text="100")
-        self.p6_pdr = tk.Label(self.playerinfo_lframe, text="3")
-        self.p6_hunger = tk.Label(self.playerinfo_lframe, text="0")
-        self.p6_stamina = tk.Label(self.playerinfo_lframe, text="100")
-        self.p6_tiredLvl = tk.Label(self.playerinfo_lframe, text="0")
-
-##### END VARIABLES IN THE PLAYERINFO TABLE #####
-#####
+        self.table_columns = ['name', 'blood', 'pneuma', 'hunger', 'stamina']
+        for player in game_instance.players:
+            for col in self.table_columns:
+                setattr(self, f'p{player.id}{col}', tk.Label(self.playerinfo_lframe))
+            
 ##### WIDGETS IN THE PLACEDATETIME FRAME #####
 
         self.place_lframe = ttk.Labelframe(self.placedatetime_frame, text="local")
         self.place = tk.Label(self.place_lframe, text="lugar nenhum mas pqp esse lixo é chatão", anchor="center")
         self.datetime_lframe = ttk.Labelframe(self.placedatetime_frame, text="data e horário")
         self.datetime = tk.Label(self.datetime_lframe, text="zero hora", anchor="center")
-
-##### END WIDGETS IN THE PLACEDATETIME FRAME #####
-
 
     def dark_mode(self):
         ''' Return a dark style to the window'''
@@ -158,7 +96,7 @@ class GUI:
     def on_closing(self):
         if messageBox.askokcancel("Quit", "Are you sure you want to quit?"):
             self.container.destroy()
-        self.quit = True
+            self.quit = True
 
 
 
@@ -170,12 +108,11 @@ class GUI:
 
     def update_widgets(self, g: Game):
         self.datetime.config(text=str(g.time))
-        self.p1_hunger.config(text=str(g.players[0].hungerPts))
-        self.p2_hunger.config(text=str(g.players[1].hungerPts))
-        self.p3_hunger.config(text=str(g.players[2].hungerPts))
-        self.p4_hunger.config(text=str(g.players[3].hungerPts))
-        self.p5_hunger.config(text=str(g.players[4].hungerPts))
-        self.p6_hunger.config(text=str(g.players[5].hungerPts))
+
+        for p in g.players:
+            for col in self.table_columns:
+                getattr(self, f'p{p.id}{col}').config(text=str(getattr(p, col)))
+    
         self.place.config(text=g.location)
 
         self.container.update_idletasks()
@@ -225,21 +162,9 @@ class GUI:
 
 
     def draw_screen(self): 
-##### MAIN WINDOW FRAMES #####
-
         self.logs_frame.grid(row=0)
         self.main_frame.grid(row=1)
         self.placedatetime_frame.grid(row=2)
-
-##### END MAIN WINDOW FRAMES #####
-#####
-##### LOGS FRAME WINDGETS #####
-
-
-
-##### END LOGS FRAME WINDGETS #####
-#####
-##### MAIN FRAME WIDGETS #####
 
         self.cmd_line.grid(row=1, column=1)
         self.info_lframe.grid(row=0, rowspan=3, column=0)
@@ -253,74 +178,15 @@ class GUI:
 
         self.table_name.grid(row=0, column=0)
         self.table_blood.grid(row=0, column=1)
-        self.table_bloodloss.grid(row=0, column=2)
         self.table_pneuma.grid(row=0, column=3)
-        self.table_pdr.grid(row=0, column=4)
         self.table_hunger.grid(row=0, column=5)
         self.table_stamina.grid(row=0, column=6)
-        self.table_tiredLvl.grid(row=0, column=7)
 
-        self.p1_name.grid(row=1, column=0)
-        self.p1_blood.grid(row=1, column=1)
-        self.p1_bloodloss.grid(row=1, column=2)
-        self.p1_pneuma.grid(row=1, column=3)
-        self.p1_pdr.grid(row=1, column=4)
-        self.p1_hunger.grid(row=1, column=5)
-        self.p1_stamina.grid(row=1, column=6)
-        self.p1_tiredLvl.grid(row=1, column=7)
-
-        self.p2_name.grid(row=2, column=0)
-        self.p2_blood.grid(row=2, column=1)
-        self.p2_bloodloss.grid(row=2, column=2)
-        self.p2_pneuma.grid(row=2, column=3)
-        self.p2_pdr.grid(row=2, column=4)
-        self.p2_hunger.grid(row=2, column=5)
-        self.p2_stamina.grid(row=2, column=6)
-        self.p2_tiredLvl.grid(row=2, column=7)
-
-        self.p3_name.grid(row=3, column=0)
-        self.p3_blood.grid(row=3, column=1)
-        self.p3_bloodloss.grid(row=3, column=2)
-        self.p3_pneuma.grid(row=3, column=3)
-        self.p3_pdr.grid(row=3, column=4)
-        self.p3_hunger.grid(row=3, column=5)
-        self.p3_stamina.grid(row=3, column=6)
-        self.p3_tiredLvl.grid(row=3, column=7)
-
-        self.p4_name.grid(row=4, column=0)
-        self.p4_blood.grid(row=4, column=1)
-        self.p4_bloodloss.grid(row=4, column=2)
-        self.p4_pneuma.grid(row=4, column=3)
-        self.p4_pdr.grid(row=4, column=4)
-        self.p4_hunger.grid(row=4, column=5)
-        self.p4_stamina.grid(row=4, column=6)
-        self.p4_tiredLvl.grid(row=4, column=7)
-
-        self.p5_name.grid(row=5, column=0)
-        self.p5_blood.grid(row=5, column=1)
-        self.p5_bloodloss.grid(row=5, column=2)
-        self.p5_pneuma.grid(row=5, column=3)
-        self.p5_pdr.grid(row=5, column=4)
-        self.p5_hunger.grid(row=5, column=5)
-        self.p5_stamina.grid(row=5, column=6)
-        self.p5_tiredLvl.grid(row=5, column=7)
-
-        self.p6_name.grid(row=6, column=0)
-        self.p6_blood.grid(row=6, column=1)
-        self.p6_bloodloss.grid(row=6, column=2)
-        self.p6_pneuma.grid(row=6, column=3)
-        self.p6_pdr.grid(row=6, column=4)
-        self.p6_hunger.grid(row=6, column=5)
-        self.p6_stamina.grid(row=6, column=6)
-        self.p6_tiredLvl.grid(row=6, column=7)
-
-##### END MAIN FRAME WIDGETS #####
-#####
-##### PLACEDATETIME FRAME WIDGETS #####
+        for player_id in self.player_ids:
+            for col_no, col in enumerate(self.table_columns):
+                getattr(self, f'p{player_id}{col}').grid(row=player_id+1, column=col_no)
         
         self.place_lframe.grid(column=0, row=0, columnspan=5)
         self.datetime_lframe.grid(column=5, row=0, columnspan=2)
         self.place.pack()
         self.datetime.pack()
-
-##### END PLACEDATETIME FRAME WIDGETS ##### 

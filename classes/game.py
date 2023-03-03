@@ -32,14 +32,38 @@ class Game:
         if new_time.m != old_time.m:
             # minute change, update bloodloss, stamina
             pass
+
+    def blood(self, target: str, points: int):
+        if target == '*':
+            for p in self.players:
+                p.takeBloodHit(points)
+        else:
+            player_id = int(target)
+            self.players[player_id].takeBloodHit(points)
     
+    def pdr(self, target: str, points: int):
+        if target == '*':
+            for p in self.players:
+                p.takePDRHit(points)
+        else:
+            player_id = int(target)
+            self.players[player_id].takePDRHit(points)
+
     def hunger(self, target: str, points: int):
         if target == '*':
             for p in self.players:
                 p.addHunger(points)
         else:
-            player_id = int(target) - 1
+            player_id = int(target)
             self.players[player_id].addHunger(points)
+
+    def stamina(self, target: str, points: int):
+        if target == '*':
+            for p in self.players:
+                p.takeStmHit(points)
+        else:
+            player_id = int(target)
+            self.players[player_id].takeStmHit(points)
 
     def move_scene(self, location: str):
         self.location = location

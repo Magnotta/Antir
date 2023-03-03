@@ -12,7 +12,10 @@ class Parser:
     def __init__(self, g: Game) -> None:
         self.time_dict = {'a': [g.advance,'time'],}
         self.env_dict = {}
-        self.player_dict = {'h': [g.hunger,'player','int'],}
+        self.player_dict = {'h': [g.hunger, 'player', 'int'],
+                            'b': [g.blood, 'player', 'int'],
+                            'p': [g.pdr, 'player', 'int'],
+                            's': [g.stamina, 'player', 'int']}
         self.location_dict = {'g': [g.move_scene, 'str']}
 
         self.top_dict = {'t': self.time_dict,
