@@ -114,7 +114,8 @@ class Player(Entity):
         return ret
 
     def addHunger(self, points: int):
-        self.hunger += points
+        if not self.sleeping:
+            self.hunger += points
     
     def goToSleep(self):
         self.sleeping = True

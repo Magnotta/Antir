@@ -17,6 +17,6 @@ class Inventory:
                 break
 
         if not removed:
-            raise ValueError(f'Remove item not in p{self.owner_id}inventory: ID={item_id}')
+            raise ValueError(f'Item is not in p{self.owner_id} inventory: ID={item_id}')
 
     

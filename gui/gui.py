@@ -6,8 +6,7 @@ Created on Thu Jun  9 16:31:15 2022
 """
 
 from math import exp, sqrt
-from classes.game import Game
-from .cmd_parser import Parser
+from classes.game import Game, Parser
 
 
 import tkinter as tk
@@ -18,7 +17,7 @@ import tkinter.scrolledtext as st
 import refs
 
 
-class GUI:
+class MAIN_GUI:
     def __init__(self, game_instance: Game) -> None:
         self.container = tk.Tk()
         self.parser = Parser(game_instance)
@@ -152,12 +151,16 @@ class GUI:
             self.cmd_trigger = True
             self.cmd_line.delete(0, 'end')
 
+    def _tab_callback(self, event):
+        pass
+
 
 
     def bind_keys(self):
         self.container.bind("<Key-Escape>", self._esc_callback)
         self.container.bind("<Control-z>", self._undo_callback)
         self.container.bind("<KeyPress-Return>", self.enter_callback)
+        self.container.bind("<Tab>", self._tab_callback)
 
 
 
@@ -190,3 +193,6 @@ class GUI:
         self.datetime_lframe.grid(column=5, row=0, columnspan=2)
         self.place.pack()
         self.datetime.pack()
+
+class player_gui:
+    pass

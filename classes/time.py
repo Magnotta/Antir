@@ -7,20 +7,27 @@ class Time:
         self.m = tm[2]
         self.mins = self.d*1440 + self.h*60 + self.m
 
+        self.hour_change = False
+        self.day_change = False
+
     def __add__(self, other):
         if isinstance(other, Time):
-            __r =  (self.d + other.d, self.h + other.h, self.m + other.m)
+            __r =  Time((self.d + other.d, self.h + other.h, self.m + other.m))
         elif isinstance(other, tuple):
-            __r = (self.d + other[0], self.h + other[1], self.m + other[2])
+            __r = Time((self.d + other[0], self.h + other[1], self.m + other[2]))
         else:
             raise TypeError(f"unsupported operand types for +: {type(self)} and {type(other)}")
+        
 
-        if __r[2] >= 60:
-            __r = (__r[0], __r[1] + (__r[2]//60), __r[2] % 60)
-        if __r[1] >= 24:
-            __r = (__r[0] + (__r[1]//24), __r[1] % 24, __r[2])
+
+        if __r.m >= 60:
+            __r = Time((__r.d, __r.h + (__r.m//60), __r.m % 60))
+            __r.hour_change = True
+        if __r.h >= 24:
+            __r = Time((__r.d + (__r.h//24), __r.h % 24, __r.m))
+            __r.day_change = True
             
-        return Time(__r)
+        return __r
 
     def __repr__(self) -> str:
         return f"{self.d}, {self.h}:{self.m}"
@@ -29,11 +36,12 @@ class Time:
         return f"{self.d}, {self.h}:{self.m}"
 
     def __eq__(self, other: object) -> bool:
-        if isinstance(other, type(self)):
+        if isinstance(other, Time):
             return self.mins == other.mins
         elif isinstance(other, tuple):
-            return self.time == other
-        return False
+            return self.d == other[0] and self.h == other[1] and self.m == other[2]
+        else:          
+            return False
     
     def __lt__(self, other: Time):
         return self.mins < other.mins

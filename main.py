@@ -6,7 +6,7 @@ Created on Sat Jun 11 15:53:14 2022
 """
 
 from classes.game import Game
-from gui.gui import GUI
+from gui.gui import MAIN_GUI
 from classes.solver import Solver
 from player.player import Player
 from classes.logger import Logger
@@ -14,10 +14,10 @@ from classes.logger import Logger
 def main():
     test_players = [Player('joao'), Player('jose'), Player('seucu'), Player('miguel'), Player('sandino'), Player('castro')]
     game_instance = Game(players=test_players)
-    display = GUI(game_instance)
-    solver = Solver()
+    display = MAIN_GUI(game_instance)
     logger = Logger()
     
+    game_instance.start()
     display.begin(game_instance)
 
     while not display.quit:
@@ -25,7 +25,7 @@ def main():
 
         if display.cmd_trigger:
             display.cmd_trigger = False
-            solver.execute(display.parser.parsed)
+            game_instance.execute(display.parser.parsed)
             logger.log(game_instance)
 
         display.update_widgets(game_instance)
