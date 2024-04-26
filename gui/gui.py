@@ -14,17 +14,39 @@ import tkinter.messagebox as messageBox
 import tkinter.ttk as ttk
 import tkinter.scrolledtext as st
 
-import refs
+window_name = "Antir Pre Alpha"
 
-
-class MAIN_GUI:
-    def __init__(self, game_instance: Game) -> None:
+class GUI_BASE:
+    def __init__(self) -> None:
         self.container = tk.Tk()
-        self.parser = Parser(game_instance)
-        self.undo = None
         self.quit = False
+        self.style = ttk.Style(self.container)
+        self.container.tk.call('source', './Azure/azure.tcl')
+        self.container.tk.call("set_theme", "dark")
+
+        self.container.title(window_name)
+        self.container.resizable(False, False)
+        self.container.protocol("WM_DELETE_WINDOW", self.on_closing)
+
+
+
+    def on_closing(self):
+        self.quit = True
+        self.container.destroy()
+
+
+
+class MAIN_PAGE(GUI_BASE):
+    def __init__(self, game_instance: Game) -> None:
+        super().__init__()
+        self.container.protocol("WM_DELETE_WINDOW", self.on_closing)
+
+        self.parser = Parser(game_instance)
         self.cmd_trigger: bool = False
         self.player_ids = [p.id for p in game_instance.players]
+
+        #self.container.bind("<KeyPress-Return>", self.enter_callback)
+        self.container.bind("<Key-Escape>", self.esc_callback)
         
 
 ##### FRAMES IN THE MAIN WINDOW #####
@@ -65,30 +87,7 @@ class MAIN_GUI:
         self.place_lframe = ttk.Labelframe(self.placedatetime_frame, text="local")
         self.place = tk.Label(self.place_lframe, text="lugar nenhum mas pqp esse lixo é chatão", anchor="center")
         self.datetime_lframe = ttk.Labelframe(self.placedatetime_frame, text="data e horário")
-        self.datetime = tk.Label(self.datetime_lframe, text="zero hora", anchor="center")
-
-    def dark_mode(self):
-        ''' Return a dark style to the window'''
-        
-        self.style = ttk.Style(self.container)
-        self.container.tk.call('source', './Azure/azure.tcl')
-        self.container.tk.call("set_theme", "dark")
-
-
-
-    def configure(self, context: Game):
-        self.container.title(refs.win_name)
-        #self.container.geometry(str(refs.win_width) + "x" + str(refs.win_height))
-        self.container.resizable(False, False)
-
-        self.container.protocol("WM_DELETE_WINDOW", self.on_closing)
-
-        self.dark_mode()
-
-        self.bind_keys()
-
-        self.datetime.config(text=str(context.time))
-
+        self.datetime = tk.Label(self.datetime_lframe, text="zera hora", anchor="center")
 
 
 
@@ -99,68 +98,10 @@ class MAIN_GUI:
 
 
 
-    def begin(self, game):
-        self.configure(game)
-        self.draw_screen()
-
-    
-
-    def update_widgets(self, g: Game):
-        self.datetime.config(text=str(g.time))
-
-        for p in g.players:
-            for col in self.table_columns:
-                getattr(self, f'p{p.id}{col}').config(text=str(getattr(p, col)))
-    
-        self.place.config(text=g.location)
-
-        self.container.update_idletasks()
-        self.container.update()
-
-
-
-    def read_input(self):
-        if cmd:=self.cmd_line.get():
-            self.parser.parse(cmd)
-
-
-
-    def reply(self, ans):
-        self.description.config(state=tk.NORMAL)
-        self.description.delete("1.0", tk.END)
-
-        self.description.insert("1.0", ans.description)
-
-
-
-    def _esc_callback(self, event):
+    def esc_callback(self, event):
         self.undo = self.cmd_line.get()
         self.cmd_line.delete(0, 'end')
         self.cmd_line.focus()
-
-
-
-    def _undo_callback(self, event):
-        if self.undo:
-            self.cmd_line.insert(0, self.undo)
-
-
-
-    def enter_callback(self, event):
-        if self.parser.command_is_complete:
-            self.cmd_trigger = True
-            self.cmd_line.delete(0, 'end')
-
-    def _tab_callback(self, event):
-        pass
-
-
-
-    def bind_keys(self):
-        self.container.bind("<Key-Escape>", self._esc_callback)
-        self.container.bind("<Control-z>", self._undo_callback)
-        self.container.bind("<KeyPress-Return>", self.enter_callback)
-        self.container.bind("<Tab>", self._tab_callback)
 
 
 
@@ -194,5 +135,55 @@ class MAIN_GUI:
         self.place.pack()
         self.datetime.pack()
 
-class player_gui:
-    pass
+
+
+    def configure(self, context:Game):
+        self.datetime.config(text=str(context.time))
+
+
+
+    def begin(self, game):
+        self.configure(game)
+        self.draw_screen()
+
+
+
+    def read_input(self):
+        if cmd:=self.cmd_line.get():
+            self.parser.parse(cmd)
+
+
+
+    def reply(self, ans):
+        self.description.config(state=tk.NORMAL)
+        self.description.delete("1.0", tk.END)
+
+        self.description.insert("1.0", ans.description)
+
+
+
+    def update_widgets(self, g: Game):
+        self.datetime.config(text=str(g.time))
+
+        for p in g.players:
+            for col in self.table_columns:
+                getattr(self, f'p{p.id}{col}').config(text=str(getattr(p, col)))
+    
+        self.place.config(text=g.location)
+
+        self.container.update_idletasks()
+        self.container.update()
+
+
+
+class PLAYER_PAGE(GUI_BASE):
+    def __init__(self) -> None:
+        super().__init__()
+
+        self.player_ids = []
+
+        
+
+class ITEM_PAGE(GUI_BASE):
+    def __init__(self) -> None:
+        super().__init__()
