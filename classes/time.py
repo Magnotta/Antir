@@ -6,9 +6,8 @@ class Time:
         self.h = tm[1]
         self.m = tm[2]
         self.mins = self.d*1440 + self.h*60 + self.m
-
-        self.hour_change = False
-        self.day_change = False
+        self._hour_change = False
+        self._day_change = False
 
     def __add__(self, other):
         if isinstance(other, Time):
@@ -17,15 +16,13 @@ class Time:
             __r = Time((self.d + other[0], self.h + other[1], self.m + other[2]))
         else:
             raise TypeError(f"unsupported operand types for +: {type(self)} and {type(other)}")
-        
-
 
         if __r.m >= 60:
             __r = Time((__r.d, __r.h + (__r.m//60), __r.m % 60))
-            __r.hour_change = True
+            __r._hour_change = True
         if __r.h >= 24:
             __r = Time((__r.d + (__r.h//24), __r.h % 24, __r.m))
-            __r.day_change = True
+            __r._day_change = True
             
         return __r
 
@@ -64,6 +61,12 @@ class Time:
             list_hours.append(copy)
             copy += (0,1,0)
         return list_hours
+    
+    def hour_change(self):
+        return self._hour_change
+    
+    def day_change(self):
+        return self._day_change
     
     @classmethod
     def from_int_mins(cls, total_mins: int):

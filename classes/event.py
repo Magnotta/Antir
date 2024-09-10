@@ -1,11 +1,8 @@
 from classes.time import Time
+from typing import Callable
 
 class Event():
-    def __init__(self, _due_time: Time, action:str='') -> None:
-        self.due_time = _due_time
-        self.action = ''
-
-
-daily_events = [Event(Time((0,12,0)), action='ph*1'),
-                Event(Time((0,18,0)), action='ph*1'),
-                Event(Time((0,23,59)), action='ph*1')]
+    def __init__(self, due_time: Time, action:str='', *, player_condition:Callable=None) -> None:
+        self.due_time = due_time
+        self.action = action
+        self.player_condition = player_condition

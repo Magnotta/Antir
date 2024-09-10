@@ -122,6 +122,13 @@ class Player(Entity):
         self.pdr += 3
         self.pdr -= self.hunger
 
+    def step_pneuma(self):
+        self.pdr += 3
+        self.pdr -= self.hunger
+        self.pneuma += self.pdr
+        self.pneuma = min(self.pneuma, 100)
+        self.pdr = 0
+
     def wakeUp(self):
         self.sleeping = False
         self.pneuma += self.pdr

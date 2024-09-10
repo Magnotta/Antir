@@ -7,7 +7,7 @@ Created on Sat Jun 11 15:53:14 2022
 
 from classes.game import Game
 from gui.gui import MAIN_PAGE
-from classes.solver import Solver
+# from classes.solver import Solver
 from player.player import Player
 from classes.logger import Logger
 
@@ -25,7 +25,7 @@ def main():
 
         if display.cmd_trigger:
             display.cmd_trigger = False
-            game_instance.execute(display.parser.parsed)
+            game_instance.execute(display.parser.exec)
             logger.log(game_instance)
 
         display.update_widgets(game_instance)
