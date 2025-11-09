@@ -1,27 +1,36 @@
 from math import sqrt, exp
 
 from classes.entity import Entity
-from classes.weapon import Weapon
 from .inventory import Inventory
 
 class Player(Entity):
     def __init__(self, name, id=None):
         super().__init__(id=id)
+
+        self.state_blood = 1000
+        self.state_bstack = 0
+        self.state_pneuma = 1000
+        self.state_pstack = 0
+        self.state_stamina = 1000
+        self.state_tired = 0
+        self.state_hunger = 0
+        self.state_awake = True
         self.name: str = name
-        self.blood: int = 100
-        self.pneuma: int = 100
-        self.hunger: int = 0
-        self.stamina: int = 100
-        self.pdr: int = 0
-        self.bloodLoss: int = 0
-        self.tiredLvl: int = 0
         self.cdims = {'ímpeto':0,'agilidade':0,'precisão':0,'defesa':0}
         self.cdimsTot: int = 6
         self.cdimsRsvd = {'ímpeto':0,'agilidade':0,'precisão':0,'defesa':0}
         self.weapon: Weapon = None
         self.sleeping: bool = False
-        
         self.inventory = Inventory(self.id)
+
+    def asleep(self):
+        return self.state_awake == False
+    
+    def sleep(self):
+        self.state_awake = False
+
+    def wake(self):
+        self.state_awake = True
          
     def setCdim(self, cdimName, cdimVal):
         if(cdimVal < self.cdimsRsvd[cdimName]):
@@ -91,17 +100,14 @@ class Player(Entity):
         pass
     
     def takeBloodHit(self, dmg):
-        self.blood -= dmg
+        self.state_blood -= dmg
     
     def takePDRHit(self, dmg):
-        self.pdr -= dmg
+        self.state_pstack -= dmg
 
     def takeStmHit(self, dmg):
-        self.stamina -= dmg
+        self.state_stamina -= dmg
 
-    def eatFood(self, food):
-        pass
-    
     def printState(self):
         ret = ''
         ret += 'blood ' + str(self.blood) + '\n'
@@ -114,21 +120,10 @@ class Player(Entity):
         return ret
 
     def addHunger(self, points: int):
-        if not self.sleeping:
-            self.hunger += points
-    
-    def goToSleep(self):
-        self.sleeping = True
-        self.pdr += 3
-        self.pdr -= self.hunger
+        self.state_hunger += points
 
     def step_pneuma(self):
-        self.pdr += 3
-        self.pdr -= self.hunger
-        self.pneuma += self.pdr
-        self.pneuma = min(self.pneuma, 100)
-        self.pdr = 0
-
-    def wakeUp(self):
-        self.sleeping = False
-        self.pneuma += self.pdr
+        self.state_pstack += 3 - self.state_hunger
+        self.state_pneuma += self.state_pstack
+        self.state_pstack = 0
+        self.state_pneuma = min(self.state_pneuma, 1000)

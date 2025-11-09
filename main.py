@@ -7,17 +7,30 @@ Created on Sat Jun 11 15:53:14 2022
 
 from classes.game import Game
 from gui.gui import MAIN_PAGE
-# from classes.solver import Solver
 from player.player import Player
-from classes.logger import Logger
+
+from sqlalchemy import create_engine, MetaData
+from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.exc import IntegrityError
+from db.models import Base
 
 def main():
+    engine = create_engine('sqlite:///db/antir_db.db')
+    Base.metadata.create_all(engine)
+    session = Session(engine, future=True)
+
+    try:
+        session.begin()
+        # session.add(teste)
+        session.flush()
+        session.commit()
+    except IntegrityError:
+        session.rollback()
+
     test_players = [Player('joao'), Player('jose'), Player('seucu'), Player('miguel'), Player('sandino'), Player('castro')]
     game_instance = Game(players=test_players)
-    display = MAIN_PAGE(game_instance)
-    logger = Logger()
+    display = MAIN_PAGE(game_instance, session)
     
-    game_instance.start()
     display.begin(game_instance)
 
     while not display.quit:
@@ -26,7 +39,6 @@ def main():
         if display.cmd_trigger:
             display.cmd_trigger = False
             game_instance.execute(display.parser.exec)
-            logger.log(game_instance)
 
         display.update_widgets(game_instance)
 

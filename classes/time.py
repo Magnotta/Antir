@@ -30,7 +30,17 @@ class Time:
         return f"{self.d}, {self.h}:{self.m}"
     
     def __str__(self) -> str:
-        return f"{self.d}, {self.h}:{self.m}"
+        if self.h < 10:
+            if self.m < 10:
+                return f"Dia {self.d}, 0{self.h}:0{self.m}"
+            else:
+                return f"Dia {self.d}, 0{self.h}:{self.m}"
+        else:
+            if self.m < 10:
+                return f"Dia {self.d}, {self.h}:0{self.m}"
+            else:
+                return f"Dia {self.d}, {self.h}:{self.m}"
+
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, Time):
