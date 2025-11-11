@@ -3,6 +3,12 @@ from math import sqrt, exp
 from classes.entity import Entity
 from .inventory import Inventory
 
+def targets_player(func):
+    def wrapper(*args, **kwargs):
+        
+        
+        return wrapper
+
 class Player(Entity):
     def __init__(self, name, id=None):
         super().__init__(id=id)
