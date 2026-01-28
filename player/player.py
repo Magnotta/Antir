@@ -5,7 +5,10 @@ from .inventory import Inventory
 
 def targets_player(func):
     def wrapper(*args, **kwargs):
-        
+        if args[1] == '*':
+            newargs = []
+            for arg in args:
+                pass
         
         return wrapper
 
