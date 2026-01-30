@@ -1,83 +1,105 @@
 from typing import List, Optional
-from db.database import Session
+from sqlalchemy import select
 from db.models import (
-    Player,
-    Location,
-    Item,
-    Item_Mold,
-    Item_Param
+    Player, Location, BodyNode,
+    EquipmentSlot, Item
 )
 
 class PlayerRepository:
-    def create(self, name: str) -> Player:
-        session = Session()
-        instance = Player(name=name)
-        session.add(instance)
-        session.commit()
-        session.refresh(instance)
-        return instance
+    def __init__(self, session):
+        self.session = session
 
     def get(self, id: int):
-        session = Session()
-        return session.get(Player, id)
+        return self.session.get(Player, id)
 
     def update(self, id: int, **fields):
-        session = Session()
-        instance = session.get(Player, id)
+        instance = self.session.get(Player, id)
         if not instance:
             return None
 
         for key, value in fields.items():
             setattr(instance, key, value)
 
-        session.commit()
+        self.session.commit()
         return instance
 
     def delete(self, id: int) -> bool:
-        session = Session()
-        instance = session.get(Player, id)
+        instance = self.session.get(Player, id)
         if not instance:
             return False
 
-        session.delete(instance)
-        session.commit()
+        self.session.delete(instance)
+        self.session.commit()
         return True
     
     # def list_all(self) -> List[Player]:
-    #     session = Session()
-    #     return session.query(Player).all()
+    #     return self.session.query(Player).all()
     
 class LocationRepository:
+    def __init__(self, session):
+        self.session = session
+
     def create(self, name: str):
-        session = Session()
         instance = Location(name=name)
-        session.add(instance)
-        session.commit()
-        session.refresh(instance)
+        self.session.add(instance)
+        self.session.commit()
+        self.session.refresh(instance)
         return instance
 
     def get(self, id: int):
-        session = Session()
-        return session.get(Location, id)
+        return self.session.get(Location, id)
 
     def update(self, id: int, **fields):
-        session = Session()
-        instance = session.get(Location, id)
+        instance = self.session.get(Location, id)
         if not instance:
             return None
 
         for key, value in fields.items():
             setattr(instance, key, value)
 
-        session.commit()
+        self.session.commit()
         return instance
 
     def delete(self, id: int) -> bool:
-        session = Session()
-        instance = session.get(Location, id)
+        instance = self.session.get(Location, id)
         if not instance:
             return False
 
-        session.delete(instance)
-        session.commit()
+        self.session.delete(instance)
+        self.session.commit()
         return True
+    
+class ItemRepository:
+    def __init__(self, session):
+        self.session = session
+
+    def get_loose_items(self, player_id: int):
+        equipped_ids = (
+            select(EquipmentSlot.item_id)
+            .where(EquipmentSlot.item_id.isnot(None))
+        )
+
+        return (
+            self.session.query(Item)
+            .filter(Item.owner == player_id)
+            .filter(Item.container_item_id.is_(None))
+            .filter(~Item.id.in_(equipped_ids))
+            .all()
+        )
+
+    def get_equipped_items(self, player_id: int):
+        return (
+            self.session.query(EquipmentSlot)
+            .join(BodyNode)
+            .filter(BodyNode.owner == player_id)
+            .filter(EquipmentSlot.item_id.isnot(None))
+            .all()
+        )
+
+    def get_containers(self, player_id: int):
+        return (
+            self.session.query(Item)
+            .filter(Item.owner == player_id)
+            .filter(Item.contained_items.any())
+            .all()
+        )

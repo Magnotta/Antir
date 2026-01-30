@@ -1,20 +1,8 @@
-from db.repository import PlayerRepository
-from db.models import (
-    BodyNode,
-    Item,
-    EquipmentSlot
-)
+from db.models import BodyNode
 
-
-class PlayerService:
-    def __init__(self):
-        self.repo = PlayerRepository()
-
-    def create_new_player(self, name: str):
-        return self.repo.create(name=name)
-    
-    def create_player_anatomy(self, player_id):
-        head = BodyNode(
+class Anatomy:
+    def __init__(self, player_id):
+        self.head = BodyNode(
             owner=player_id,
             name="head"
         )
@@ -22,7 +10,7 @@ class PlayerService:
         spine = BodyNode(
             owner=player_id,
             name="spine",
-            parent=head
+            parent=self.head
         )
 
         neck = BodyNode(
@@ -126,5 +114,3 @@ class PlayerService:
             name="right_foot",
             parent=right_shank,
         )
-
-        return head

@@ -8,15 +8,12 @@ from PyQt6.QtWidgets import (
 
 from PyQt6.QtCore import Qt
 
-# from systems.command_service import CommandService
-from engine.event_engine import Engine
-
 
 class HomeTab(QWidget):
-    def __init__(self):
+    def __init__(self, engine):
         super().__init__()
 
-        self.engine = Engine()
+        self.engine = engine
 
         self.output = QTextEdit()
         self.output.setReadOnly(True)
@@ -30,9 +27,10 @@ class HomeTab(QWidget):
         # self.input.returnPressed.connect(self.execute_command)
         self.input.setStyleSheet(
                     "QLineEdit { font-family: Consolas, monospace; }")
+        self.input.returnPressed.connect(self.on_command_entered)
         
         self.placedatetime = QLabel()
-        self.placedatetime.setAlignment(Qt.AlignmentFlag.AlignLeft |
+        self.placedatetime.setAlignment(Qt.AlignmentFlag.AlignRight |
                                         Qt.AlignmentFlag.AlignVCenter)
         self.placedatetime.setObjectName("statusLabel")
         self.update_placedatetime()
@@ -60,7 +58,7 @@ class HomeTab(QWidget):
             QLabel#statusLabel {
                 font-family: Consolas, monospace;
                 font-size: 11px;
-                color: #888;
+                color: #666;
                 padding: 4px;
             }
             """
@@ -75,3 +73,17 @@ class HomeTab(QWidget):
     def update_placedatetime(self):
         string = self.engine.state.get_placedatetime_string()
         self.placedatetime.setText(string)
+
+    def on_command_entered(self):
+        text = self.input.text().strip()
+        if not text:
+            return
+
+        self.print_line(f"> {text}")
+
+        responses = self.engine.cmd.execute(text)
+        for line in responses:
+            self.print_line(line)
+
+        self.input.clear()
+        self.update_placedatetime()

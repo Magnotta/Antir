@@ -1,40 +1,36 @@
 from __future__ import annotations
 
 class Time:
-    def __init__(self, tm = (0, 0, 0)) -> None:
-        self.d = tm[0]
-        self.h = tm[1]
-        self.m = tm[2]
-        self.tick = self.d*1440 + self.h*60 + self.m
-        self._hour_change = False
-        self._day_change = False
+    def __init__(self, tm:int=0) -> None:
+        self.tick = tm
+        self.d = tm//1440
+        self.h = tm%1440//60
+        self.m = tm%60
+        self.day_change = False
+        self.hour_change = False
+
+
 
     def __add__(self, other):
         if isinstance(other, Time):
-            __r =  Time((self.d + other.d, self.h + other.h, self.m + other.m))
-        elif isinstance(other, tuple):
-            __r = Time((self.d + other[0], self.h + other[1], self.m + other[2]))
+            __r =  Time(self.tick + other.tick)
+        elif isinstance(other, int):
+            __r = Time(self.tick + other)
         else:
             raise TypeError(f"unsupported operand types for +: {type(self)} and {type(other)}")
-
-        if __r.m >= 60:
-            __r = Time((__r.d, __r.h + (__r.m//60), __r.m % 60))
-            __r._hour_change = True
-        if __r.h >= 24:
-            __r = Time((__r.d + (__r.h//24), __r.h % 24, __r.m))
-            __r._day_change = True
             
+        __r._day_change(self)
+        __r._hour_change(self)
         return __r
+    
 
-    def __repr__(self) -> str:
-        return f"{self.d}, {self.h}:{self.m}"
     
     def __str__(self) -> str:
         if self.h < 10:
             if self.m < 10:
                 return f"Dia {self.d}   0{self.h}:0{self.m}"
             else:
-                return f"Dia {self.d}   {self.h}:{self.m}"
+                return f"Dia {self.d}   0{self.h}:{self.m}"
         else:
             if self.m < 10:
                 return f"Dia {self.d}   {self.h}:0{self.m}"
@@ -42,19 +38,36 @@ class Time:
                 return f"Dia {self.d}   {self.h}:{self.m}"
 
 
+
     def __eq__(self, other: object) -> bool:
         if isinstance(other, Time):
             return self.tick == other.tick
-        elif isinstance(other, tuple):
-            return self.d == other[0] and self.h == other[1] and self.m == other[2]
+        elif isinstance(other, int):
+            return self.tick == other
+        else:          
+            return False
+
+
+    
+    def __lt__(self, other: object):
+        if isinstance(other, Time):
+            return self.tick < other.tick
+        elif isinstance(other, int):
+            return self.tick < other
         else:          
             return False
     
-    def __lt__(self, other: Time):
-        return self.tick < other.tick
+
     
     def __gt__(self, other: Time):
-        return self.tick > other.tick
+        if isinstance(other, Time):
+            return self.tick > other.tick
+        elif isinstance(other, int):
+            return self.tick > other
+        else:          
+            return False
+    
+
 
     def ticks_until(self, stop: Time):
         list_minutes = []
@@ -64,6 +77,8 @@ class Time:
             copy += (0,0,1)
         return list_minutes
     
+    
+    
     def hours_until(self, stop: Time):
         list_hours = []
         copy = Time((self.d,self.h,self.m))
@@ -72,18 +87,14 @@ class Time:
             copy += (0,1,0)
         return list_hours
     
-    def hour_change(self):
-        return self._hour_change
     
-    def day_change(self):
-        return self._day_change
     
-    @classmethod
-    def from_int_ticks(cls, ticks: int):
-        days = ticks // 1440
-        ticks %= 1440
-        hours = ticks // 60
-        ticks %= 60
-        mins = ticks
-
-        return (days,hours,mins)
+    def _hour_change(self, other:Time):
+        if self.h != other.h:
+            self.hour_change = True
+    
+    
+    
+    def _day_change(self, other:Time):
+        if self.d != other.d:
+            self.day_change = True
