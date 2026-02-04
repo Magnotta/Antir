@@ -1,21 +1,15 @@
+from db.repository import PlayerStatRepository
+
 class Stats:
-    def __init__(self):
-        self.height = 180
-        self.weight = 75
+    def __init__(self, stat_repo: PlayerStatRepository, player_id):
+        self.repo = stat_repo
+        self.player_id = player_id
 
-        self.arm_strength = 500
-        self.leg_strength = 500
-        self.dexterity = 500
-        self.vitality = 500
+    def get(self, stat_name: str):
+        return self.repo.get(self.player_id, stat_name)
 
-        self.blood = 1000
-        self.blood_change = 0
-        self.pneuma = 1000
-        self.pneuma_change = 0
-        self.stress = 0
-        self.stamina = 1000
-        self.exhaustion_level = 0
-        self.hunger = 0
-        self.thirst = 0
-        self.awake = True
-        self.sickness = []
+    def get_all(self) -> dict:
+        return self.repo.get_all(self.player_id)
+    
+    def add(self, stat_name:str, amount: int):
+        self.repo.add(self.player_id, stat_name, amount)

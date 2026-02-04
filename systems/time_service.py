@@ -39,35 +39,45 @@ class Time:
 
 
 
-    def __eq__(self, other: object) -> bool:
+    def __eq__(self, other) -> bool:
         if isinstance(other, Time):
             return self.tick == other.tick
         elif isinstance(other, int):
             return self.tick == other
         else:          
-            return False
-
-
+            raise TypeError
     
-    def __lt__(self, other: object):
+    def __lt__(self, other):
         if isinstance(other, Time):
             return self.tick < other.tick
         elif isinstance(other, int):
             return self.tick < other
         else:          
-            return False
+            raise TypeError
     
-
-    
-    def __gt__(self, other: Time):
+    def __gt__(self, other):
         if isinstance(other, Time):
             return self.tick > other.tick
         elif isinstance(other, int):
             return self.tick > other
         else:          
-            return False
+            raise TypeError
     
+    def __ge__(self, other):
+        if isinstance(other, Time):
+            return self.tick >= other.tick
+        elif isinstance(other, int):
+            return self.tick >= other
+        else:          
+            raise TypeError
 
+    def __le__(self, other):
+        if isinstance(other, Time):
+            return self.tick <= other.tick
+        elif isinstance(other, int):
+            return self.tick <= other
+        else:          
+            raise TypeError
 
     def ticks_until(self, stop: Time):
         list_minutes = []

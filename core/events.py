@@ -1,16 +1,18 @@
 from db.models import (
     Item, EquipmentSlot
 )
+from systems.time_service import Time
 
 EVENTS = {}
 
 class Event:
     type: str = "base"
+    impacts: str = ''
 
-    def __init__(self, payload: dict | None = None, due_tick: int = 0):
+    def __init__(self, due_time: Time, payload: dict | None = None):
         self.id = 0
         self.payload = payload or {}
-        self.due_tick = due_tick
+        self.due_time = due_time
 
     def _set_id(self, id):
         self.id = id
@@ -22,7 +24,7 @@ class Event:
         raise NotImplementedError
     
 class EquipItemEvent(Event):
-    def execute(self, engine):
+    def apply(self, engine):
         session = engine.session
 
         item = session.get(Item, self.payload["item_id"])
@@ -46,4 +48,16 @@ class PutItemInContainerEvent(Event):
 
         inv.put_in_container(item, container)
 
+        return []
+
+class HungerEvent(Event):
+    type = "player hunger"
+    impacts = "stats"
+     
+    def __init__(self, due_time: Time, payload = None):
+        super().__init__(due_time, payload)
+
+    def apply(self, state):
+        player = state.get_player_by_id(self.payload["target"])
+        player.stats.add("hunger", self.payload["amount"])
         return []

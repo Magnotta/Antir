@@ -1,45 +1,27 @@
-PLAYERS_SCHEMA = {
-    "0": {
-        "name": "Joao"
-    },
-    "1": {
-        "name": "Jose"
-    },
-    "2": {
-        "name": "Malina"
-    },
-    "3": {
-        "name": "Estranha"
-    },
-    "4": {
-        "name": "Ricardo"
-    }
-}
-
 BODY_SCHEMA = {
     "Head": {
-        "slots": [],
+        "slots": ["earring", "hat", "headband"],
         "children": {
             "Spine": {
                 "slots": [],
                 "children": {
                     "Neck":{
-                        "slots": [],
+                        "slots": ["around", "necklace"],
                         "children": {
                             "Torso":{
-                                "slots": [],
+                                "slots": ["front", "back"],
                                 "children": {
                                     "Right_shoulder": {
-                                        "slots": [],
+                                        "slots": ["bag"],
                                         "children": {
                                             "Right_arm": {
-                                                "slots": [],
+                                                "slots": ["armband"],
                                                 "children": {
                                                     "Right_forearm": {
-                                                        "slots": [],
+                                                        "slots": ["bracelet"],
                                                         "children": {
                                                             "Right_hand": {
-                                                                "slots": [],
+                                                                "slots": ["ring"],
                                                                 "children": {}
                                                             }
                                                         }
@@ -49,16 +31,16 @@ BODY_SCHEMA = {
                                         }
                                     },
                                     "Left_shoulder": {
-                                        "slots": [],
+                                        "slots": ["bag"],
                                         "children": {
                                             "Left_arm": {
-                                                "slots": [],
+                                                "slots": ["armband"],
                                                 "children": {
                                                     "Left_forearm":{
-                                                        "slots": [],
+                                                        "slots": ["bracelet"],
                                                         "children": {
                                                             "Left_hand": {
-                                                                "slots": [],
+                                                                "slots": ["ring"],
                                                                 "children": {}
                                                             }
                                                         }
@@ -72,16 +54,16 @@ BODY_SCHEMA = {
                         }
                     },
                     "Hips": {
-                        "slots": [],
+                        "slots": ["belt"],
                         "children": {
                             "Right_leg": {
-                                "slots": [],
+                                "slots": ["holster"],
                                 "children": {
                                     "Right_shank": {
                                         "slots": [],
                                         "children": {
                                             "Right_foot":{
-                                                "slots": [],
+                                                "slots": ["anklet"],
                                                 "children": {}
                                             }
                                         }
@@ -89,13 +71,13 @@ BODY_SCHEMA = {
                                 }
                             },
                             "Left_leg":{
-                                "slots": [],
+                                "slots": ["holster"],
                                 "children": {
                                     "Left_shank": {
                                         "slots": [],
                                         "children": {
                                             "Left_foot": {
-                                                "slots": [],
+                                                "slots": ["anklet"],
                                                 "children": {}
                                             }
                                         }

@@ -1,19 +1,66 @@
 from typing import List, Optional
 from sqlalchemy import select
 from db.models import (
-    Player, Location, BodyNode,
-    EquipmentSlot, Item
+    PlayerRecord, Location, BodyNode,
+    EquipmentSlot, Item, PlayerStat
 )
+
+class PlayerStatRepository:
+    def __init__(self, session):
+        self.session = session
+    
+    def get_all(self, player_id: int) -> dict[str, float]:
+        rows = (
+            self.session.query(PlayerStat)
+            .filter(PlayerStat.player_id == player_id)
+            .all()
+        )
+        return {row.name: row.value for row in rows}
+    
+    def get(self, player_id: int, statname: str) -> int:
+        row = (
+            self.session.query(PlayerStat)
+            .filter(
+                PlayerStat.player_id == player_id,
+                PlayerStat.name == statname
+            )
+            .one()
+        )
+        return row.value
+    
+    def set(self, player_id: int, stat: str, value: float):
+        row = (
+            self.session.query(PlayerStat)
+            .filter(
+                PlayerStat.player_id == player_id,
+                PlayerStat.name == stat
+            )
+            .one()
+        )
+        row.value = value
+        self.session.commit()
+
+    def add(self, player_id: int, stat: str, delta: float):
+        row = (
+            self.session.query(PlayerStat)
+            .filter(
+                PlayerStat.player_id == player_id,
+                PlayerStat.name == stat
+            )
+            .one()
+        )
+        row.value += delta
+        self.session.commit()
 
 class PlayerRepository:
     def __init__(self, session):
         self.session = session
 
     def get(self, id: int):
-        return self.session.get(Player, id)
+        return self.session.get(PlayerRecord, id)
 
-    def update(self, id: int, **fields):
-        instance = self.session.get(Player, id)
+    def set(self, id: int, **fields):
+        instance = self.session.get(PlayerRecord, id)
         if not instance:
             return None
 
@@ -24,7 +71,7 @@ class PlayerRepository:
         return instance
 
     def delete(self, id: int) -> bool:
-        instance = self.session.get(Player, id)
+        instance = self.session.get(PlayerRecord, id)
         if not instance:
             return False
 
@@ -49,7 +96,7 @@ class LocationRepository:
     def get(self, id: int):
         return self.session.get(Location, id)
 
-    def update(self, id: int, **fields):
+    def set(self, id: int, **fields):
         instance = self.session.get(Location, id)
         if not instance:
             return None

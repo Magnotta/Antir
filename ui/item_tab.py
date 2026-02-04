@@ -7,7 +7,8 @@ from PyQt6.QtWidgets import (
 
 from PyQt6.QtCore import QAbstractTableModel, Qt, QModelIndex, QSortFilterProxyModel, QStringListModel
 from sqlalchemy import select
-from db.models import Item_Mold, itemmold_tags
+from db.models import ItemMold
+from core.defs import ITEMMOLD_TAGS
 
 class TagFilterModel(QSortFilterProxyModel):
     def __init__(self):
@@ -66,9 +67,9 @@ class ItemMoldTableModel(QAbstractTableModel):
     def refresh(self, search: str | None = None):
         self.beginResetModel()
 
-        stmt = select(Item_Mold)
+        stmt = select(ItemMold)
         if search:
-            stmt = stmt.where(Item_Mold.name.ilike(f"%{search}%"))
+            stmt = stmt.where(ItemMold.name.ilike(f"%{search}%"))
 
         self.items = self.session.scalars(stmt).all()
         self.endResetModel()
@@ -170,7 +171,7 @@ class ItemTab(QWidget):
 
 
 class ItemMoldEditor(QDialog):
-    def __init__(self, session, item: Item_Mold | None = None, parent=None):
+    def __init__(self, session, item: ItemMold | None = None, parent=None):
         super().__init__(parent)
 
         self.session = session
@@ -245,7 +246,7 @@ class ItemMoldEditor(QDialog):
 
         try:
             if self.item is None:
-                self.item = Item_Mold(
+                self.item = ItemMold(
                     name=name,
                     type=type_,
                     tags=tags,
@@ -288,7 +289,7 @@ class ItemMoldEditor(QDialog):
     def build_tag_completer(self):
         display_strings = [
             f"{t['tagname']}"
-            for t in itemmold_tags
+            for t in ITEMMOLD_TAGS
         ]
 
         base_model = QStringListModel(display_strings)
