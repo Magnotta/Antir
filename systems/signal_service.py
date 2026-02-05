@@ -1,6 +1,5 @@
 from collections import defaultdict
 from typing import Callable
-from enum import Enum, auto
 
 SIGNALS = [
     "inventory",
@@ -9,15 +8,16 @@ SIGNALS = [
     "minute",
     "hour",
     "day",
-    "location"
+    "location",
 ]
-
 
 
 class SignalBus:
     def __init__(self):
-        self._listeners: dict[str, list[Callable]] = defaultdict(list)
-        self._stored_signals:set[str] = set()
+        self._listeners: dict[str, list[Callable]] = (
+            defaultdict(list)
+        )
+        self._stored_signals: set[str] = set()
 
     def connect(self, signal: str, callback: Callable):
         if signal not in SIGNALS:

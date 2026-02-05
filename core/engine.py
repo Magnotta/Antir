@@ -3,10 +3,9 @@ from core.game_state import GameState
 from core.events import Event, EVENTS
 from core.rules import Rule, RULES
 from player.domain import Player
-from systems.time_service import Time
 from systems.command_service import CommandService
 from systems.signal_service import SignalBus
-from typing import Callable
+
 
 class Engine:
     def __init__(self, session, players: list[Player]):
@@ -22,7 +21,7 @@ class Engine:
             type=event.type,
             payload=event.payload,
             due_tick=event.due_time.tick,
-            origin = org
+            origin=org,
         )
         event._set_id(rec.id)
         self.session.add(rec)
@@ -43,8 +42,10 @@ class Engine:
             self.signals.store('day')
 
     def _dispatch_due_events(self):
-        due:list[Event] = [
-            e for e in self.events if e.due_time <= self.state.time
+        due: list[Event] = [
+            e
+            for e in self.events
+            if e.due_time <= self.state.time
         ]
         for event in due:
             if event.condition(self.state):
@@ -53,7 +54,9 @@ class Engine:
                 followups = event.apply(self.state)
                 self.events.remove(event)
                 for e in followups:
-                    self.schedule(e, f"follow-up from {event.id}")
+                    self.schedule(
+                        e, f"follow-up from {event.id}"
+                    )
                 self.session.commit()
         self._fulfill_rules()
         self.signals.notify()
@@ -62,7 +65,9 @@ class Engine:
         for rule in self.rules:
             for signal in self.signals._stored_signals:
                 if signal in rule.listens_to:
-                    for next_event in rule.fulfill(self.state):
+                    for next_event in rule.fulfill(
+                        self.state
+                    ):
                         self.schedule(next_event, rule.name)
 
     def load_game(self, start_id: int) -> GameState:

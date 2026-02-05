@@ -1,0 +1,23 @@
+[tool.ruff]
+line-length = 60
+target-version = "py312"
+
+select = [
+    "E",    # pycodestyle errors
+    "F",    # pyflakes
+    "N",    # pep8-naming
+]
+
+exclude = [
+    "db/schemas.py",
+]
+
+ignore = [
+    "N999",
+    "F841",
+    "N802",
+]
+
+[tool.black]
+line-length = 60
+skip-string-normalization = true

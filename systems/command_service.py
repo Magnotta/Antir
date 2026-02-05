@@ -1,5 +1,4 @@
 from systems.commands import COMMANDS
-    
 
 
 class CommandParser:
@@ -8,21 +7,28 @@ class CommandParser:
 
     def tokenize(self, text: str) -> list[str]:
         return [t for t in text.strip().split() if t]
-    
-    def parse_targets(self, target_type: str, token: str) -> list[int]:
+
+    def parse_targets(
+        self, target_type: str, token: str
+    ) -> list[int]:
         if target_type == "Player":
             if token == "*":
                 return list(range(6))
             return [int(c) for c in token if c.isdigit()]
         elif target_type is None:
             return []
-        raise ValueError(f"Unknown target type: {target_type}")
-    
+        raise ValueError(
+            f"Unknown target type: {target_type}"
+        )
+
     def parse_arg(self, arg_type: type, token: str):
         try:
             return arg_type(token)
         except Exception:
-            raise ValueError(f"Invalid value for {arg_type.__name__}: {token}")
+            raise ValueError(
+                "Invalid value for"
+                "{arg_type.__name__}:{token}"
+            )
 
     def parse(self, text: str):
         tokens = self.tokenize(text)
@@ -37,17 +43,19 @@ class CommandParser:
         if spec.target_type:
             if len(tokens) <= idx:
                 raise ValueError("Missing targets")
-            targets = self.parse_targets(spec.target_type, tokens[idx])
+            targets = self.parse_targets(
+                spec.target_type, tokens[idx]
+            )
             idx += 1
-
         args = []
         for arg_type in spec.arg_types:
             if len(tokens) <= idx:
                 raise ValueError("Missing arguments")
-            args.append(self.parse_arg(arg_type, tokens[idx]))
+            args.append(
+                self.parse_arg(arg_type, tokens[idx])
+            )
             idx += 1
         return spec, targets, args
-
 
 
 class CommandService:

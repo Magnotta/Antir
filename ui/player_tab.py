@@ -1,11 +1,17 @@
 from PyQt6.QtCore import Qt, QAbstractTableModel
 from PyQt6.QtWidgets import (
-    QWidget, QFormLayout, QLabel,
-    QGroupBox, QTableView, QVBoxLayout,
-    QHBoxLayout, QTabWidget
+    QWidget,
+    QFormLayout,
+    QLabel,
+    QGroupBox,
+    QTableView,
+    QVBoxLayout,
+    QHBoxLayout,
+    QTabWidget,
 )
 from player.domain import Player
 from player.stats import Stats
+
 
 class InventoryTableModel(QAbstractTableModel):
     HEADERS = ["ID", "Name", "Type", "Location"]
@@ -21,20 +27,34 @@ class InventoryTableModel(QAbstractTableModel):
         return len(self.HEADERS)
 
     def headerData(self, section, orientation, role):
-        if role == Qt.ItemDataRole.DisplayRole and orientation == Qt.Orientation.Horizontal:
+        if (
+            role == Qt.ItemDataRole.DisplayRole
+            and orientation == Qt.Orientation.Horizontal
+        ):
             return self.HEADERS[section]
 
     def data(self, index, role):
-        if not index.isValid() or role != Qt.ItemDataRole.DisplayRole:
+        if (
+            not index.isValid()
+            or role != Qt.ItemDataRole.DisplayRole
+        ):
             return None
         item = self.items[index.row()]
         col = index.column()
         if col == 0:
             return item.id
         if col == 1:
-            return item.mold.name if hasattr(item, "mold") else str(item.original_mold)
+            return (
+                item.mold.name
+                if hasattr(item, "mold")
+                else str(item.original_mold)
+            )
         if col == 2:
-            return item.mold.type if hasattr(item, "mold") else ""
+            return (
+                item.mold.type
+                if hasattr(item, "mold")
+                else ""
+            )
         if col == 3:
             return self._location_text(item)
 
@@ -42,9 +62,8 @@ class InventoryTableModel(QAbstractTableModel):
         if item.container_item_id:
             return "Container"
         return "Loose"
-    
 
-    
+
 class InventoryPanel(QWidget):
     def __init__(self, inventory):
         super().__init__()
@@ -65,16 +84,17 @@ class InventoryPanel(QWidget):
         self.table.resizeColumnsToContents()
 
 
-    
 class StatsPanel(QGroupBox):
-    def __init__(self, stats:Stats):
+    def __init__(self, stats: Stats):
         super().__init__("Stats")
         layout = QFormLayout()
         self.setLayout(layout)
         self.labels = {}
         for name, val in stats.get_all().items():
             label = QLabel(str(val))
-            layout.addRow(name.replace("_", " ").title(), label)
+            layout.addRow(
+                name.replace("_", " ").title(), label
+            )
             self.labels[name] = label
 
     def refresh(self, stats: Stats):
@@ -82,13 +102,14 @@ class StatsPanel(QGroupBox):
             label.setText(str(stats.get_all()[name]))
 
 
-
 class SinglePlayerTab(QWidget):
     def __init__(self, player_domain: Player):
         super().__init__()
         self.player = player_domain
         self.stats_panel = StatsPanel(self.player.stats)
-        self.inventory_panel = InventoryPanel(self.player.inventory)
+        self.inventory_panel = InventoryPanel(
+            self.player.inventory
+        )
         layout = QHBoxLayout()
         layout.addWidget(self.stats_panel, stretch=1)
         layout.addWidget(self.inventory_panel, stretch=2)
@@ -97,7 +118,6 @@ class SinglePlayerTab(QWidget):
     def refresh(self):
         self.stats_panel.refresh(self.player.stats)
         self.inventory_panel.refresh()
-
 
 
 class PlayersTab(QWidget):

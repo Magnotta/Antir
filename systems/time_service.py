@@ -1,30 +1,29 @@
 from __future__ import annotations
 
+
 class Time:
-    def __init__(self, tm:int=0) -> None:
+    def __init__(self, tm: int = 0) -> None:
         self.tick = tm
-        self.d = tm//1440
-        self.h = tm%1440//60
-        self.m = tm%60
+        self.d = tm // 1440
+        self.h = tm % 1440 // 60
+        self.m = tm % 60
         self.day_change = False
         self.hour_change = False
 
-
-
     def __add__(self, other):
         if isinstance(other, Time):
-            __r =  Time(self.tick + other.tick)
+            __r = Time(self.tick + other.tick)
         elif isinstance(other, int):
             __r = Time(self.tick + other)
         else:
-            raise TypeError(f"unsupported operand types for +: {type(self)} and {type(other)}")
-            
+            raise TypeError(
+                "unsupported operand types for +:"
+                f"{type(self)} and {type(other)}"
+            )
         __r._day_change(self)
         __r._hour_change(self)
         return __r
-    
 
-    
     def __str__(self) -> str:
         if self.h < 10:
             if self.m < 10:
@@ -37,38 +36,36 @@ class Time:
             else:
                 return f"Dia {self.d}   {self.h}:{self.m}"
 
-
-
     def __eq__(self, other) -> bool:
         if isinstance(other, Time):
             return self.tick == other.tick
         elif isinstance(other, int):
             return self.tick == other
-        else:          
+        else:
             raise TypeError
-    
+
     def __lt__(self, other):
         if isinstance(other, Time):
             return self.tick < other.tick
         elif isinstance(other, int):
             return self.tick < other
-        else:          
+        else:
             raise TypeError
-    
+
     def __gt__(self, other):
         if isinstance(other, Time):
             return self.tick > other.tick
         elif isinstance(other, int):
             return self.tick > other
-        else:          
+        else:
             raise TypeError
-    
+
     def __ge__(self, other):
         if isinstance(other, Time):
             return self.tick >= other.tick
         elif isinstance(other, int):
             return self.tick >= other
-        else:          
+        else:
             raise TypeError
 
     def __le__(self, other):
@@ -76,35 +73,29 @@ class Time:
             return self.tick <= other.tick
         elif isinstance(other, int):
             return self.tick <= other
-        else:          
+        else:
             raise TypeError
 
     def ticks_until(self, stop: Time):
         list_minutes = []
-        copy = Time((self.d,self.h,self.m))
+        copy = Time((self.d, self.h, self.m))
         while copy < stop:
             list_minutes.append(copy)
-            copy += (0,0,1)
+            copy += (0, 0, 1)
         return list_minutes
-    
-    
-    
+
     def hours_until(self, stop: Time):
         list_hours = []
-        copy = Time((self.d,self.h,self.m))
+        copy = Time((self.d, self.h, self.m))
         while copy < stop:
             list_hours.append(copy)
-            copy += (0,1,0)
+            copy += (0, 1, 0)
         return list_hours
-    
-    
-    
-    def _hour_change(self, other:Time):
+
+    def _hour_change(self, other: Time):
         if self.h != other.h:
             self.hour_change = True
-    
-    
-    
-    def _day_change(self, other:Time):
+
+    def _day_change(self, other: Time):
         if self.d != other.d:
             self.day_change = True

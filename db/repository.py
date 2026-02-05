@@ -1,14 +1,18 @@
-from typing import List, Optional
 from sqlalchemy import select
 from db.models import (
-    PlayerRecord, Location, BodyNode,
-    EquipmentSlot, Item, PlayerStat
+    PlayerRecord,
+    Location,
+    BodyNode,
+    EquipmentSlot,
+    Item,
+    PlayerStat,
 )
+
 
 class PlayerStatRepository:
     def __init__(self, session):
         self.session = session
-    
+
     def get_all(self, player_id: int) -> dict[str, float]:
         rows = (
             self.session.query(PlayerStat)
@@ -16,24 +20,24 @@ class PlayerStatRepository:
             .all()
         )
         return {row.name: row.value for row in rows}
-    
+
     def get(self, player_id: int, statname: str) -> int:
         row = (
             self.session.query(PlayerStat)
             .filter(
                 PlayerStat.player_id == player_id,
-                PlayerStat.name == statname
+                PlayerStat.name == statname,
             )
             .one()
         )
         return row.value
-    
+
     def set(self, player_id: int, stat: str, value: float):
         row = (
             self.session.query(PlayerStat)
             .filter(
                 PlayerStat.player_id == player_id,
-                PlayerStat.name == stat
+                PlayerStat.name == stat,
             )
             .one()
         )
@@ -45,12 +49,13 @@ class PlayerStatRepository:
             self.session.query(PlayerStat)
             .filter(
                 PlayerStat.player_id == player_id,
-                PlayerStat.name == stat
+                PlayerStat.name == stat,
             )
             .one()
         )
         row.value += delta
         self.session.commit()
+
 
 class PlayerRepository:
     def __init__(self, session):
@@ -63,10 +68,8 @@ class PlayerRepository:
         instance = self.session.get(PlayerRecord, id)
         if not instance:
             return None
-
         for key, value in fields.items():
             setattr(instance, key, value)
-
         self.session.commit()
         return instance
 
@@ -74,14 +77,11 @@ class PlayerRepository:
         instance = self.session.get(PlayerRecord, id)
         if not instance:
             return False
-
         self.session.delete(instance)
         self.session.commit()
         return True
-    
-    # def list_all(self) -> List[Player]:
-    #     return self.session.query(Player).all()
-    
+
+
 class LocationRepository:
     def __init__(self, session):
         self.session = session
@@ -100,10 +100,8 @@ class LocationRepository:
         instance = self.session.get(Location, id)
         if not instance:
             return None
-
         for key, value in fields.items():
             setattr(instance, key, value)
-
         self.session.commit()
         return instance
 
@@ -111,21 +109,19 @@ class LocationRepository:
         instance = self.session.get(Location, id)
         if not instance:
             return False
-
         self.session.delete(instance)
         self.session.commit()
         return True
-    
+
+
 class ItemRepository:
     def __init__(self, session):
         self.session = session
 
     def get_loose_items(self, player_id: int):
-        equipped_ids = (
-            select(EquipmentSlot.item_id)
-            .where(EquipmentSlot.item_id.isnot(None))
+        equipped_ids = select(EquipmentSlot.item_id).where(
+            EquipmentSlot.item_id.isnot(None)
         )
-
         return (
             self.session.query(Item)
             .filter(Item.owner == player_id)
