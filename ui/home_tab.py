@@ -15,24 +15,18 @@ class HomeTab(QWidget):
         self.engine = engine
         self.output = QTextEdit()
         self.output.setReadOnly(True)
-        self.output.setPlaceholderText(
-            "Welcome to the world..."
-        )
+        self.output.setPlaceholderText("Welcome to the world...")
         self.output.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.output.setStyleSheet(
-            "QTextEdit"
-            "{ font-family: Consolas, monospace; }"
+            "QTextEdit" "{ font-family: Consolas, monospace; }"
         )
         self.input = QLineEdit()
         self.input.setPlaceholderText(
             "Type a command and press Enter..."
         )
-        self.input.returnPressed.connect(
-            self.on_command_entered
-        )
+        self.input.returnPressed.connect(self.on_command_entered)
         self.input.setStyleSheet(
-            "QLineEdit"
-            "{ font-family: Consolas, monospace; }"
+            "QLineEdit" "{ font-family: Consolas, monospace; }"
         )
         self.placedatetime = QLabel()
         self.placedatetime.setAlignment(
@@ -51,12 +45,10 @@ class HomeTab(QWidget):
 
     def _init_style(self):
         self.output.setStyleSheet(
-            "QTextEdit"
-            "{ font-family: Consolas, monospace; }"
+            "QTextEdit" "{ font-family: Consolas, monospace; }"
         )
         self.input.setStyleSheet(
-            "QLineEdit"
-            "{ font-family: Consolas, monospace; }"
+            "QLineEdit" "{ font-family: Consolas, monospace; }"
         )
         self.placedatetime.setStyleSheet(
             """
@@ -76,9 +68,7 @@ class HomeTab(QWidget):
         )
 
     def refresh(self):
-        string = (
-            self.engine.state.get_placedatetime_string()
-        )
+        string = self.engine.state.get_placedatetime_string()
         self.placedatetime.setText(string)
 
     def on_command_entered(self):

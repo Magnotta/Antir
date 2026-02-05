@@ -19,21 +19,17 @@ class ItemMold(Base):
     __tablename__ = 'item_molds'
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True)
-    type = Column(String, nullable=False)
     tags = Column(String, nullable=False)
     description = Column(String)
-
-    def as_tuple(self):
-        return tuple(
-            self.id, self.name, self.type, self.tags
-        )
 
 
 class Item(Base):
     __tablename__ = 'items'
     id = Column(Integer, primary_key=True)
     original_mold = Column(
-        Integer, ForeignKey('item_molds.id'), nullable=False
+        Integer,
+        ForeignKey('item_molds.id'),
+        nullable=False,
     )
     owner = Column(Integer, nullable=False)
     param_list = relationship(
@@ -62,14 +58,10 @@ class Item(Base):
 class ItemParam(Base):
     __tablename__ = 'item_params'
     id = Column(Integer, primary_key=True)
-    item = Column(
-        Integer, ForeignKey('items.id'), nullable=False
-    )
+    item = Column(Integer, ForeignKey('items.id'), nullable=False)
     param = Column(String, nullable=False)
     value = Column(Float, nullable=False)
-    parent_item = relationship(
-        "Item", back_populates="param_list"
-    )
+    parent_item = relationship("Item", back_populates="param_list")
 
 
 class Character(Base):
@@ -91,31 +83,23 @@ class BodyNode(Base):
         remote_side=[id],
         back_populates="children",
     )
-    children = relationship(
-        "BodyNode", back_populates="parent"
-    )
+    children = relationship("BodyNode", back_populates="parent")
     slots = relationship(
         "EquipmentSlot", cascade="all, delete-orphan"
     )
-
-    def __repr__(self):
-        return (
-            f"<BodyNode {self.name}"
-            f"{self.health}/{self.max_health}>"
-        )
 
 
 class EquipmentSlot(Base):
     __tablename__ = "equipment_slots"
     id = Column(Integer, primary_key=True)
     body_node_id = Column(
-        Integer, ForeignKey("body_nodes.id"), nullable=False
+        Integer,
+        ForeignKey("body_nodes.id"),
+        nullable=False,
     )
     slot_type = Column(String, nullable=False)
     slot_index = Column(Integer, default=0)
-    item_id = Column(
-        Integer, ForeignKey("items.id"), nullable=True
-    )
+    item_id = Column(Integer, ForeignKey("items.id"), nullable=True)
 
 
 class PlayerRecord(Base):
@@ -132,9 +116,7 @@ class PlayerStat(Base):
     )
     name = Column(String, nullable=False)
     value = Column(Integer, nullable=False)
-    __table_args__ = (
-        UniqueConstraint("player_id", "name"),
-    )
+    __table_args__ = (UniqueConstraint("player_id", "name"),)
 
 
 @dataclass(frozen=True)

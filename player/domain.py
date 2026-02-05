@@ -16,8 +16,6 @@ class Player:
         stat_repo: PlayerStatRepository,
     ):
         self.player_rec = player
-        self.inventory = Inventory(
-            item_repo, self.player_rec.id
-        )
+        self.inventory = Inventory(item_repo, self.player_rec.id)
         self.anatomy = Anatomy(self.player_rec.id)
         self.stats = Stats(stat_repo, self.player_rec.id)

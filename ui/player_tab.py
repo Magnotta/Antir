@@ -34,10 +34,7 @@ class InventoryTableModel(QAbstractTableModel):
             return self.HEADERS[section]
 
     def data(self, index, role):
-        if (
-            not index.isValid()
-            or role != Qt.ItemDataRole.DisplayRole
-        ):
+        if not index.isValid() or role != Qt.ItemDataRole.DisplayRole:
             return None
         item = self.items[index.row()]
         col = index.column()
@@ -50,11 +47,7 @@ class InventoryTableModel(QAbstractTableModel):
                 else str(item.original_mold)
             )
         if col == 2:
-            return (
-                item.mold.type
-                if hasattr(item, "mold")
-                else ""
-            )
+            return item.mold.type if hasattr(item, "mold") else ""
         if col == 3:
             return self._location_text(item)
 
@@ -92,9 +85,7 @@ class StatsPanel(QGroupBox):
         self.labels = {}
         for name, val in stats.get_all().items():
             label = QLabel(str(val))
-            layout.addRow(
-                name.replace("_", " ").title(), label
-            )
+            layout.addRow(name.replace("_", " ").title(), label)
             self.labels[name] = label
 
     def refresh(self, stats: Stats):
@@ -107,9 +98,7 @@ class SinglePlayerTab(QWidget):
         super().__init__()
         self.player = player_domain
         self.stats_panel = StatsPanel(self.player.stats)
-        self.inventory_panel = InventoryPanel(
-            self.player.inventory
-        )
+        self.inventory_panel = InventoryPanel(self.player.inventory)
         layout = QHBoxLayout()
         layout.addWidget(self.stats_panel, stretch=1)
         layout.addWidget(self.inventory_panel, stretch=2)

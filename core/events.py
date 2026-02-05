@@ -8,9 +8,7 @@ class Event:
     type: str = "base"
     impacts: str = ''
 
-    def __init__(
-        self, due_time: Time, payload: dict | None = None
-    ):
+    def __init__(self, due_time: Time, payload: dict | None = None):
         self.id = 0
         self.payload = payload or {}
         self.due_time = due_time
@@ -30,9 +28,7 @@ class EquipItemEvent(Event):
         session = engine.session
         item = session.get(Item, self.payload["item_id"])
         inv = item.owner
-        slot = session.get(
-            EquipmentSlot, self.payload["slot_id"]
-        )
+        slot = session.get(EquipmentSlot, self.payload["slot_id"])
         if not inv.can_equip(item, slot):
             raise ValueError("Cannot equip item")
         inv.equip_item(item, slot)
@@ -40,13 +36,11 @@ class EquipItemEvent(Event):
 
 
 class PutItemInContainerEvent(Event):
-    def execute(self, engine):
+    def apply(self, engine):
         session = engine.session
         inv = engine.inventory
         item = session.get(Item, self.payload["item_id"])
-        container = session.get(
-            Item, self.payload["container_id"]
-        )
+        container = session.get(Item, self.payload["container_id"])
         inv.put_in_container(item, container)
         return []
 
@@ -59,8 +53,6 @@ class HungerEvent(Event):
         super().__init__(due_time, payload)
 
     def apply(self, state):
-        player = state.get_player_by_id(
-            self.payload["target"]
-        )
+        player = state.get_player_by_id(self.payload["target"])
         player.stats.add("hunger", self.payload["amount"])
         return []

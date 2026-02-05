@@ -2,9 +2,7 @@ from db.repository import PlayerStatRepository
 
 
 class Stats:
-    def __init__(
-        self, stat_repo: PlayerStatRepository, player_id
-    ):
+    def __init__(self, stat_repo: PlayerStatRepository, player_id):
         self.repo = stat_repo
         self.player_id = player_id
 

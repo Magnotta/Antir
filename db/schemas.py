@@ -15,9 +15,7 @@ BODY_SCHEMA = {
                                         "slots": ["bag"],
                                         "children": {
                                             "Right_arm": {
-                                                "slots": [
-                                                    "armband"
-                                                ],
+                                                "slots": ["armband"],
                                                 "children": {
                                                     "Right_forearm": {
                                                         "slots": [
@@ -40,9 +38,7 @@ BODY_SCHEMA = {
                                         "slots": ["bag"],
                                         "children": {
                                             "Left_arm": {
-                                                "slots": [
-                                                    "armband"
-                                                ],
+                                                "slots": ["armband"],
                                                 "children": {
                                                     "Left_forearm": {
                                                         "slots": [
@@ -75,9 +71,7 @@ BODY_SCHEMA = {
                                         "slots": [],
                                         "children": {
                                             "Right_foot": {
-                                                "slots": [
-                                                    "anklet"
-                                                ],
+                                                "slots": ["anklet"],
                                                 "children": {},
                                             }
                                         },
@@ -91,9 +85,7 @@ BODY_SCHEMA = {
                                         "slots": [],
                                         "children": {
                                             "Left_foot": {
-                                                "slots": [
-                                                    "anklet"
-                                                ],
+                                                "slots": ["anklet"],
                                                 "children": {},
                                             }
                                         },

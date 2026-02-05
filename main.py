@@ -5,6 +5,7 @@ from db.models import PlayerRecord
 from db.repository import (
     ItemRepository,
     PlayerStatRepository,
+    ItemMoldRepository,
 )
 from player.domain import Player
 from core.engine import Engine
@@ -18,15 +19,14 @@ if __name__ == "__main__":
 
     db_eng, Session = init_metadata()
     session = Session()
+    itemmold_repo = ItemMoldRepository(session)
     item_repo = ItemRepository(session)
     stat_repo = PlayerStatRepository(session)
     # loc_repo = LocationRepository(session)
     init_db(session)
 
     player_recs = (
-        session.query(PlayerRecord)
-        .order_by(PlayerRecord.id)
-        .all()
+        session.query(PlayerRecord).order_by(PlayerRecord.id).all()
     )
     if not player_recs:
         raise RuntimeError("No players found in DB")
@@ -39,6 +39,6 @@ if __name__ == "__main__":
 
     engine = Engine(session, players)
     app = QApplication(sys.argv)
-    win = Window(session, engine)
+    win = Window(session, engine, itemmold_repo, item_repo)
     win.show()
     sys.exit(app.exec())

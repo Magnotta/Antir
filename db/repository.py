@@ -1,9 +1,11 @@
 from sqlalchemy import select
+from typing import Optional
 from db.models import (
     PlayerRecord,
     Location,
     BodyNode,
     EquipmentSlot,
+    ItemMold,
     Item,
     PlayerStat,
 )
@@ -114,9 +116,42 @@ class LocationRepository:
         return True
 
 
+class ItemMoldRepository:
+    def __init__(self, session):
+        self.session = session
+
+    def add(self, itemmold: ItemMold):
+        self.session.add(itemmold)
+        self.session.commit()
+
+    def update(
+        self, itemmold: ItemMold, **fields
+    ) -> Optional[ItemMold]:
+        for key, value in fields.items():
+            setattr(itemmold, key, value)
+        self.session.commit()
+
+    def delete(self, itemmold: ItemMold):
+        self.session.delete(itemmold)
+        self.session.commit()
+
+    def get_all(self, search: str | None = None) -> list[ItemMold]:
+        stmt = select(ItemMold)
+        if search:
+            stmt = stmt.where(ItemMold.name.ilike(f"%{search}%"))
+        return self.session.scalars(stmt).all()
+
+
 class ItemRepository:
     def __init__(self, session):
         self.session = session
+
+    def spawn(self, itemmold: ItemMold):
+        return Item()
+
+    def destroy(self, item):
+        self.session.delete(item)
+        self.session.commit()
 
     def get_loose_items(self, player_id: int):
         equipped_ids = select(EquipmentSlot.item_id).where(
@@ -146,3 +181,9 @@ class ItemRepository:
             .filter(Item.contained_items.any())
             .all()
         )
+
+    def get_all(self, search: str | None = None) -> list[Item]:
+        stmt = select(Item)
+        if search:
+            stmt = stmt.where(Item.name.ilike(f"%{search}%"))
+        return self.session.scalars(stmt).all()

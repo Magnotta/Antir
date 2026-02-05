@@ -17,17 +17,14 @@ class CommandParser:
             return [int(c) for c in token if c.isdigit()]
         elif target_type is None:
             return []
-        raise ValueError(
-            f"Unknown target type: {target_type}"
-        )
+        raise ValueError(f"Unknown target type: {target_type}")
 
     def parse_arg(self, arg_type: type, token: str):
         try:
             return arg_type(token)
         except Exception:
             raise ValueError(
-                "Invalid value for"
-                "{arg_type.__name__}:{token}"
+                "Invalid value for" "{arg_type.__name__}:{token}"
             )
 
     def parse(self, text: str):
@@ -51,9 +48,7 @@ class CommandParser:
         for arg_type in spec.arg_types:
             if len(tokens) <= idx:
                 raise ValueError("Missing arguments")
-            args.append(
-                self.parse_arg(arg_type, tokens[idx])
-            )
+            args.append(self.parse_arg(arg_type, tokens[idx]))
             idx += 1
         return spec, targets, args
 

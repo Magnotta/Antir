@@ -136,9 +136,41 @@ ITEMMOLD_TAGS = [
         "text": "sonoro",
         "params": ["power"],
     },
-    {"tagname": "li", "text": "vivo", "params": ["health"]},
+    {
+        "tagname": "li",
+        "text": "vivo",
+        "params": ["health"],
+    },
 ]
 
+TAG_NAMES = [
+    'we',
+    'cu',
+    'bl',
+    'pi',
+    'ar',
+    'cl',
+    'wr',
+    'rd',
+    'fl',
+    'to',
+    'mt',
+    'pa',
+    'cp',
+    'un',
+    'qt',
+    'ed',
+    'lu',
+    'co',
+    'en',
+    'dr',
+    're',
+    'tx',
+    'wd',
+    'sy',
+    'so',
+    'li',
+]
 
 ITEM_PARAMS = [
     {"paramname": "durability", "paramrange": 1000},
