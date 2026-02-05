@@ -64,7 +64,10 @@ class ItemMoldTableModel(QAbstractTableModel):
         return len(self.HEADERS)
 
     def data(self, index, role=Qt.ItemDataRole.DisplayRole):
-        if not index.isValid() or role != Qt.ItemDataRole.DisplayRole:
+        if (
+            not index.isValid()
+            or role != Qt.ItemDataRole.DisplayRole
+        ):
             return None
         item = self.itemmolds[index.row()]
         col = index.column()
@@ -103,7 +106,10 @@ class ItemTableModel(QAbstractTableModel):
         return len(self.HEADERS)
 
     def data(self, index, role):
-        if not index.isValid() or role != Qt.ItemDataRole.DisplayRole:
+        if (
+            not index.isValid()
+            or role != Qt.ItemDataRole.DisplayRole
+        ):
             return None
         item = self.items[index.row()]
         col = index.column()
@@ -136,13 +142,17 @@ class ItemTab(QWidget):
         self.itemmold_repo = itemmold_repo
         self.item_repo = item_repo
         self.search_itemmold = QLineEdit()
-        self.search_itemmold.setPlaceholderText("Search item molds…")
+        self.search_itemmold.setPlaceholderText(
+            "Search item molds…"
+        )
         self.search_itemmold.textChanged.connect(
             self.on_search_itemmold
         )
         self.itemmold_table = QTableView()
         self.itemmold_table_model = ItemMoldTableModel()
-        self.itemmold_table.setModel(self.itemmold_table_model)
+        self.itemmold_table.setModel(
+            self.itemmold_table_model
+        )
         self.itemmold_table.setSelectionBehavior(
             QTableView.SelectionBehavior.SelectRows
         )
@@ -203,8 +213,12 @@ class ItemTab(QWidget):
 
     def refresh_molds(self, search: str | None = None):
         molds = self.itemmold_repo.get_all(search=search)
-        self.itemmold_table_model = ItemMoldTableModel(molds)
-        self.itemmold_table.setModel(self.itemmold_table_model)
+        self.itemmold_table_model = ItemMoldTableModel(
+            molds
+        )
+        self.itemmold_table.setModel(
+            self.itemmold_table_model
+        )
         (
             self.itemmold_table.selectionModel().selectionChanged.connect(
                 self.on_itemmold_selected
@@ -217,14 +231,24 @@ class ItemTab(QWidget):
         self.item_table.setModel(self.item_model)
 
     def spawn_item(self):
-        index = self.itemmold_table.selectionModel().selectedRows()[0]
-        mold = self.itemmold_table_model.itemmolds[index.row()]
-        item = self.item_repo.spawn(mold_id=mold.id, owner=0)
+        index = self.itemmold_table.selectionModel().selectedRows()[
+            0
+        ]
+        mold = self.itemmold_table_model.itemmolds[
+            index.row()
+        ]
+        item = self.item_repo.spawn(
+            mold_id=mold.id, owner=0
+        )
         # self.session.commit()
         self.refresh_items(mold.id)
 
     def destroy_item(self):
-        index = self.item_table.selectionModel().selectedRows()[0]
+        index = (
+            self.item_table.selectionModel().selectedRows()[
+                0
+            ]
+        )
         item = self.item_model.items[index.row()]
         confirm = QMessageBox.question(
             self,
@@ -243,10 +267,14 @@ class ItemTab(QWidget):
         self.refresh_molds(search=text)
 
     def delete_itemmold(self):
-        indexes = self.itemmold_table.selectionModel().selectedRows()
+        indexes = (
+            self.itemmold_table.selectionModel().selectedRows()
+        )
         if not indexes:
             return
-        item = self.itemmold_table_model.itemmolds[indexes[0].row()]
+        item = self.itemmold_table_model.itemmolds[
+            indexes[0].row()
+        ]
         if not self.confirm_delete(
             "Delete Item Mold",
             "Are you sure you want to delete"
@@ -258,12 +286,16 @@ class ItemTab(QWidget):
         self.refresh_molds()
 
     def add_itemmold(self):
-        dlg = ItemMoldEditor(self.itemmold_repo, parent=self)
+        dlg = ItemMoldEditor(
+            self.itemmold_repo, parent=self
+        )
         if dlg.exec():
             self.refresh_molds()
 
     def edit_itemmold(self):
-        indexes = self.itemmold_table.selectionModel().selectedRows()
+        indexes = (
+            self.itemmold_table.selectionModel().selectedRows()
+        )
         if not indexes:
             return
         itemmold = self.itemmold_table_model.itemmolds[
@@ -275,7 +307,9 @@ class ItemTab(QWidget):
         if dlg.exec():
             self.refresh_molds()
 
-    def confirm_delete(self, title: str, message: str) -> bool:
+    def confirm_delete(
+        self, title: str, message: str
+    ) -> bool:
         reply = QMessageBox.question(
             self,
             title,
@@ -288,13 +322,17 @@ class ItemTab(QWidget):
 
     @pyqtSlot()
     def on_itemmold_selected(self):
-        indexes = self.itemmold_table.selectionModel().selectedRows()
+        indexes = (
+            self.itemmold_table.selectionModel().selectedRows()
+        )
         if not indexes:
             self.spawn_btn.setEnabled(False)
             self.refresh_items(None)
             return
         self.spawn_btn.setEnabled(True)
-        mold = self.itemmold_table_model.itemmolds[indexes[0].row()]
+        mold = self.itemmold_table_model.itemmolds[
+            indexes[0].row()
+        ]
 
     @pyqtSlot()
     def on_item_selected(self):
@@ -315,7 +353,9 @@ class ItemMoldEditor(QDialog):
         self.repo = itemmold_repo
         self.itemmold = itemmold
         self.setWindowTitle(
-            "Edit Item Mold" if itemmold else "Create Item Mold"
+            "Edit Item Mold"
+            if itemmold
+            else "Create Item Mold"
         )
         self.setModal(True)
         self.name_edit = QLineEdit()
@@ -328,11 +368,19 @@ class ItemMoldEditor(QDialog):
         self.tag_list.setSelectionMode(
             QListWidget.SelectionMode.SingleSelection
         )
-        self.tag_list.keyPressEvent = self._tag_list_keypress
-        self.completer, self.filter_model = self.build_tag_completer()
+        self.tag_list.keyPressEvent = (
+            self._tag_list_keypress
+        )
+        self.completer, self.filter_model = (
+            self.build_tag_completer()
+        )
         self.tag_input.setCompleter(self.completer)
-        self.tag_input.textEdited.connect(self.on_tags_edited)
-        self.tag_input.returnPressed.connect(self.commit_tag)
+        self.tag_input.textEdited.connect(
+            self.on_tags_edited
+        )
+        self.tag_input.returnPressed.connect(
+            self.commit_tag
+        )
         self.completer.activated.connect(self.commit_tag)
         self.desc_edit = QTextEdit()
         self.desc_edit.setFixedHeight(80)
@@ -363,13 +411,17 @@ class ItemMoldEditor(QDialog):
             Qt.Key.Key_Backspace,
         ):
             for item in self.tag_list.selectedItems():
-                self.tag_list.takeItem(self.tag_list.row(item))
+                self.tag_list.takeItem(
+                    self.tag_list.row(item)
+                )
         else:
             QListWidget.keyPressEvent(self.tag_list, event)
 
     def _load_item(self):
         self.name_edit.setText(self.itemmold.name)
-        self.desc_edit.setText(self.itemmold.description or "")
+        self.desc_edit.setText(
+            self.itemmold.description or ""
+        )
 
         for tag in self.itemmold.tags.split(","):
             self.tag_list.addItem(tag.strip())
@@ -424,11 +476,16 @@ class ItemMoldEditor(QDialog):
         if not tag:
             return
         for i in range(self.tag_list.count()):
-            if self.tag_list.item(i).text().split(" - ")[0] == tag:
+            if (
+                self.tag_list.item(i).text().split(" - ")[0]
+                == tag
+            ):
                 QTimer.singleShot(0, self.tag_input.clear)
                 return
         tag_text = [
-            t["text"] for t in ITEMMOLD_TAGS if t["tagname"] == tag
+            t["text"]
+            for t in ITEMMOLD_TAGS
+            if t["tagname"] == tag
         ][0]
         self.tag_list.addItem(tag + " - " + tag_text)
         QTimer.singleShot(0, self.tag_input.clear)
@@ -437,7 +494,9 @@ class ItemMoldEditor(QDialog):
         QMessageBox.critical(self, "Error", message)
 
     def build_tag_completer(self):
-        display_strings = [f"{t['tagname']}" for t in ITEMMOLD_TAGS]
+        display_strings = [
+            f"{t['tagname']}" for t in ITEMMOLD_TAGS
+        ]
         base_model = QStringListModel(display_strings)
         filter_model = TagFilterModel()
         filter_model.setSourceModel(base_model)

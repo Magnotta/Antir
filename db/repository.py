@@ -135,10 +135,14 @@ class ItemMoldRepository:
         self.session.delete(itemmold)
         self.session.commit()
 
-    def get_all(self, search: str | None = None) -> list[ItemMold]:
+    def get_all(
+        self, search: str | None = None
+    ) -> list[ItemMold]:
         stmt = select(ItemMold)
         if search:
-            stmt = stmt.where(ItemMold.name.ilike(f"%{search}%"))
+            stmt = stmt.where(
+                ItemMold.name.ilike(f"%{search}%")
+            )
         return self.session.scalars(stmt).all()
 
 
@@ -182,8 +186,12 @@ class ItemRepository:
             .all()
         )
 
-    def get_all(self, search: str | None = None) -> list[Item]:
+    def get_all(
+        self, search: str | None = None
+    ) -> list[Item]:
         stmt = select(Item)
         if search:
-            stmt = stmt.where(Item.name.ilike(f"%{search}%"))
+            stmt = stmt.where(
+                Item.name.ilike(f"%{search}%")
+            )
         return self.session.scalars(stmt).all()

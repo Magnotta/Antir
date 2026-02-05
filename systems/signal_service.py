@@ -14,7 +14,9 @@ SIGNALS = [
 
 class SignalBus:
     def __init__(self):
-        self._listeners: dict[str, list[Callable]] = defaultdict(list)
+        self._listeners: dict[str, list[Callable]] = (
+            defaultdict(list)
+        )
         self._stored_signals: set[str] = set()
 
     def connect(self, signal: str, callback: Callable):

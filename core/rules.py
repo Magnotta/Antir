@@ -98,7 +98,9 @@ class MidnightHungerRule(Rule):
             if p.stats.get("awake") > 0
         ]
         return [
-            HungerEvent(state.time, {"target": t, "amount": 1})
+            HungerEvent(
+                state.time, {"target": t, "amount": 1}
+            )
             for t in targets
         ]
 

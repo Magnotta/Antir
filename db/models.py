@@ -58,10 +58,14 @@ class Item(Base):
 class ItemParam(Base):
     __tablename__ = 'item_params'
     id = Column(Integer, primary_key=True)
-    item = Column(Integer, ForeignKey('items.id'), nullable=False)
+    item = Column(
+        Integer, ForeignKey('items.id'), nullable=False
+    )
     param = Column(String, nullable=False)
     value = Column(Float, nullable=False)
-    parent_item = relationship("Item", back_populates="param_list")
+    parent_item = relationship(
+        "Item", back_populates="param_list"
+    )
 
 
 class Character(Base):
@@ -83,7 +87,9 @@ class BodyNode(Base):
         remote_side=[id],
         back_populates="children",
     )
-    children = relationship("BodyNode", back_populates="parent")
+    children = relationship(
+        "BodyNode", back_populates="parent"
+    )
     slots = relationship(
         "EquipmentSlot", cascade="all, delete-orphan"
     )
@@ -99,7 +105,9 @@ class EquipmentSlot(Base):
     )
     slot_type = Column(String, nullable=False)
     slot_index = Column(Integer, default=0)
-    item_id = Column(Integer, ForeignKey("items.id"), nullable=True)
+    item_id = Column(
+        Integer, ForeignKey("items.id"), nullable=True
+    )
 
 
 class PlayerRecord(Base):
@@ -116,7 +124,9 @@ class PlayerStat(Base):
     )
     name = Column(String, nullable=False)
     value = Column(Integer, nullable=False)
-    __table_args__ = (UniqueConstraint("player_id", "name"),)
+    __table_args__ = (
+        UniqueConstraint("player_id", "name"),
+    )
 
 
 @dataclass(frozen=True)

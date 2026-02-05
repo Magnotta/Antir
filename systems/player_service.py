@@ -12,11 +12,17 @@ class PlayerService:
     def create_player_anatomy(self, player_id):
         head = BodyNode(owner=player_id, name="head")
 
-        spine = BodyNode(owner=player_id, name="spine", parent=head)
+        spine = BodyNode(
+            owner=player_id, name="spine", parent=head
+        )
 
-        neck = BodyNode(owner=player_id, name="head", parent=spine)
+        neck = BodyNode(
+            owner=player_id, name="head", parent=spine
+        )
 
-        torso = BodyNode(owner=player_id, name="torso", parent=neck)
+        torso = BodyNode(
+            owner=player_id, name="torso", parent=neck
+        )
         left_shoulder = BodyNode(
             owner=player_id,
             name="left_shoulder",

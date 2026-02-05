@@ -1,9 +1,9 @@
 [tool.black]
-line-length = 70
+line-length = 60
 skip-string-normalization = true
 
 [tool.ruff]
-line-length = 70
+line-length = 60
 target-version = "py312"
 
 select = [
@@ -20,4 +20,5 @@ ignore = [
     "N999",
     "F841",
     "N802",
+    "E501",
 ]

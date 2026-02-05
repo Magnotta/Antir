@@ -14,7 +14,9 @@ DATABASE_URL = "sqlite:///db/antir_db.db"
 
 
 def init_metadata():
-    engine = create_engine(DATABASE_URL, echo=False, future=True)
+    engine = create_engine(
+        DATABASE_URL, echo=False, future=True
+    )
     Base.metadata.create_all(bind=engine)
     session_factory = sessionmaker(
         bind=engine, autoflush=False, autocommit=False

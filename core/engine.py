@@ -43,7 +43,9 @@ class Engine:
 
     def _dispatch_due_events(self):
         due: list[Event] = [
-            e for e in self.events if e.due_time <= self.state.time
+            e
+            for e in self.events
+            if e.due_time <= self.state.time
         ]
         for event in due:
             if event.condition(self.state):
@@ -52,7 +54,9 @@ class Engine:
                 followups = event.apply(self.state)
                 self.events.remove(event)
                 for e in followups:
-                    self.schedule(e, f"follow-up from {event.id}")
+                    self.schedule(
+                        e, f"follow-up from {event.id}"
+                    )
                 self.session.commit()
         self._fulfill_rules()
         self.signals.notify()
@@ -61,7 +65,9 @@ class Engine:
         for rule in self.rules:
             for signal in self.signals._stored_signals:
                 if signal in rule.listens_to:
-                    for next_event in rule.fulfill(self.state):
+                    for next_event in rule.fulfill(
+                        self.state
+                    ):
                         self.schedule(next_event, rule.name)
 
     def load_game(self, start_id: int) -> GameState:

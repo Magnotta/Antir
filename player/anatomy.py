@@ -7,8 +7,12 @@ class Anatomy:
         spine = BodyNode(
             owner=player_id, name="spine", parent=self.head
         )
-        neck = BodyNode(owner=player_id, name="head", parent=spine)
-        torso = BodyNode(owner=player_id, name="torso", parent=neck)
+        neck = BodyNode(
+            owner=player_id, name="head", parent=spine
+        )
+        torso = BodyNode(
+            owner=player_id, name="torso", parent=neck
+        )
         left_shoulder = BodyNode(
             owner=player_id,
             name="left_shoulder",

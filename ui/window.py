@@ -21,7 +21,9 @@ class Window(QMainWindow):
         self.tabs = QTabWidget()
         self.setCentralWidget(self.tabs)
         self.home_tab = HomeTab(self.engine)
-        self.item_tab = ItemTab(itemmold_repo, item_repo, self)
+        self.item_tab = ItemTab(
+            itemmold_repo, item_repo, self
+        )
         self.player_tab = PlayersTab(engine.state.players)
         self.engine.signals.connect(
             "inventory", self.player_tab.refresh
@@ -29,9 +31,15 @@ class Window(QMainWindow):
         self.engine.signals.connect(
             "equipment", self.player_tab.refresh
         )
-        self.engine.signals.connect("stats", self.player_tab.refresh)
-        self.engine.signals.connect("minute", self.home_tab.refresh)
-        self.engine.signals.connect("location", self.home_tab.refresh)
+        self.engine.signals.connect(
+            "stats", self.player_tab.refresh
+        )
+        self.engine.signals.connect(
+            "minute", self.home_tab.refresh
+        )
+        self.engine.signals.connect(
+            "location", self.home_tab.refresh
+        )
         self.tabs.addTab(self.home_tab, "Home")
         self.tabs.addTab(self.item_tab, "Items")
         self.tabs.addTab(self.player_tab, "Players")

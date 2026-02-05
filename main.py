@@ -26,7 +26,9 @@ if __name__ == "__main__":
     init_db(session)
 
     player_recs = (
-        session.query(PlayerRecord).order_by(PlayerRecord.id).all()
+        session.query(PlayerRecord)
+        .order_by(PlayerRecord.id)
+        .all()
     )
     if not player_recs:
         raise RuntimeError("No players found in DB")

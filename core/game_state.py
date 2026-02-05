@@ -25,7 +25,9 @@ class GameState:
                 return p
         raise ValueError(f"Invalid player ID: {id}")
 
-    def get_players_by_id(self, ids: list[int]) -> list[Player]:
+    def get_players_by_id(
+        self, ids: list[int]
+    ) -> list[Player]:
         filtered_players = filter(
             lambda player: player.player_rec.id in ids,
             self.players,
