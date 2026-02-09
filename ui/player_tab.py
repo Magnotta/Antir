@@ -47,7 +47,7 @@ class InventoryTableModel(QAbstractTableModel):
             return (
                 item.mold.name
                 if hasattr(item, "mold")
-                else str(item.original_mold)
+                else str(item.original_mold_id)
             )
         if col == 2:
             return (

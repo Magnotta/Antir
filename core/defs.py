@@ -1,87 +1,99 @@
-ITEMMOLD_TAGS = [
+MOLD_TAG_DICTS = [
     {
-        "tagname": "we",
+        "tag_name": "we",
         "text": "armamento",
         "params": [
             "durability",
-            "quality",
             "wet",
             "mass",
-            "com",
+            "cleanliness",
+            "balance",
         ],
     },
     {
-        "tagname": "cu",
+        "tag_name": "cu",
         "text": "cortante",
-        "params": ["sharpness"],
+        "params": ["sharpness", "hardness"],
     },
     {
-        "tagname": "bl",
+        "tag_name": "bl",
         "text": "contundente",
-        "params": ["roughness"],
+        "params": ["roughness", "hardness"],
     },
     {
-        "tagname": "pi",
+        "tag_name": "pi",
         "text": "perfurante",
-        "params": ["pointiness"],
+        "params": ["pointiness", "hardness", "anchor"],
     },
     {
-        "tagname": "ar",
+        "tag_name": "ar",
         "text": "armadura",
-        "params": ["durability", "hardness", "wet"],
+        "params": [
+            "mass",
+            "wieldiness",
+            "hardness",
+            "durability",
+            "wet",
+        ],
     },
     {
-        "tagname": "cl",
+        "tag_name": "cl",
         "text": "vestimenta",
-        "params": ["elegance", "cleanliness", "wet"],
+        "params": [
+            "formality",
+            "charm",
+            "cleanliness",
+            "wet",
+            "insulation",
+        ],
     },
     {
-        "tagname": "wr",
+        "tag_name": "wr",
         "text": "escrevível",
         "params": ["fill", "wet"],
     },
     {
-        "tagname": "rd",
+        "tag_name": "rd",
         "text": "legível",
-        "params": ["clarity"],
+        "params": ["legibility"],
     },
     {
-        "tagname": "fl",
+        "tag_name": "fl",
         "text": "inflamável",
         "params": ["wet"],
     },
     {
-        "tagname": "to",
+        "tag_name": "to",
         "text": "ferramenta",
         "params": ["durability", "quality", "wet"],
     },
     {
-        "tagname": "mt",
+        "tag_name": "mt",
         "text": "material",
         "params": ["quality", "purity"],
     },
     {
-        "tagname": "pa",
+        "tag_name": "pa",
         "text": "peça",
         "params": ["durability", "quality"],
     },
     {
-        "tagname": "cp",
+        "tag_name": "cp",
         "text": "composição",
         "params": ["durability", "integration"],
     },
     {
-        "tagname": "un",
+        "tag_name": "un",
         "text": "unitário",
         "params": ["count"],
     },
     {
-        "tagname": "qt",
+        "tag_name": "qt",
         "text": "quantificável",
-        "params": ["quantity"],
+        "params": ["volume"],
     },
     {
-        "tagname": "ed",
+        "tag_name": "ed",
         "text": "comestível",
         "params": [
             "aroma",
@@ -92,116 +104,309 @@ ITEMMOLD_TAGS = [
         ],
     },
     {
-        "tagname": "lu",
+        "tag_name": "lu",
         "text": "luminoso",
         "params": ["power"],
     },
     {
-        "tagname": "co",
+        "tag_name": "co",
         "text": "conteiner",
-        "params": ["leakage"],
+        "params": ["retention"],
     },
     {
-        "tagname": "en",
+        "tag_name": "en",
         "text": "energético",
         "params": ["fill", "power"],
     },
     {
-        "tagname": "dr",
+        "tag_name": "dr",
         "text": "bebível",
         "params": ["aroma", "flavor", "saturation"],
     },
     {
-        "tagname": "re",
+        "tag_name": "re",
         "text": "regenerante",
         "params": ["power", "purity"],
     },
     {
-        "tagname": "tx",
+        "tag_name": "tx",
         "text": "tóxico",
         "params": ["power"],
     },
     {
-        "tagname": "wd",
+        "tag_name": "wd",
         "text": "molha estraga",
-        "params": ["damage"],
+        "params": ["condition"],
     },
     {
-        "tagname": "sy",
+        "tag_name": "sy",
         "text": "psicoativo",
         "params": ["power", "purity"],
     },
     {
-        "tagname": "so",
+        "tag_name": "so",
         "text": "sonoro",
         "params": ["power"],
     },
     {
-        "tagname": "li",
+        "tag_name": "li",
         "text": "vivo",
         "params": ["health"],
     },
 ]
 
-TAG_NAMES = [
-    'we',
-    'cu',
-    'bl',
-    'pi',
-    'ar',
-    'cl',
-    'wr',
-    'rd',
-    'fl',
-    'to',
-    'mt',
-    'pa',
-    'cp',
-    'un',
-    'qt',
-    'ed',
-    'lu',
-    'co',
-    'en',
-    'dr',
-    're',
-    'tx',
-    'wd',
-    'sy',
-    'so',
-    'li',
-]
+
+TAG_TO_PARAMS = {
+    t["tag_name"]: t["params"] for t in MOLD_TAG_DICTS
+}
+
+
+TAG_NAMES = [t["tag_name"] for t in MOLD_TAG_DICTS]
+
 
 ITEM_PARAMS = [
-    {"paramname": "durability", "paramrange": 1000},
-    {"paramname": "quality", "paramrange": 4},
-    {"paramname": "integration", "paramrange": 1000},
-    {"paramname": "wet", "paramrange": 1000},
-    {"paramname": "mass", "paramrange": 20},
-    {"paramname": "com", "paramrange": 1000},
-    {"paramname": "sharpness", "paramrange": 1000},
-    {"paramname": "roughness", "paramrange": 1000},
-    {"paramname": "pointiness", "paramrange": 1000},
-    {"paramname": "hardness", "paramrange": 1000},
-    {"paramname": "elegance", "paramrange": 5},
-    {"paramname": "cleanliness", "paramrange": 1000},
-    {"paramname": "fill", "paramrange": 1000},
-    {"paramname": "clarity", "paramrange": 1000},
-    {"paramname": "purity", "paramrange": 1000},
-    {"paramname": "count", "paramrange": 1000000},
-    {"paramname": "quantity", "paramrange": 10000},
-    {"paramname": "aroma", "paramrange": 1000},
-    {"paramname": "flavor", "paramrange": 1000},
-    {"paramname": "rot", "paramrange": 1000},
-    {"paramname": "power", "paramrange": 1000},
-    {"paramname": "damage", "paramrange": 1000},
-    {"paramname": "saturation", "paramrange": 1000},
-    {"paramname": "nutrition", "paramrange": 1000},
-    {"paramname": "leakage", "paramrange": 1000},
+    {
+        "param_name": "durability",
+        "param_range": 1000,
+        "param_mode": "manual",
+        "default_distribution": {
+            "base": 500,
+            "variance": 100,
+        },
+    },
+    {
+        "param_name": "quality",
+        "param_range": 4,
+        "param_mode": "manual",
+        "default_distribution": {"base": 1, "variance": 1},
+    },
+    {
+        "param_name": "wet",
+        "param_range": 4,
+        "param_mode": "manual",
+        "default_distribution": {"base": 0, "variance": 1},
+    },
+    {
+        "param_name": "fill",
+        "param_range": 1000,
+        "param_mode": "manual",
+        "default_distribution": {
+            "base": 900,
+            "variance": 50,
+        },
+    },
+    {
+        "param_name": "legibility",
+        "param_range": 5,
+        "param_mode": "manual",
+        "default_distribution": {"base": 2, "variance": 1},
+    },
+    {
+        "param_name": "purity",
+        "param_range": 1000,
+        "param_mode": "manual",
+        "default_distribution": {
+            "base": 700,
+            "variance": 150,
+        },
+    },
+    {
+        "param_name": "count",
+        "param_range": 1000000,
+        "param_mode": "manual",
+        "default_distribution": {"base": 1, "variance": 0},
+    },
+    {
+        "param_name": "volume",
+        "param_range": 1000000,
+        "param_mode": "manual",
+        "default_distribution": {
+            "base": 1000,
+            "variance": 100,
+        },
+    },
+    {
+        "param_name": "rot",
+        "param_range": 1000,
+        "param_mode": "manual",
+        "default_distribution": {"base": 1, "variance": 50},
+    },
+    {
+        "param_name": "condition",
+        "param_range": 1000,
+        "param_mode": "manual",
+        "default_distribution": {
+            "base": 950,
+            "variance": 50,
+        },
+    },
+    {
+        "param_name": "aroma",
+        "param_range": 5,
+        "param_mode": "semi",
+        "default_distribution": {"base": 3, "variance": 1},
+    },
+    {
+        "param_name": "flavor",
+        "param_range": 6,
+        "param_mode": "semi",
+        "default_distribution": {"base": 3, "variance": 1},
+    },
+    {
+        "param_name": "charm",
+        "param_range": 5,
+        "param_mode": "semi",
+        "default_distribution": {"base": 2, "variance": 1},
+    },
+    {
+        "param_name": "balance",
+        "param_range": 1000,
+        "param_mode": "auto",
+        "default_distribution": {
+            "base": 300,
+            "variance": 200,
+        },
+    },
+    {
+        "param_name": "integration",
+        "param_range": 1000,
+        "param_mode": "auto",
+        "default_distribution": {
+            "base": 600,
+            "variance": 150,
+        },
+    },
+    {
+        "param_name": "mass",
+        "param_range": 20000,
+        "param_mode": "auto",
+        "default_distribution": {
+            "base": 1000,
+            "variance": 500,
+        },
+    },
+    {
+        "param_name": "sharpness",
+        "param_range": 1000,
+        "param_mode": "auto",
+        "default_distribution": {
+            "base": 300,
+            "variance": 100,
+        },
+    },
+    {
+        "param_name": "roughness",
+        "param_range": 1000,
+        "param_mode": "auto",
+        "default_distribution": {
+            "base": 100,
+            "variance": 50,
+        },
+    },
+    {
+        "param_name": "wieldiness",
+        "param_range": 1000,
+        "param_mode": "auto",
+        "default_distribution": {
+            "base": 600,
+            "variance": 200,
+        },
+    },
+    {
+        "param_name": "pointiness",
+        "param_range": 1000,
+        "param_mode": "auto",
+        "default_distribution": {
+            "base": 500,
+            "variance": 100,
+        },
+    },
+    {
+        "param_name": "hardness",
+        "param_range": 1000,
+        "param_mode": "auto",
+        "default_distribution": {
+            "base": 500,
+            "variance": 250,
+        },
+    },
+    {
+        "param_name": "cleanliness",
+        "param_range": 1000,
+        "param_mode": "auto",
+        "default_distribution": {
+            "base": 800,
+            "variance": 100,
+        },
+    },
+    {
+        "param_name": "power",
+        "param_range": 1000,
+        "param_mode": "auto",
+        "default_distribution": {
+            "base": 350,
+            "variance": 150,
+        },
+    },
+    {
+        "param_name": "saturation",
+        "param_range": 1000,
+        "param_mode": "auto",
+        "default_distribution": {
+            "base": 600,
+            "variance": 150,
+        },
+    },
+    {
+        "param_name": "nutrition",
+        "param_range": 4,
+        "param_mode": "auto",
+        "default_distribution": {"base": 1, "variance": 0},
+    },
+    {
+        "param_name": "retention",
+        "param_range": 1000,
+        "param_mode": "auto",
+        "default_distribution": {
+            "base": 700,
+            "variance": 250,
+        },
+    },
+    {
+        "param_name": "formality",
+        "param_range": 5,
+        "param_mode": "auto",
+        "default_distribution": {"base": 2, "variance": 0},
+    },
+    {
+        "param_name": "insulation",
+        "param_range": 5,
+        "param_mode": "auto",
+        "default_distribution": {"base": 1, "variance": 0},
+    },
+    {
+        "param_name": "anchor",
+        "param_range": 3,
+        "param_mode": "auto",
+        "default_distribution": {"base": 0, "variance": 0},
+    },
 ]
 
 
-EVENTS = {}
+ITEM_PARAM_MAXES = {
+    p["param_name"]: p["param_range"] for p in ITEM_PARAMS
+}
+
+
+ITEM_PARAM_MODES = {
+    p["param_name"]: p["param_mode"] for p in ITEM_PARAMS
+}
+
+
+ITEM_PARAM_DEFAULTS = {
+    p["param_name"]: p["default_distribution"]
+    for p in ITEM_PARAMS
+}
 
 
 SLOT_RULES = {
@@ -322,4 +527,114 @@ PLAYERS_SCHEMA = {
     "2": {"name": "Malina"},
     "3": {"name": "Estranha"},
     "4": {"name": "Ricardo"},
+}
+
+BODY_SCHEMA = {
+    "Head": {
+        "slots": ["earring", "hat", "headband"],
+        "children": {
+            "Spine": {
+                "slots": [],
+                "children": {
+                    "Neck": {
+                        "slots": ["around", "necklace"],
+                        "children": {
+                            "Torso": {
+                                "slots": ["front", "back"],
+                                "children": {
+                                    "Right_shoulder": {
+                                        "slots": ["bag"],
+                                        "children": {
+                                            "Right_arm": {
+                                                "slots": [
+                                                    "armband"
+                                                ],
+                                                "children": {
+                                                    "Right_forearm": {
+                                                        "slots": [
+                                                            "bracelet"
+                                                        ],
+                                                        "children": {
+                                                            "Right_hand": {
+                                                                "slots": [
+                                                                    "ring"
+                                                                ],
+                                                                "children": {},
+                                                            }
+                                                        },
+                                                    }
+                                                },
+                                            }
+                                        },
+                                    },
+                                    "Left_shoulder": {
+                                        "slots": ["bag"],
+                                        "children": {
+                                            "Left_arm": {
+                                                "slots": [
+                                                    "armband"
+                                                ],
+                                                "children": {
+                                                    "Left_forearm": {
+                                                        "slots": [
+                                                            "bracelet"
+                                                        ],
+                                                        "children": {
+                                                            "Left_hand": {
+                                                                "slots": [
+                                                                    "ring"
+                                                                ],
+                                                                "children": {},
+                                                            }
+                                                        },
+                                                    }
+                                                },
+                                            }
+                                        },
+                                    },
+                                },
+                            }
+                        },
+                    },
+                    "Hips": {
+                        "slots": ["belt"],
+                        "children": {
+                            "Right_leg": {
+                                "slots": ["holster"],
+                                "children": {
+                                    "Right_shank": {
+                                        "slots": [],
+                                        "children": {
+                                            "Right_foot": {
+                                                "slots": [
+                                                    "anklet"
+                                                ],
+                                                "children": {},
+                                            }
+                                        },
+                                    }
+                                },
+                            },
+                            "Left_leg": {
+                                "slots": ["holster"],
+                                "children": {
+                                    "Left_shank": {
+                                        "slots": [],
+                                        "children": {
+                                            "Left_foot": {
+                                                "slots": [
+                                                    "anklet"
+                                                ],
+                                                "children": {},
+                                            }
+                                        },
+                                    }
+                                },
+                            },
+                        },
+                    },
+                },
+            }
+        },
+    }
 }

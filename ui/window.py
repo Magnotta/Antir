@@ -10,7 +10,9 @@ class Window(QMainWindow):
         self,
         session,
         engine: Engine,
-        itemmold_repo,
+        spec_repo,
+        mold_repo,
+        param_repo,
         item_repo,
     ):
         super().__init__()
@@ -22,7 +24,11 @@ class Window(QMainWindow):
         self.setCentralWidget(self.tabs)
         self.home_tab = HomeTab(self.engine)
         self.item_tab = ItemTab(
-            itemmold_repo, item_repo, self
+            spec_repo,
+            mold_repo,
+            param_repo,
+            item_repo,
+            self,
         )
         self.player_tab = PlayersTab(engine.state.players)
         self.engine.signals.connect(

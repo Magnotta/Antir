@@ -1,7 +1,10 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
-from core.defs import SLOT_RULES, BASE_PLAYER_STATS
-from db.schemas import BODY_SCHEMA
+from core.defs import (
+    SLOT_RULES,
+    BASE_PLAYER_STATS,
+    BODY_SCHEMA,
+)
 from db.models import (
     Base,
     PlayerRecord,
@@ -34,7 +37,7 @@ def create_body_node_recursive(
 ):
     node = BodyNode(
         health=1000,
-        owner=owner_id,
+        owner_id=owner_id,
         name=name,
         parent=parent,
     )

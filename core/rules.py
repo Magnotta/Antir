@@ -1,12 +1,21 @@
+from enum import IntEnum, auto
 from core.events import (
     HungerEvent,
 )
-from systems.time_service import Time
+
+
+class RuleCategory(IntEnum):
+    PERMISSIVE = auto()
+    LENIENT = auto()
+    FIRM = auto()
+    STRINGENT = auto()
+    DRACONIAN = auto()
 
 
 class Rule:
     listens_to: list[str] = []
     name = 'rulebase'
+    category = RuleCategory.PERMISSIVE
 
     def __init__(self):
         self._state_dict = dict()
@@ -21,67 +30,68 @@ class Rule:
 class DayHungerRule(Rule):
     listens_to = ['day']
     name = 'daily hunger rule'
+    category = RuleCategory.PERMISSIVE
 
     def fulfill(self, state):
         return [
             HungerEvent(
-                state.time + Time(480),
+                state.time + 480,
                 {"target": 1, "amount": 1},
             ),
             HungerEvent(
-                state.time + Time(480),
+                state.time + 480,
                 {"target": 2, "amount": 1},
             ),
             HungerEvent(
-                state.time + Time(480),
+                state.time + 480,
                 {"target": 3, "amount": 1},
             ),
             HungerEvent(
-                state.time + Time(480),
+                state.time + 480,
                 {"target": 4, "amount": 1},
             ),
             HungerEvent(
-                state.time + Time(480),
+                state.time + 480,
                 {"target": 5, "amount": 1},
             ),
             HungerEvent(
-                state.time + Time(720),
+                state.time + 720,
                 {"target": 1, "amount": 1},
             ),
             HungerEvent(
-                state.time + Time(720),
+                state.time + 720,
                 {"target": 2, "amount": 1},
             ),
             HungerEvent(
-                state.time + Time(720),
+                state.time + 720,
                 {"target": 3, "amount": 1},
             ),
             HungerEvent(
-                state.time + Time(720),
+                state.time + 720,
                 {"target": 4, "amount": 1},
             ),
             HungerEvent(
-                state.time + Time(720),
+                state.time + 720,
                 {"target": 5, "amount": 1},
             ),
             HungerEvent(
-                state.time + Time(1080),
+                state.time + 1080,
                 {"target": 1, "amount": 1},
             ),
             HungerEvent(
-                state.time + Time(1080),
+                state.time + 1080,
                 {"target": 2, "amount": 1},
             ),
             HungerEvent(
-                state.time + Time(1080),
+                state.time + 1080,
                 {"target": 3, "amount": 1},
             ),
             HungerEvent(
-                state.time + Time(1080),
+                state.time + 1080,
                 {"target": 4, "amount": 1},
             ),
             HungerEvent(
-                state.time + Time(1080),
+                state.time + 1080,
                 {"target": 5, "amount": 1},
             ),
         ]
@@ -90,6 +100,7 @@ class DayHungerRule(Rule):
 class MidnightHungerRule(Rule):
     listens_to = ['day']
     name = 'midnight hunger rule'
+    category = RuleCategory.PERMISSIVE
 
     def fulfill(self, state):
         targets = [

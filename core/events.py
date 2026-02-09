@@ -29,7 +29,7 @@ class EquipItemEvent(Event):
     def apply(self, engine):
         session = engine.session
         item = session.get(Item, self.payload["item_id"])
-        inv = item.owner
+        inv = item.owner_id
         slot = session.get(
             EquipmentSlot, self.payload["slot_id"]
         )
