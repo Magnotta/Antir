@@ -1,9 +1,9 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from core.defs import (
-    SLOT_RULES,
     BASE_PLAYER_STATS,
     BODY_SCHEMA,
+    SLOT_MAX_INDEX,
 )
 from db.models import (
     Base,
@@ -44,7 +44,7 @@ def create_body_node_recursive(
     session.add(node)
     session.flush()
     for slot_type in schema.get("slots", []):
-        for idx in range(SLOT_RULES[slot_type]):
+        for idx in range(SLOT_MAX_INDEX[slot_type]):
             slot = EquipmentSlot(
                 body_node_id=node.id,
                 slot_type=slot_type,

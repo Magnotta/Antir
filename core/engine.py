@@ -1,31 +1,34 @@
-from db.models import EventRecord
+from db.repository import (
+    EventRepository,
+    ItemRepository,
+    PlayerRepository,
+)
 from core.game_state import GameState
-from core.events import Event, EVENTS
-from core.rules import Rule, RULES
+from core.rules import RULES
 from player.domain import Player
 from systems.command_service import CommandService
 from systems.signal_service import SignalBus
 
 
 class Engine:
-    def __init__(self, session, players: list[Player]):
+    def __init__(
+        self,
+        event_repo: EventRepository,
+        item_repo: ItemRepository,
+        player_repo: PlayerRepository,
+        players: list[Player],
+    ):
         self.state = GameState(players)
-        self.session = session
+        self.event_repo = event_repo
+        self.item_repo = item_repo
+        self.player_repo = player_repo
         self.cmd = CommandService(self)
-        self.events: list[Event] = []
-        self.rules: list[Rule] = RULES
+        self.events = []
+        self.rules = RULES
         self.signals = SignalBus()
 
-    def schedule(self, event: Event, org: str):
-        rec = EventRecord(
-            type=event.type,
-            payload=event.payload,
-            due_tick=event.due_time.tick,
-            origin=org,
-        )
-        event._set_id(rec.id)
-        self.session.add(rec)
-        self.session.commit()
+    def schedule(self, event, org: str):
+        self.event_repo.add_record(event, org)
         self.events.append(event)
         self.events.sort(key=lambda e: e.due_time)
 
@@ -42,7 +45,7 @@ class Engine:
             self.signals.store('day')
 
     def _dispatch_due_events(self):
-        due: list[Event] = [
+        due = [
             e
             for e in self.events
             if e.due_time <= self.state.time
@@ -55,9 +58,8 @@ class Engine:
                 self.events.remove(event)
                 for e in followups:
                     self.schedule(
-                        e, f"follow-up from {event.id}"
+                        e, f"follow-up from {event.type}"
                     )
-                self.session.commit()
         self._fulfill_rules()
         self.signals.notify()
 
@@ -69,15 +71,3 @@ class Engine:
                         self.state
                     ):
                         self.schedule(next_event, rule.name)
-
-    def load_game(self, start_id: int) -> GameState:
-        records = (
-            self.session.query(EventRecord)
-            .filter(EventRecord.executed.is_(False))
-            .order_by(EventRecord.due_tick, EventRecord.id)
-            .all()
-        )
-        for rec in records:
-            event_cls = EVENTS[rec.type]
-            event = event_cls(rec.payload, rec.due_tick)
-            self.events.append(event)

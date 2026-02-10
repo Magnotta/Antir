@@ -8,25 +8,17 @@ from ui.player_tab import PlayersTab
 class Window(QMainWindow):
     def __init__(
         self,
-        session,
         engine: Engine,
-        spec_repo,
-        mold_repo,
-        param_repo,
         item_repo,
     ):
         super().__init__()
         self.setWindowTitle("Antir, otários")
         self.resize(800, 600)
-        self.session = session
         self.engine = engine
         self.tabs = QTabWidget()
         self.setCentralWidget(self.tabs)
         self.home_tab = HomeTab(self.engine)
         self.item_tab = ItemTab(
-            spec_repo,
-            mold_repo,
-            param_repo,
             item_repo,
             self,
         )

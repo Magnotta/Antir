@@ -1,4 +1,4 @@
-from db.models import Item, EquipmentSlot
+from db.models import Item
 from systems.time_service import Time
 
 EVENTS = {}
@@ -6,17 +6,13 @@ EVENTS = {}
 
 class Event:
     type: str = "base"
-    impacts: str = ''
+    impacts: str = ""
 
     def __init__(
         self, due_time: Time, payload: dict | None = None
     ):
-        self.id = 0
         self.payload = payload or {}
         self.due_time = due_time
-
-    def _set_id(self, id):
-        self.id = id
 
     def condition(self, state):
         return True
@@ -26,16 +22,15 @@ class Event:
 
 
 class EquipItemEvent(Event):
+    type = "equip item"
+    impacts = "equipment"
+
     def apply(self, engine):
-        session = engine.session
-        item = session.get(Item, self.payload["item_id"])
-        inv = item.owner_id
-        slot = session.get(
-            EquipmentSlot, self.payload["slot_id"]
+        item = engine.item_repo.get_by_id(
+            self.payload["item_id"]
         )
-        if not inv.can_equip(item, slot):
-            raise ValueError("Cannot equip item")
-        inv.equip_item(item, slot)
+        player = engine.player_repo.get(item.owner_id)
+        player.equip_item(item)
         return []
 
 

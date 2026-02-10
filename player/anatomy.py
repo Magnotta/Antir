@@ -1,95 +1,48 @@
-from db.models import BodyNode
+from db.models import BodyNode, EquipmentSlot
+from db.repository import PlayerRepository
 
 
 class Anatomy:
-    def __init__(self, ana_repo, player_id):
-        self.repo = ana_repo
-        self.head = BodyNode(
-            owner_id=player_id, name="head"
+    def __init__(
+        self, player_id, player_repo: PlayerRepository
+    ):
+        self.player_id = player_id
+        self.repo = player_repo
+        self.head = self.repo.create_body_tree(
+            self.player_id
         )
-        spine = BodyNode(
-            owner_id=player_id,
-            name="spine",
-            parent=self.head,
-        )
-        neck = BodyNode(
-            owner_id=player_id, name="head", parent=spine
-        )
-        torso = BodyNode(
-            owner_id=player_id, name="torso", parent=neck
-        )
-        left_shoulder = BodyNode(
-            owner_id=player_id,
-            name="left_shoulder",
-            parent=torso,
-        )
-        left_arm = BodyNode(
-            owner_id=player_id,
-            name="left_arm",
-            parent=left_shoulder,
-        )
-        left_forearm = BodyNode(
-            owner_id=player_id,
-            name="left_forearm",
-            parent=left_arm,
-        )
-        left_hand = BodyNode(
-            owner_id=player_id,
-            name="left_hand",
-            parent=left_forearm,
-        )
-        right_shoulder = BodyNode(
-            owner_id=player_id,
-            name="right_shoulder",
-            parent=torso,
-        )
-        right_arm = BodyNode(
-            owner_id=player_id,
-            name="right_arm",
-            parent=right_shoulder,
-        )
-        right_forearm = BodyNode(
-            owner_id=player_id,
-            name="right_forearm",
-            parent=right_arm,
-        )
-        right_hand = BodyNode(
-            owner_id=player_id,
-            name="right_hand",
-            parent=right_forearm,
-        )
-        hips = BodyNode(
-            owner_id=player_id,
-            name="hips",
-            parent=spine,
-        )
-        left_thigh = BodyNode(
-            owner_id=player_id,
-            name="left_thigh",
-            parent=hips,
-        )
-        left_shank = BodyNode(
-            owner_id=player_id,
-            name="left_shank",
-            parent=left_thigh,
-        )
-        left_foot = BodyNode(
-            owner_id=player_id,
-            name="left_foot",
-            parent=left_shank,
-        )
-        right_thigh = BodyNode(
-            owner_id=player_id,
-            name="right_thigh",
-            parent=hips,
-        )
-        right_shank = BodyNode(
-            owner_id=player_id,
-            name="right_shank",
-            parent=right_thigh,
-        )
-        right_foot = BodyNode(
-            owner_id=player_id,
-            name="right_foot",
-            parent=right_shank,
+        self.by_name = {}
+        self._index_tree(self.head)
+
+    def _index_tree(self, node: BodyNode):
+        self.by_name[node.name] = node
+        for child in node.children:
+            self._index_tree(child)
+
+    def get_bodynode_by_name(
+        self, name: str
+    ) -> BodyNode | None:
+        return self.by_name[name]
+
+    def get_slot_by_description(
+        self, body_name, slot_name
+    ) -> EquipmentSlot:
+        body = self.get_bodynode_by_name(body_name)
+        if not body:
+            raise ValueError(
+                f"Body part not found: {body_name}"
+            )
+        found_slot = False
+        for slot in body.slots:
+            if slot.slot_type == slot_name:
+                found_slot = True
+                if slot.item_id is not None:
+                    continue
+                return slot
+        if not found_slot:
+            raise ValueError(
+                f"Slot '{slot_name}' not found on body part '{body_name}'"
+            )
+        raise ValueError(
+            f"Slot '{slot_name}' is over-encumbered!"
         )

@@ -4,7 +4,7 @@ from core.events import (
 )
 
 
-class RuleCategory(IntEnum):
+class RuleStrictness(IntEnum):
     PERMISSIVE = auto()
     LENIENT = auto()
     FIRM = auto()
@@ -15,7 +15,7 @@ class RuleCategory(IntEnum):
 class Rule:
     listens_to: list[str] = []
     name = 'rulebase'
-    category = RuleCategory.PERMISSIVE
+    strictness = RuleStrictness.PERMISSIVE
 
     def __init__(self):
         self._state_dict = dict()
@@ -30,7 +30,7 @@ class Rule:
 class DayHungerRule(Rule):
     listens_to = ['day']
     name = 'daily hunger rule'
-    category = RuleCategory.PERMISSIVE
+    category = RuleStrictness.PERMISSIVE
 
     def fulfill(self, state):
         return [
@@ -100,7 +100,7 @@ class DayHungerRule(Rule):
 class MidnightHungerRule(Rule):
     listens_to = ['day']
     name = 'midnight hunger rule'
-    category = RuleCategory.PERMISSIVE
+    category = RuleStrictness.PERMISSIVE
 
     def fulfill(self, state):
         targets = [

@@ -75,10 +75,10 @@ class InventoryPanel(QWidget):
         self.table = QTableView()
         layout.addWidget(self.table)
         self.inventory = inventory
-        self.refresh()
+        # self.refresh()
 
     def refresh(self):
-        items = self.inventory.loose_items()
+        items = None
         self.model = InventoryTableModel(items)
         self.table.setModel(self.model)
         self.table.resizeColumnsToContents()

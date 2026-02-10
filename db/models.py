@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy import (
@@ -35,14 +34,35 @@ class Mold(Base):
     name = Column(String, unique=True)
     tags = Column(String, nullable=False)
     description = Column(String)
+    occupied_slots = Column(JSON, nullable=True)
     param_specs = relationship(
         "ParamSpec", cascade="all, delete-orphan"
+    )
+
+
+class ItemSlotOccupancy(Base):
+    __tablename__ = "item_slot_occupancy"
+    id = Column(Integer, primary_key=True)
+    item_id = Column(
+        Integer, ForeignKey("items.id"), nullable=False
+    )
+    equipment_slot_id = Column(
+        Integer,
+        ForeignKey("equipment_slots.id"),
+        nullable=False,
+    )
+    __table_args__ = (
+        UniqueConstraint(
+            "equipment_slot_id",
+            name="uix_slot_occupied_once",
+        ),
     )
 
 
 class Item(Base):
     __tablename__ = "items"
     id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
     original_mold_id = Column(
         Integer,
         ForeignKey("molds.id"),
@@ -147,14 +167,6 @@ class PlayerStat(Base):
     __table_args__ = (
         UniqueConstraint("player_id", "name"),
     )
-
-
-@dataclass(frozen=True)
-class Sickness:
-    id: int = 0
-    name: str = ""
-    description: str = ""
-    contagious: bool = False
 
 
 class Location(Base):

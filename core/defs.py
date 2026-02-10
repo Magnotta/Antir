@@ -48,6 +48,11 @@ MOLD_TAG_DICTS = [
         ],
     },
     {
+        "tag_name": "eq",
+        "text": "equipável",
+        "params": ["delay"],
+    },
+    {
         "tag_name": "wr",
         "text": "escrevível",
         "params": ["fill", "wet"],
@@ -390,6 +395,12 @@ ITEM_PARAMS = [
         "param_mode": "auto",
         "default_distribution": {"base": 0, "variance": 0},
     },
+    {
+        "param_name": "delay",
+        "param_range": 60,
+        "param_mode": "auto",
+        "default_distribution": {"base": 5, "variance": 1},
+    },
 ]
 
 
@@ -406,24 +417,6 @@ ITEM_PARAM_MODES = {
 ITEM_PARAM_DEFAULTS = {
     p["param_name"]: p["default_distribution"]
     for p in ITEM_PARAMS
-}
-
-
-SLOT_RULES = {
-    "earring": 6,
-    "hat": 1,
-    "headband": 1,
-    "around": 1,
-    "necklace": 5,
-    "front": 1,
-    "back": 1,
-    "bag": 2,
-    "armband": 2,
-    "bracelet": 6,
-    "ring": 9,
-    "belt": 2,
-    "holster": 1,
-    "anklet": 3,
 }
 
 
@@ -521,6 +514,31 @@ BASE_PLAYER_STATS = {
 }
 
 
+SLOT_MAX_INDEX = {
+    "earring": 6,
+    "hat": 1,
+    "headband": 1,
+    "around": 1,
+    "necklace": 4,
+    "front": 1,
+    "back": 1,
+    "shirt": 2,
+    "bag": 2,
+    "armband": 2,
+    "bracelet": 6,
+    "ring": 9,
+    "glove": 1,
+    "belt": 2,
+    "underpants": 1,
+    "holster": 1,
+    "pants": 2,
+    "armor": 1,
+    "anklet": 3,
+    "sock": 1,
+    "shoe": 1,
+}
+
+
 PLAYERS_SCHEMA = {
     "0": {"name": "Joao"},
     "1": {"name": "Jose"},
@@ -530,35 +548,49 @@ PLAYERS_SCHEMA = {
 }
 
 BODY_SCHEMA = {
-    "Head": {
+    "head": {
         "slots": ["earring", "hat", "headband"],
+        "depth": 0,
         "children": {
-            "Spine": {
+            "spine": {
                 "slots": [],
+                "depth": 1,
                 "children": {
-                    "Neck": {
+                    "neck": {
                         "slots": ["around", "necklace"],
+                        "depth": 2,
                         "children": {
-                            "Torso": {
-                                "slots": ["front", "back"],
+                            "torso": {
+                                "slots": [
+                                    "front",
+                                    "back",
+                                    "shirt",
+                                    "armor",
+                                ],
+                                "depth": 7,
                                 "children": {
-                                    "Right_shoulder": {
+                                    "right_shoulder": {
                                         "slots": ["bag"],
+                                        "depth": 3,
                                         "children": {
-                                            "Right_arm": {
+                                            "right_arm": {
                                                 "slots": [
                                                     "armband"
                                                 ],
+                                                "depth": 4,
                                                 "children": {
-                                                    "Right_forearm": {
+                                                    "right_forearm": {
                                                         "slots": [
                                                             "bracelet"
                                                         ],
+                                                        "depth": 5,
                                                         "children": {
-                                                            "Right_hand": {
+                                                            "right_hand": {
                                                                 "slots": [
-                                                                    "ring"
+                                                                    "ring",
+                                                                    "glove",
                                                                 ],
+                                                                "depth": 6,
                                                                 "children": {},
                                                             }
                                                         },
@@ -567,23 +599,28 @@ BODY_SCHEMA = {
                                             }
                                         },
                                     },
-                                    "Left_shoulder": {
+                                    "left_shoulder": {
                                         "slots": ["bag"],
+                                        "depth": 3,
                                         "children": {
-                                            "Left_arm": {
+                                            "left_arm": {
                                                 "slots": [
                                                     "armband"
                                                 ],
+                                                "depth": 4,
                                                 "children": {
-                                                    "Left_forearm": {
+                                                    "left_forearm": {
                                                         "slots": [
                                                             "bracelet"
                                                         ],
+                                                        "depth": 5,
                                                         "children": {
-                                                            "Left_hand": {
+                                                            "left_hand": {
                                                                 "slots": [
-                                                                    "ring"
+                                                                    "ring",
+                                                                    "glove",
                                                                 ],
+                                                                "depth": 6,
                                                                 "children": {},
                                                             }
                                                         },
@@ -596,35 +633,54 @@ BODY_SCHEMA = {
                             }
                         },
                     },
-                    "Hips": {
-                        "slots": ["belt"],
+                    "hips": {
+                        "slots": ["belt", "underpants"],
+                        "depth": 8,
                         "children": {
-                            "Right_leg": {
-                                "slots": ["holster"],
+                            "right_leg": {
+                                "slots": [
+                                    "holster",
+                                    "pants",
+                                    "armor",
+                                ],
+                                "depth": 9,
                                 "children": {
-                                    "Right_shank": {
+                                    "right_shank": {
                                         "slots": [],
+                                        "depth": 10,
                                         "children": {
-                                            "Right_foot": {
+                                            "right_foot": {
                                                 "slots": [
-                                                    "anklet"
+                                                    "anklet",
+                                                    "sock",
+                                                    "shoe",
                                                 ],
+                                                "depth": 11,
                                                 "children": {},
                                             }
                                         },
                                     }
                                 },
                             },
-                            "Left_leg": {
-                                "slots": ["holster"],
+                            "left_leg": {
+                                "slots": [
+                                    "holster",
+                                    "pants",
+                                    "armor",
+                                ],
+                                "depth": 9,
                                 "children": {
-                                    "Left_shank": {
+                                    "left_shank": {
                                         "slots": [],
+                                        "depth": 10,
                                         "children": {
-                                            "Left_foot": {
+                                            "left_foot": {
                                                 "slots": [
-                                                    "anklet"
+                                                    "anklet",
+                                                    "sock",
+                                                    "shoe",
                                                 ],
+                                                "depth": 11,
                                                 "children": {},
                                             }
                                         },
@@ -638,3 +694,26 @@ BODY_SCHEMA = {
         },
     }
 }
+
+
+def enumerate_slots(node_name, node_dict, initial=0):
+    results = []
+    for slot in node_dict["slots"]:
+        results.append(
+            (node_dict["depth"], f"{node_name} {slot}")
+        )
+    for child in node_dict["children"]:
+        results.extend(
+            enumerate_slots(
+                child, node_dict["children"][child]
+            )
+        )
+    if not initial:
+        return results
+    final = sorted(results, key=lambda d: d[0])
+    return [e[1] for e in final]
+
+
+SLOTS_LIST = enumerate_slots(
+    "head", BODY_SCHEMA["head"], initial=1
+)

@@ -3,12 +3,10 @@ import sys
 from db.database import init_metadata, init_db
 from db.models import PlayerRecord
 from db.repository import (
-    ParamRepository,
+    EventRepository,
     ItemRepository,
-    AnatomyRepository,
-    PlayerStatRepository,
-    SpecRepository,
-    MoldRepository,
+    PlayerRepository,
+    LocationRepository,
 )
 from player.domain import Player
 from core.engine import Engine
@@ -22,14 +20,11 @@ if __name__ == "__main__":
 
     db_eng, Session = init_metadata()
     session = Session()
-    spec_repo = SpecRepository(session)
-    mold_repo = MoldRepository(session)
-    param_repo = ParamRepository(session)
-    item_repo = ItemRepository(session)
-    stat_repo = PlayerStatRepository(session)
-    ana_repo = AnatomyRepository(session)
-    # loc_repo = LocationRepository(session)
     init_db(session)
+    item_repo = ItemRepository(session)
+    player_repo = PlayerRepository(session)
+    event_repo = EventRepository(session)
+    loc_repo = LocationRepository(session)
 
     player_recs = (
         session.query(PlayerRecord)
@@ -44,17 +39,15 @@ if __name__ == "__main__":
         player_recs, BASE_PLAYER_STATS.items()
     ):
         players.append(
-            Player(player, item_repo, stat_repo, ana_repo)
+            Player(player, player_repo, item_repo)
         )
 
-    engine = Engine(session, players)
+    engine = Engine(
+        event_repo, item_repo, player_repo, players
+    )
     app = QApplication(sys.argv)
     win = Window(
-        session,
         engine,
-        spec_repo,
-        mold_repo,
-        param_repo,
         item_repo,
     )
     win.show()

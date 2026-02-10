@@ -27,12 +27,14 @@ from PyQt6.QtCore import (
 )
 from db.models import Mold, Item, ItemParam, ParamSpec
 from db.repository import (
-    SpecRepository,
-    MoldRepository,
-    ParamRepository,
     ItemRepository,
 )
-from core.defs import MOLD_TAG_DICTS, TAG_NAMES
+from core.defs import (
+    MOLD_TAG_DICTS,
+    TAG_NAMES,
+    ITEM_PARAM_MAXES,
+    SLOTS_LIST,
+)
 
 
 class TagFilterModel(QSortFilterProxyModel):
@@ -183,7 +185,7 @@ class MoldTableModel(QAbstractTableModel):
 
 
 class ItemTableModel(QAbstractTableModel):
-    HEADERS = ["ID", "Mold", "Owner", "Container"]
+    HEADERS = ["ID", "Name", "Owner", "Container"]
 
     def __init__(self, items: list[Item] = []):
         super().__init__()
@@ -205,7 +207,7 @@ class ItemTableModel(QAbstractTableModel):
         col = index.column()
         return [
             item.id,
-            item.original_mold_id,
+            item.name,
             item.owner_id,
             item.container_item_id,
         ][col]
@@ -222,24 +224,18 @@ class ItemTableModel(QAbstractTableModel):
 class ItemTab(QWidget):
     def __init__(
         self,
-        spec_repo: SpecRepository,
-        mold_repo: MoldRepository,
-        param_repo: ParamRepository,
         item_repo: ItemRepository,
         parent=None,
     ):
         super().__init__(parent)
-        self.spec_repo = spec_repo
-        self.mold_repo = mold_repo
-        self.param_repo = param_repo
         self.item_repo = item_repo
         self.search_mold = QLineEdit()
         self.search_mold.setPlaceholderText("Search molds…")
         self.search_mold.textChanged.connect(
             self.on_search_mold
         )
-        self.mold_table = QTableView()
         self.mold_table_model = MoldTableModel()
+        self.mold_table = QTableView()
         self.mold_table.setModel(self.mold_table_model)
         self.mold_table.setSelectionBehavior(
             QTableView.SelectionBehavior.SelectRows
@@ -263,10 +259,15 @@ class ItemTab(QWidget):
         self.del_mold_btn = QPushButton("Delete")
         self.del_mold_btn.clicked.connect(self.delete_mold)
         self.del_mold_btn.setEnabled(False)
+        self.edit_slots_btn = QPushButton("Slots")
+        self.edit_slots_btn.clicked.connect(
+            self.on_edit_occupied_slots
+        )
         left_btn_layout = QHBoxLayout()
         left_btn_layout.addWidget(self.add_mold_btn)
         left_btn_layout.addWidget(self.edit_mold_btn)
         left_btn_layout.addWidget(self.del_mold_btn)
+        left_btn_layout.addWidget(self.edit_slots_btn)
         left = QVBoxLayout()
         left.addWidget(self.search_mold)
         left.addWidget(self.mold_table)
@@ -328,8 +329,26 @@ class ItemTab(QWidget):
         self.refresh_items()
         self.refresh_molds()
 
+    def on_edit_occupied_slots(self):
+        index = (
+            self.mold_table.selectionModel().selectedRows()[
+                0
+            ]
+        )
+        mold = self.mold_table_model.molds[index.row()]
+        if not mold:
+            QMessageBox.warning(
+                self, "No selection", "Select a mold first."
+            )
+            return
+        dlg = OccupiedSlotsEditorDialog(
+            mold, self.item_repo, self
+        )
+        if dlg.exec():
+            self.item_repo.session.commit()
+
     def refresh_molds(self, search: str | None = None):
-        molds = self.mold_repo.get_all(search=search)
+        molds = self.item_repo.get_all_molds(search=search)
         self.mold_table_model = MoldTableModel(molds)
         self.mold_table.setModel(self.mold_table_model)
         (
@@ -337,9 +356,10 @@ class ItemTab(QWidget):
                 self.on_mold_selected
             )
         )
+        self.mold_table.setColumnWidth(0, 5)
 
     def refresh_items(self, search: str | None = None):
-        items = self.item_repo.get_all(search=search)
+        items = self.item_repo.get_all_items(search=search)
         self.item_table_model = ItemTableModel(items)
         self.item_table.setModel(self.item_table_model)
         (
@@ -347,6 +367,7 @@ class ItemTab(QWidget):
                 self.on_item_selected
             )
         )
+        self.item_table.setColumnWidth(0, 5)
 
     def _get_selected_item(self) -> Item | None:
         selection = (
@@ -384,7 +405,6 @@ class ItemTab(QWidget):
         if dlg.exec():
             manual_params = dlg.get_manual_params()
             self.item_repo.spawn(
-                self.param_repo,
                 mold,
                 666,
                 manual_params,
@@ -397,7 +417,7 @@ class ItemTab(QWidget):
                 0
             ]
         )
-        item = self.item_model.items[index.row()]
+        item = self.item_table_model.items[index.row()]
         confirm = QMessageBox.question(
             self,
             "Destroy Item",
@@ -407,8 +427,8 @@ class ItemTab(QWidget):
         )
         if confirm != QMessageBox.StandardButton.Yes:
             return
-        self.item_repo.destroy(item)
-        self.refresh_items(item.original_mold_id)
+        self.item_repo.destroy_item(item)
+        self.refresh_items()
 
     def edit_item(self, item: Item):
         dlg = ItemEditorDialog(
@@ -437,13 +457,11 @@ class ItemTab(QWidget):
             "This action cannot be undone.",
         ):
             return
-        self.mold_repo.delete(item)
+        self.item_repo.delete_mold(item)
         self.refresh_molds()
 
     def add_mold(self):
-        dlg = MoldEditor(
-            self.spec_repo, self.mold_repo, parent=self
-        )
+        dlg = MoldEditor(self.item_repo, parent=self)
         if dlg.exec():
             self.refresh_molds()
 
@@ -452,9 +470,7 @@ class ItemTab(QWidget):
             return
         row = index.row()
         mold = self.mold_table_model.molds[row]
-        dlg = MoldEditor(
-            self.spec_repo, self.mold_repo, mold=mold
-        )
+        dlg = MoldEditor(self.item_repo, mold=mold)
         if dlg.exec():
             self.refresh_molds()
 
@@ -466,8 +482,7 @@ class ItemTab(QWidget):
             return
         mold = self.mold_table_model.molds[indexes[0].row()]
         dlg = MoldEditor(
-            self.spec_repo,
-            self.mold_repo,
+            self.item_repo,
             mold,
             parent=self,
         )
@@ -503,10 +518,74 @@ class ItemTab(QWidget):
         self.destroy_item_btn.setEnabled(has_selection)
 
 
+class OccupiedSlotsEditorDialog(QDialog):
+    def __init__(self, mold, repo, schema, parent=None):
+        super().__init__(parent)
+        self.mold = mold
+        self.repo = repo
+        self.setModal(True)
+        self.setWindowTitle(f"Occupied Slots – {mold.name}")
+        self.all_slots = QListWidget()
+        self.used_slots = QListWidget()
+        for slot in SLOTS_LIST:
+            self.all_slots.addItem(slot)
+        for slot in mold.occupied_slots or []:
+            self.used_slots.addItem(slot)
+        add_btn = QPushButton("→")
+        remove_btn = QPushButton("←")
+        add_btn.clicked.connect(self.add_slot)
+        remove_btn.clicked.connect(self.remove_slot)
+        arrows = QVBoxLayout()
+        arrows.addStretch()
+        arrows.addWidget(add_btn)
+        arrows.addWidget(remove_btn)
+        arrows.addStretch()
+        lists = QHBoxLayout()
+        lists.addWidget(self.all_slots)
+        lists.addLayout(arrows)
+        lists.addWidget(self.used_slots)
+        save = QPushButton("Save")
+        cancel = QPushButton("Cancel")
+        save.clicked.connect(self.on_save)
+        cancel.clicked.connect(self.reject)
+        btns = QHBoxLayout()
+        btns.addStretch()
+        btns.addWidget(cancel)
+        btns.addWidget(save)
+        layout = QVBoxLayout(self)
+        layout.addLayout(lists)
+        layout.addLayout(btns)
+
+    def add_slot(self):
+        item = self.all_slots.currentItem()
+        if not item:
+            return
+
+        text = item.text()
+        if not self._exists(self.used_slots, text):
+            self.used_slots.addItem(text)
+
+    def remove_slot(self):
+        row = self.used_slots.currentRow()
+        if row >= 0:
+            self.used_slots.takeItem(row)
+
+    def _exists(self, list_widget, text):
+        for i in range(list_widget.count()):
+            if list_widget.item(i).text() == text:
+                return True
+        return False
+
+    def on_save(self):
+        self.mold.occupied_slots = [
+            self.used_slots.item(i).text()
+            for i in range(self.used_slots.count())
+        ]
+        self.accept()
+
+
 class ParamSpecEditor(QDialog):
-    def __init__(
-        self, spec: ParamSpec | None = None, parent=None
-    ):
+    def __init__(self, spec: ParamSpec, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Edit Parameter Spec")
         self.param_edit = QLineEdit()
@@ -516,7 +595,7 @@ class ParamSpecEditor(QDialog):
             self.base_edit,
             self.var_edit,
         ):
-            box.setRange(0, 1000)
+            box.setRange(0, ITEM_PARAM_MAXES[spec.param])
         form = QFormLayout()
         form.addRow("Param", self.param_edit)
         form.addRow("Base", self.base_edit)
@@ -548,8 +627,7 @@ class ParamSpecEditor(QDialog):
 class MoldEditor(QDialog):
     def __init__(
         self,
-        spec_repo: SpecRepository,
-        mold_repo: MoldRepository,
+        item_repo: ItemRepository,
         mold: Mold | None = None,
         parent=None,
     ):
@@ -557,8 +635,7 @@ class MoldEditor(QDialog):
         self.setWindowTitle(
             "Edit Item Mold" if mold else "Create Item Mold"
         )
-        self.spec_repo = spec_repo
-        self.mold_repo = mold_repo
+        self.item_repo = item_repo
         if mold is None:
             self.mold = Mold(
                 name="",
@@ -608,8 +685,6 @@ class MoldEditor(QDialog):
         self.spec_table.doubleClicked.connect(
             self.on_spec_double_clicked
         )
-        add_btn = QPushButton("Add")
-        add_btn.clicked.connect(self.add_spec)
         edit_btn = QPushButton("Edit")
         edit_btn.clicked.connect(self.edit_spec)
         del_btn = QPushButton("Remove")
@@ -617,7 +692,6 @@ class MoldEditor(QDialog):
         get_btn = QPushButton("GET")
         get_btn.clicked.connect(self.get_specs_from_tags)
         spec_btns = QHBoxLayout()
-        spec_btns.addWidget(add_btn)
         spec_btns.addWidget(edit_btn)
         spec_btns.addWidget(del_btn)
         spec_btns.addWidget(get_btn)
@@ -698,13 +772,6 @@ class MoldEditor(QDialog):
             for i in range(self.tag_list.count())
         ]
 
-    def add_spec(self):
-        dlg = ParamSpecEditor(parent=self)
-        if dlg.exec():
-            data = dlg.get_data()
-            spec = ParamSpec(**data)
-            self.spec_model.add_spec(spec)
-
     def remove_spec(self):
         idx = self.spec_table.currentIndex()
         if idx.isValid():
@@ -724,18 +791,18 @@ class MoldEditor(QDialog):
             self.mold.name = new_name
             self.mold.tags = new_tags
             self.mold.description = new_desc or None
-            errors = self.spec_repo.validate_specs(
+            errors = self.item_repo.validate_specs(
                 self.mold
             )
             if errors:
                 self._error("\n".join(errors))
                 return
             if self.is_new:
-                self.mold_repo.session.add(self.mold)
-            self.mold_repo.session.commit()
+                self.item_repo.session.add(self.mold)
+            self.item_repo.session.commit()
             self.accept()
         except Exception as e:
-            self.mold_repo.session.rollback()
+            self.item_repo.session.rollback()
             self._error(str(e))
 
     def on_tags_edited(self, text):
@@ -787,7 +854,7 @@ class MoldEditor(QDialog):
             )
             return
         self.mold.tags = ",".join(tags)
-        created = self.spec_repo.create_specs_from_tags(
+        created = self.item_repo.create_specs_from_tags(
             self.mold
         )
         if created:
@@ -859,6 +926,9 @@ class ItemEditorDialog(QDialog):
     def _build_ui(self):
         layout = QVBoxLayout(self)
         form = QFormLayout()
+        self.name_edit = QLineEdit()
+        self.name_edit.setText(self.item.name)
+        form.addRow("Name", self.name_edit)
         for param in self.item.param_list:
             spin = QDoubleSpinBox()
             spin.setMinimum(0)
@@ -867,6 +937,10 @@ class ItemEditorDialog(QDialog):
             spin.setDecimals(0)
             self.inputs[param.name] = spin
             form.addRow(param.name, spin)
+        self.desc_edit = QTextEdit()
+        self.desc_edit.setFixedHeight(80)
+        self.desc_edit.setText(self.item.description)
+        form.addRow("Description", self.desc_edit)
         layout.addLayout(form)
         btns = QHBoxLayout()
         btns.addStretch()
@@ -883,10 +957,12 @@ class ItemEditorDialog(QDialog):
             for param, widget in self.inputs.items():
                 value = widget.value()
                 self._set_param(param, value)
-
+            self.item.name = self.name_edit.text()
+            self.item.description = (
+                self.desc_edit.toPlainText()
+            )
             self.repo.session.commit()
             self.accept()
-
         except Exception as e:
             self.repo.session.rollback()
             QMessageBox.critical(self, "Error", str(e))
