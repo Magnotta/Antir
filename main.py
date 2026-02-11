@@ -18,9 +18,12 @@ if __name__ == "__main__":
     from ui.window import Window
     import sys
 
+    sys.tracebacklimit = 1
+
     db_eng, Session = init_metadata()
     session = Session()
     init_db(session)
+
     item_repo = ItemRepository(session)
     player_repo = PlayerRepository(session)
     event_repo = EventRepository(session)

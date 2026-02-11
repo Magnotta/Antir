@@ -1,12 +1,14 @@
 from db.models import Item
+from core.game_state import GameState
 from systems.time_service import Time
+from systems.signal_service import Signal
 
 EVENTS = {}
 
 
 class Event:
     type: str = "base"
-    impacts: str = ""
+    signals: list[Signal] = []
 
     def __init__(
         self, due_time: Time, payload: dict | None = None
@@ -23,14 +25,14 @@ class Event:
 
 class EquipItemEvent(Event):
     type = "equip item"
-    impacts = "equipment"
+    signals = [Signal.equipment]
 
-    def apply(self, engine):
-        item = engine.item_repo.get_by_id(
+    def apply(self, state: GameState):
+        item = state.item_repo.get_item_by_id(
             self.payload["item_id"]
         )
-        player = engine.player_repo.get(item.owner_id)
-        player.equip_item(item)
+        player = state.get_player_by_id(item.owner_id)
+        player.equip_item(item, self.payload["slot_ids"])
         return []
 
 
@@ -48,7 +50,7 @@ class PutItemInContainerEvent(Event):
 
 class HungerEvent(Event):
     type = "player hunger"
-    impacts = "stats"
+    signals = [Signal.stats]
 
     def __init__(self, due_time: Time, payload=None):
         super().__init__(due_time, payload)

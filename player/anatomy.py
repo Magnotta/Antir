@@ -46,3 +46,6 @@ class Anatomy:
         raise ValueError(
             f"Slot '{slot_name}' is over-encumbered!"
         )
+
+    def occupy_slot(self, slot, item):
+        self.repo.occupy_equipment_slot(slot, item.id)

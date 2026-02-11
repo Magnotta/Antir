@@ -18,17 +18,16 @@ class Engine:
         player_repo: PlayerRepository,
         players: list[Player],
     ):
-        self.state = GameState(players)
-        self.event_repo = event_repo
-        self.item_repo = item_repo
-        self.player_repo = player_repo
+        self.state = GameState(
+            event_repo, item_repo, player_repo, players
+        )
         self.cmd = CommandService(self)
+        self.signals = SignalBus()
         self.events = []
         self.rules = RULES
-        self.signals = SignalBus()
 
     def schedule(self, event, org: str):
-        self.event_repo.add_record(event, org)
+        self.state.event_repo.add_record(event, org)
         self.events.append(event)
         self.events.sort(key=lambda e: e.due_time)
 
@@ -52,8 +51,7 @@ class Engine:
         ]
         for event in due:
             if event.condition(self.state):
-                for impact in event.impacts.split():
-                    self.signals.store(impact)
+                self.signals.store(event.signals)
                 followups = event.apply(self.state)
                 self.events.remove(event)
                 for e in followups:

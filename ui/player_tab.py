@@ -117,21 +117,21 @@ class SinglePlayerTab(QWidget):
 
     def refresh(self):
         self.stats_panel.refresh(self.player.stats)
-        self.inventory_panel.refresh()
+        # self.inventory_panel.refresh()
 
 
 class PlayersTab(QWidget):
     def __init__(self, player_domains: list[Player]):
         super().__init__()
-        self.player_domains = player_domains
+        self.players = player_domains
         self.player_tabs: list[SinglePlayerTab] = []
         layout = QVBoxLayout(self)
         self.tabs = QTabWidget()
         layout.addWidget(self.tabs)
-        for domain in self.player_domains:
-            tab = SinglePlayerTab(domain)
+        for player in self.players:
+            tab = SinglePlayerTab(player)
             self.player_tabs.append(tab)
-            name = domain.player_rec.name
+            name = player.player_rec.name
             self.tabs.addTab(tab, name)
 
     def refresh(self):

@@ -90,7 +90,7 @@ class Item(Base):
     def __repr__(self):
         return (
             f"<Item id={self.id} mold={self.original_mold_id} "
-            f"owner={self.owner_id}"
+            f"owner={self.owner_id} "
             f"container={self.container_item}>"
         )
 
@@ -139,9 +139,7 @@ class EquipmentSlot(Base):
     __tablename__ = "equipment_slots"
     id = Column(Integer, primary_key=True)
     body_node_id = Column(
-        Integer,
-        ForeignKey("body_nodes.id"),
-        nullable=False,
+        Integer, ForeignKey("body_nodes.id"), nullable=False
     )
     slot_type = Column(String, nullable=False)
     slot_index = Column(Integer, default=0)

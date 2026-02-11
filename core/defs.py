@@ -532,6 +532,7 @@ SLOT_MAX_INDEX = {
     "underpants": 1,
     "holster": 1,
     "pants": 2,
+    "skirt": 1,
     "armor": 1,
     "anklet": 3,
     "sock": 1,
@@ -634,15 +635,16 @@ BODY_SCHEMA = {
                         },
                     },
                     "hips": {
-                        "slots": ["belt", "underpants"],
+                        "slots": [
+                            "pants",
+                            "skirt",
+                            "belt",
+                            "underpants",
+                        ],
                         "depth": 8,
                         "children": {
                             "right_leg": {
-                                "slots": [
-                                    "holster",
-                                    "pants",
-                                    "armor",
-                                ],
+                                "slots": ["holster"],
                                 "depth": 9,
                                 "children": {
                                     "right_shank": {
@@ -663,11 +665,7 @@ BODY_SCHEMA = {
                                 },
                             },
                             "left_leg": {
-                                "slots": [
-                                    "holster",
-                                    "pants",
-                                    "armor",
-                                ],
+                                "slots": ["holster"],
                                 "depth": 9,
                                 "children": {
                                     "left_shank": {

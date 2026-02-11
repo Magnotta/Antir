@@ -1,5 +1,6 @@
 from random import randint
 from sqlalchemy import select
+from sqlalchemy.orm import Session
 from typing import Optional
 from db.models import (
     EventRecord,
@@ -25,7 +26,7 @@ from core.defs import (
 
 
 class EventRepository:
-    def __init__(self, session):
+    def __init__(self, session: Session):
         self.session = session
 
     def add_record(self, event, org: str):
@@ -121,11 +122,7 @@ class PlayerRepository:
             .first()
         )
         if exists:
-            print(
-                f"Already exists: {exists.name} of player {exists.owner_id}"
-            )
             return exists
-        print("Didn't exist. Creating...")
         return self.create_body_node(
             "head", BODY_SCHEMA["head"], player_id
         )
@@ -146,9 +143,6 @@ class PlayerRepository:
                 name=node_name,
                 parent_id=parent_id,
             )
-        print(
-            f"Created {new_node.name} for player {player_id}"
-        )
         self.session.add(new_node)
         self.session.flush()
         for slot in node_dict["slots"]:
@@ -159,9 +153,6 @@ class PlayerRepository:
                             slot, new_node.id, idx
                         )
                     )
-                )
-                print(
-                    f"Created {slot} no. {idx} for {node_name}"
                 )
         self.session.commit()
         for child in node_dict["children"]:
@@ -179,6 +170,46 @@ class PlayerRepository:
             slot_type=slot,
             slot_index=idx,
         )
+
+    def get_slot_id(self, player_id, body_name, slot):
+        body_node = (
+            self.session.query(BodyNode)
+            .filter(
+                BodyNode.owner_id == player_id,
+                BodyNode.name == body_name,
+            )
+            .one()
+        )
+        return (
+            self.session.query(EquipmentSlot)
+            .filter(
+                EquipmentSlot.body_node_id == body_node.id,
+                EquipmentSlot.slot_type == slot,
+                EquipmentSlot.item_id is None,
+            )
+            .first()
+        )
+
+    def occupy_equipment_slot(
+        self, slot_id: int, item_id: int
+    ):
+        try:
+            self.session.add(
+                ItemSlotOccupancy(
+                    item_id=item_id,
+                    equipment_slot_id=slot_id,
+                )
+            )
+            slot = (
+                self.session.query(EquipmentSlot)
+                .filter(EquipmentSlot.id == slot_id)
+                .first()
+            )
+            slot.item_id = item_id
+            self.session.commit()
+        except Exception as e:
+            self.session.rollback()
+            raise e
 
 
 class LocationRepository:
@@ -289,17 +320,16 @@ class ItemRepository:
             .one()
         )
 
-    def check_slots_occupied(self, slots: list) -> bool:
-        for slot in slots:
-            (
-                self.session.query(
-                    ItemSlotOccupancy
-                ).filter(ItemSlotOccupancy.item_id)
-            )
-
     def add_mold(self, mold: Mold):
         self.session.add(mold)
         self.session.commit()
+
+    def get_mold_by_id(self, mold_id: int):
+        return (
+            self.session.query(Mold)
+            .filter(Mold.id == mold_id)
+            .one()
+        )
 
     def update_mold(
         self, mold: Mold, **fields

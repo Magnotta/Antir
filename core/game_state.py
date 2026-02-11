@@ -1,10 +1,24 @@
 from systems.time_service import Time
 from player.domain import Player
+from db.repository import (
+    EventRepository,
+    ItemRepository,
+    PlayerRepository,
+)
 
 
 class GameState:
-    def __init__(self, players: list[Player]):
+    def __init__(
+        self,
+        event_repo: EventRepository,
+        item_repo: ItemRepository,
+        player_repo: PlayerRepository,
+        players: list[Player],
+    ):
         self.players = players
+        self.event_repo = event_repo
+        self.item_repo = item_repo
+        self.player_repo = player_repo
         self.time = Time()
         self.location = 'Dentro da consciência'
 

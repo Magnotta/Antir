@@ -1,4 +1,4 @@
-from db.models import PlayerRecord, ItemSlotOccupancy
+from db.models import PlayerRecord, Item
 from db.repository import (
     ItemRepository,
     PlayerRepository,
@@ -24,21 +24,19 @@ class Player:
         )
         self.stats = Stats(self.player_rec.id, player_repo)
 
-    def equip_item(self, item_id):
-        item = self.inventory.repo.get_item_by_id(item_id)
+    def equip_item(self, item: Item, slot_id_list):
         mold = self.inventory.repo.get_original_mold(item)
         if "eq" not in mold.tags:
             raise ValueError(
                 f"{item.name} is not equipable!"
             )
-        self.inventory.repo.check_slots_occupied(
-            mold.occupied_slots
+        for slot_id in slot_id_list:
+            self.anatomy.occupy_slot(slot_id, item)
+
+    def get_slot_id(self, slot_dict):
+        slot = self.anatomy.repo.get_slot_id(
+            self.player_rec.id,
+            slot_dict["body_name"],
+            slot_dict["slot"],
         )
-        for slot in mold.occupied_slots:
-            self.session.add(
-                ItemSlotOccupancy(
-                    item_id=item_id,
-                    equipment_slot_id=slot.id,
-                )
-            )
-        self.session.commit()
+        return slot.id

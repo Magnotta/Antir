@@ -15,6 +15,8 @@ class CommandParser:
             if token == "*":
                 return list(range(6))
             return [int(c) for c in token if c.isdigit()]
+        elif target_type == "Item":
+            return [int(token)]
         elif target_type is None:
             return []
         raise ValueError(

@@ -519,7 +519,7 @@ class ItemTab(QWidget):
 
 
 class OccupiedSlotsEditorDialog(QDialog):
-    def __init__(self, mold, repo, schema, parent=None):
+    def __init__(self, mold, repo, parent=None):
         super().__init__(parent)
         self.mold = mold
         self.repo = repo
@@ -782,10 +782,16 @@ class MoldEditor(QDialog):
         new_tags = ",".join(self.get_tag_list())
         new_desc = self.desc_edit.toPlainText().strip()
         if not new_name:
-            self._error("Name is required.")
+            QMessageBox.critical(
+                self, "Error", "Name is required."
+            )
             return
         if not new_tags:
-            self._error("At least one tag is required.")
+            QMessageBox.critical(
+                self,
+                "Error",
+                "At least one tag is required.",
+            )
             return
         try:
             self.mold.name = new_name
@@ -795,7 +801,9 @@ class MoldEditor(QDialog):
                 self.mold
             )
             if errors:
-                self._error("\n".join(errors))
+                QMessageBox.critical(
+                    self, "Error", "\n".join(errors)
+                )
                 return
             if self.is_new:
                 self.item_repo.session.add(self.mold)
@@ -803,7 +811,7 @@ class MoldEditor(QDialog):
             self.accept()
         except Exception as e:
             self.item_repo.session.rollback()
-            self._error(str(e))
+            QMessageBox.critical(self, "Error", str(e))
 
     def on_tags_edited(self, text):
         self.filter_model.set_filter_text(text)
@@ -824,9 +832,6 @@ class MoldEditor(QDialog):
         ][0]
         self.tag_list.addItem(tag + " - " + tag_text)
         QTimer.singleShot(0, self.tag_input.clear)
-
-    def _error(self, message: str):
-        QMessageBox.critical(self, "Error", message)
 
     def build_tag_completer(self):
         display_strings = [
