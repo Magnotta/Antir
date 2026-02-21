@@ -2,12 +2,13 @@ from db.repository import (
     EventRepository,
     ItemRepository,
     PlayerRepository,
+    LocationRepository,
 )
 from core.game_state import GameState
 from core.rules import RULES
 from player.domain import Player
 from systems.command_service import CommandService
-from systems.signal_service import SignalBus
+from systems.signal_service import SignalBus, Signal
 
 
 class Engine:
@@ -16,10 +17,11 @@ class Engine:
         event_repo: EventRepository,
         item_repo: ItemRepository,
         player_repo: PlayerRepository,
+        loc_repo: LocationRepository,
         players: list[Player],
     ):
         self.state = GameState(
-            event_repo, item_repo, player_repo, players
+            event_repo, item_repo, player_repo, loc_repo, players
         )
         self.cmd = CommandService(self)
         self.signals = SignalBus()
@@ -37,11 +39,11 @@ class Engine:
 
     def _advance_time(self):
         self.state.time += 1
-        self.signals.store('minute')
+        self.signals.store([Signal.minute])
         if self.state.time.hour_change:
-            self.signals.store('hour')
+            self.signals.store([Signal.hour])
         if self.state.time.day_change:
-            self.signals.store('day')
+            self.signals.store([Signal.day])
 
     def _dispatch_due_events(self):
         due = [

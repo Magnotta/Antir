@@ -80,14 +80,6 @@ def init_players(session):
                     value=stat_value,
                 )
             )
-            session.flush()
-        for root_name, root_schema in BODY_SCHEMA.items():
-            create_body_node_recursive(
-                session=session,
-                owner_id=player.id,
-                name=root_name,
-                schema=root_schema,
-            )
     session.commit()
 
 

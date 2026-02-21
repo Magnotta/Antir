@@ -1,7 +1,7 @@
 import sys
 
 from db.database import init_metadata, init_db
-from db.models import PlayerRecord
+from db.models import PlayerRecord, Locality, ItemSlotOccupancy
 from db.repository import (
     EventRepository,
     ItemRepository,
@@ -46,12 +46,9 @@ if __name__ == "__main__":
         )
 
     engine = Engine(
-        event_repo, item_repo, player_repo, players
+        event_repo, item_repo, player_repo, loc_repo, players
     )
     app = QApplication(sys.argv)
-    win = Window(
-        engine,
-        item_repo,
-    )
+    win = Window(engine)
     win.show()
     sys.exit(app.exec())

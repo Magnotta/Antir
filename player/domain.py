@@ -26,12 +26,9 @@ class Player:
 
     def equip_item(self, item: Item, slot_id_list):
         mold = self.inventory.repo.get_original_mold(item)
-        if "eq" not in mold.tags:
-            raise ValueError(
-                f"{item.name} is not equipable!"
-            )
         for slot_id in slot_id_list:
-            self.anatomy.occupy_slot(slot_id, item)
+            slot = self.anatomy.get_slot_by_id(slot_id)
+            self.anatomy.repo.occupy_equipment_slot(slot, item)
 
     def get_slot_id(self, slot_dict):
         slot = self.anatomy.repo.get_slot_id(

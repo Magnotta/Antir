@@ -24,6 +24,9 @@ class Anatomy:
     ) -> BodyNode | None:
         return self.by_name[name]
 
+    def get_slot_by_id(self, slot_id):
+        return self.repo.get_slot_by_id(slot_id)
+
     def get_slot_by_description(
         self, body_name, slot_name
     ) -> EquipmentSlot:
@@ -46,6 +49,3 @@ class Anatomy:
         raise ValueError(
             f"Slot '{slot_name}' is over-encumbered!"
         )
-
-    def occupy_slot(self, slot, item):
-        self.repo.occupy_equipment_slot(slot, item.id)

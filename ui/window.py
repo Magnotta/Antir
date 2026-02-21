@@ -14,6 +14,7 @@ from systems.commands import DecisonType
 from ui.home_tab import HomeTab
 from ui.item_tab import ItemTab
 from ui.player_tab import PlayersTab
+from ui.loc_tab import LocalityTab
 
 
 class SlotChoiceDialog(QDialog):
@@ -22,13 +23,11 @@ class SlotChoiceDialog(QDialog):
         self.mold = mold
         self.repo = repo
         self.setModal(True)
-        self.setWindowTitle(f"Occupied Slots – {mold.name}")
+        self.setWindowTitle(f"Select slots from – {mold.name} to equip")
         self.all_slots = QListWidget()
         self.used_slots = QListWidget()
         for slot in mold.occupied_slots:
             self.all_slots.addItem(slot)
-        for slot in mold.occupied_slots or []:
-            self.used_slots.addItem(slot)
         add_btn = QPushButton("→")
         remove_btn = QPushButton("←")
         add_btn.clicked.connect(self.add_slot)
@@ -123,11 +122,7 @@ class SlotChoiceDialog(QDialog):
 
 
 class Window(QMainWindow):
-    def __init__(
-        self,
-        engine: Engine,
-        item_repo,
-    ):
+    def __init__(self, engine: Engine):
         super().__init__()
         self.setWindowTitle("Antir, otários")
         self.resize(800, 600)
@@ -136,10 +131,15 @@ class Window(QMainWindow):
         self.setCentralWidget(self.tabs)
         self.home_tab = HomeTab(self.engine)
         self.item_tab = ItemTab(
-            item_repo,
+            self.engine.state.item_repo,
             self,
         )
         self.player_tab = PlayersTab(engine.state.players)
+        self.loc_tab = LocalityTab(self.engine.state.loc_repo, self.engine.state)
+        self.tabs.addTab(self.home_tab, "Home")
+        self.tabs.addTab(self.item_tab, "Items")
+        self.tabs.addTab(self.player_tab, "Players")
+        self.tabs.addTab(self.loc_tab, "Locations")
         self.engine.signals.connect(
             Signal.inventory, self.player_tab.refresh
         )
@@ -159,36 +159,15 @@ class Window(QMainWindow):
             DecisonType.slot_choice,
             self.slot_choice_required,
         )
-        self.tabs.addTab(self.home_tab, "Home")
-        self.tabs.addTab(self.item_tab, "Items")
-        self.tabs.addTab(self.player_tab, "Players")
 
     def slot_choice_required(self, payload):
-        mold = self.engine.state.item_repo.get_mold_by_id(
-            payload["mold_id"]
-        )
         dlg = SlotChoiceDialog(
-            mold, self.engine.state.item_repo, parent=self
+            payload["mold"], self.engine.state.item_repo, parent=self
         )
         if dlg.exec():
             selected_slot_strings = dlg.selected_slots()
-            item = (
-                self.engine.state.item_repo.get_item_by_id(
-                    payload["item_id"]
-                )
-            )
-            player = self.engine.state.get_player_by_id(
-                item.owner_id
-            )
-            selected_slots = [
-                player.anatomy.get_slot_by_description(
-                    string.split()[0], string.split()[1]
-                )
-                for string in selected_slot_strings
-            ]
+            item = payload["item"]
             return {
-                "item_id": payload["item_id"],
-                "slot_ids": [
-                    slot.id for slot in selected_slots
-                ],
+                "item": item,
+                "slots_str": selected_slot_strings
             }

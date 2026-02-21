@@ -715,3 +715,40 @@ def enumerate_slots(node_name, node_dict, initial=0):
 SLOTS_LIST = enumerate_slots(
     "head", BODY_SCHEMA["head"], initial=1
 )
+
+
+PATH_CONDITION_KINDS = {
+    "fallen_tree": ["width", "hardness"],
+    "muddy": ["depth"],
+    "washout": ["traceability"],
+    "loose_rock": ["coverage"],
+    "gully": ["depth", "width"],
+    "exposed_roots": ["height", "coverage"],
+    "inclination_change": ["angle"],
+    "thorny_overgrowth": ["height", "pests", "poison"],
+    "fibrous_overgrowth": ["height", "pests", "thickness"],
+    "bushy_overgrowth": ["height", "pests", "hardness"],
+    "snow": ["thickness"],
+    "slush": ["coverage"],
+    "bridge": ["height", "length", "width", "capacity"],
+    "river_crossing": ["length", "depth", "water_speed"],
+    "rock_slide": ["height"],
+    "scenic_view": [],
+    "cliff_edge": ["height"],
+    "lakeside": ["lake"],
+    "terrain": ["type"],
+    "landmark": ["toponym"]
+}
+
+
+def get_path_cond_params():
+    aux = []
+    for param_list in PATH_CONDITION_KINDS.values():
+        aux.extend(param_list)
+    return set(aux)
+
+
+PATH_COND_PARAMS = get_path_cond_params()
+
+
+STR_PATH_COND_PARAMS = ["lake", "type", "toponym", "pests"]

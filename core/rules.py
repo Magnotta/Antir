@@ -2,6 +2,7 @@ from enum import IntEnum, auto
 from core.events import (
     HungerEvent,
 )
+from systems.signal_service import Signal
 
 
 class RuleStrictness(IntEnum):
@@ -13,7 +14,7 @@ class RuleStrictness(IntEnum):
 
 
 class Rule:
-    listens_to: list[str] = []
+    listens_to: list[Signal] = []
     name = 'rulebase'
     strictness = RuleStrictness.PERMISSIVE
 
@@ -27,8 +28,12 @@ class Rule:
         return []
 
 
+class EclipticSunRule(Rule):
+    pass
+
+
 class DayHungerRule(Rule):
-    listens_to = ['day']
+    listens_to = [Signal.day]
     name = 'daily hunger rule'
     category = RuleStrictness.PERMISSIVE
 
@@ -98,7 +103,7 @@ class DayHungerRule(Rule):
 
 
 class MidnightHungerRule(Rule):
-    listens_to = ['day']
+    listens_to = [Signal.day]
     name = 'midnight hunger rule'
     category = RuleStrictness.PERMISSIVE
 

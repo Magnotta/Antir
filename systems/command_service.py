@@ -8,17 +8,15 @@ class CommandParser:
     def tokenize(self, text: str) -> list[str]:
         return [t for t in text.strip().split() if t]
 
-    def parse_targets(
+    def parse_target(
         self, target_type: str, token: str
-    ) -> list[int]:
+    ) -> int:
         if target_type == "Player":
-            if token == "*":
-                return list(range(6))
-            return [int(c) for c in token if c.isdigit()]
+            return int(token)
         elif target_type == "Item":
-            return [int(token)]
+            return int(token)
         elif target_type is None:
-            return []
+            return 
         raise ValueError(
             f"Unknown target type: {target_type}"
         )
@@ -45,7 +43,7 @@ class CommandParser:
         if spec.target_type:
             if len(tokens) <= idx:
                 raise ValueError("Missing targets")
-            targets = self.parse_targets(
+            targets = self.parse_target(
                 spec.target_type, tokens[idx]
             )
             idx += 1
@@ -67,9 +65,9 @@ class CommandService:
 
     def execute(self, text: str) -> list[str]:
         try:
-            spec, targets, args = self.parser.parse(text)
-            if targets is not None:
-                spec.handler(self.engine, targets, *args)
+            spec, target, args = self.parser.parse(text)
+            if target is not None:
+                spec.handler(self.engine, target, *args)
             else:
                 spec.handler(self.engine, *args)
             return ["✔ Command executed"]

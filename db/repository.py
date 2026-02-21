@@ -5,7 +5,10 @@ from typing import Optional
 from db.models import (
     EventRecord,
     PlayerRecord,
-    Location,
+    Locality,
+    Path,
+    PointCondition,
+    SegmentCondition,
     BodyNode,
     EquipmentSlot,
     ParamSpec,
@@ -149,27 +152,27 @@ class PlayerRepository:
             for idx in range(SLOT_MAX_INDEX[slot]):
                 new_node.slots.append(
                     (
-                        self.create_equipment_slot(
-                            slot, new_node.id, idx
+                        EquipmentSlot(
+                        body_node_id=new_node.id,
+                        slot_type=slot,
+                        slot_index=idx,
                         )
                     )
                 )
-        self.session.commit()
         for child in node_dict["children"]:
-            self.create_body_node(
-                child,
-                node_dict["children"][child],
-                player_id,
-                parent_id=new_node.id,
+            new_node.children.append(
+                self.create_body_node(
+                    child,
+                    node_dict["children"][child],
+                    player_id,
+                    parent_id=new_node.id,
+                )
             )
+        self.session.commit()
         return new_node
 
-    def create_equipment_slot(self, slot, node_id, idx):
-        return EquipmentSlot(
-            body_node_id=node_id,
-            slot_type=slot,
-            slot_index=idx,
-        )
+    def get_slot_by_id(self, slot_id):
+        return self.session.get(EquipmentSlot, slot_id)
 
     def get_slot_id(self, player_id, body_name, slot):
         body_node = (
@@ -191,21 +194,16 @@ class PlayerRepository:
         )
 
     def occupy_equipment_slot(
-        self, slot_id: int, item_id: int
+        self, slot: EquipmentSlot, item: Item
     ):
         try:
             self.session.add(
                 ItemSlotOccupancy(
-                    item_id=item_id,
-                    equipment_slot_id=slot_id,
+                    item_id=item.id,
+                    equipment_slot_id=slot.id,
                 )
             )
-            slot = (
-                self.session.query(EquipmentSlot)
-                .filter(EquipmentSlot.id == slot_id)
-                .first()
-            )
-            slot.item_id = item_id
+            slot.item_id = item.id
             self.session.commit()
         except Exception as e:
             self.session.rollback()
@@ -216,32 +214,107 @@ class LocationRepository:
     def __init__(self, session):
         self.session = session
 
-    def create(self, name: str):
-        instance = Location(name=name)
-        self.session.add(instance)
-        self.session.commit()
-        self.session.refresh(instance)
-        return instance
-
-    def get(self, id: int):
-        return self.session.get(Location, id)
-
-    def set(self, id: int, **fields):
-        instance = self.session.get(Location, id)
-        if not instance:
+    def update_locality(self, locality_id: int, **kwargs):
+        locality = self.session.get(Locality, locality_id)
+        if not locality:
             return None
-        for key, value in fields.items():
-            setattr(instance, key, value)
+        for key, value in kwargs.items():
+            setattr(locality, key, value)
         self.session.commit()
-        return instance
+        self.session.refresh(locality)
+        return locality
 
-    def delete(self, id: int) -> bool:
-        instance = self.session.get(Location, id)
-        if not instance:
-            return False
-        self.session.delete(instance)
+    def delete_locality(self, locality_id: int):
+        locality = self.session.get(Locality, locality_id)
+        if locality:
+            self.session.delete(locality)
+            self.session.commit()
+
+    def add_locality(self, name: str, description=None, data=None) -> Locality:
+        locality = Locality(name=name, description=description, data=data)
+        self.session.add(locality)
         self.session.commit()
-        return True
+        self.session.refresh(locality)
+        return locality
+
+    def get_locality_by_id(self, locality_id: int) -> Locality | None:
+        return self.session.get(Locality, locality_id)
+
+    def get_locality_by_name(self, name: str) -> Locality | None:
+            return self.session.query(Locality).filter_by(name=name).one_or_none()
+
+    def get_all_localities(self):
+        return self.session.query(Locality).order_by(Locality.name).all()
+
+    def add_path(
+        self,
+        origin: Locality,
+        destination: Locality,
+        *,
+        distance_km: float,
+        description=None,
+        data=None,
+    ) -> Path:
+        path = Path(
+            origin_id=origin.id,
+            destination_id=destination.id,
+            distance_km=distance_km,
+            description=description,
+            data=data,
+        )
+        self.session.add(path)
+        self.session.commit()
+        self.session.refresh(path)
+        return path
+
+    def get_paths_from(self, locality: Locality) -> list[Path]:
+        return (
+            self.session.query(Path)
+            .filter(Path.origin_id == locality.id)
+            .all()
+        )
+
+    def add_point_condition(
+        self,
+        path_id: int,
+        *,
+        position: float,
+        kind: str,
+        data=None,
+    ) -> PointCondition:
+        cond = PointCondition(
+            path_id=path_id,
+            position=position,
+            kind=kind,
+            data=data,
+        )
+        self.session.add(cond)
+        self.session.commit()
+        self.session.refresh(cond)
+        return cond
+
+    def add_segment_condition(
+        self,
+        path_id: int,
+        *,
+        start: float,
+        end: float,
+        kind: str,
+        data=None,
+    ) -> SegmentCondition:
+        cond = SegmentCondition(
+            path_id=path_id,
+            start=start,
+            end=end,
+            kind=kind,
+            data=data,
+        )
+        self.session.add(cond)
+        self.session.commit()
+        return cond
+
+    def get_path_by_id(self, path_id: int) -> Path:
+        return self.session.get(Path, path_id)
 
 
 class ItemRepository:
@@ -260,6 +333,7 @@ class ItemRepository:
             original_mold_id=mold.id,
             owner_id=owner_id,
             description=mold.description,
+            destroyed=False,
         )
         self.session.add(new_item)
         self.session.flush()
@@ -293,10 +367,10 @@ class ItemRepository:
         return params
 
     def destroy_item(self, item):
-        self.session.delete(item)
+        item.destroyed = True
         self.session.commit()
 
-    def get_all_items(
+    def get_extant_items(
         self, search: str | None = None
     ) -> list[Item]:
         stmt = select(Item)
@@ -304,14 +378,10 @@ class ItemRepository:
             stmt = stmt.where(
                 Item.name.ilike(f"%{search}%")
             )
-        return self.session.scalars(stmt).all()
+        return self.session.scalars(stmt.where(Item.destroyed.is_(False))).all()
 
-    def get_item_by_id(self, id: int) -> Item:
-        return (
-            self.session.query(Item)
-            .filter(Item.id == id)
-            .one()
-        )
+    def get_item_by_id(self, item_id: int) -> Item:
+        return self.session.get(Item, item_id)
 
     def get_original_mold(self, item: Item) -> Mold:
         return (
@@ -325,11 +395,7 @@ class ItemRepository:
         self.session.commit()
 
     def get_mold_by_id(self, mold_id: int):
-        return (
-            self.session.query(Mold)
-            .filter(Mold.id == mold_id)
-            .one()
-        )
+        return self.session.get(Mold, mold_id)
 
     def update_mold(
         self, mold: Mold, **fields
@@ -351,6 +417,14 @@ class ItemRepository:
                 Mold.name.ilike(f"%{search}%")
             )
         return self.session.scalars(stmt).all()
+
+    def item_chown(self, item_id, new_owner_id):
+        item = self.get_item_by_id(item_id)
+        if item.owner_id == new_owner_id:
+            raise ValueError("Specify a new owner!")
+            return
+        item.owner_id = new_owner_id
+        self.session.commit()
 
     def populate_item_params(
         self,

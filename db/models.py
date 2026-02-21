@@ -1,52 +1,154 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy import (
-    Column,
     Integer,
+    Float,
     Boolean,
     String,
-    ForeignKey,
+    Text,
     JSON,
+    ForeignKey,
     UniqueConstraint,
 )
+
 
 Base = declarative_base()
 
 
+class Visit(Base):
+    __tablename__ = "itinerary"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    toponym: Mapped[str] = mapped_column(String, nullable=False)
+    arrival: Mapped[int] = mapped_column(Integer, nullable=False)
+    departure: Mapped[int | None] = mapped_column(Integer)
+    description: Mapped[str | None] = mapped_column(Text)
+
+
+class Path(Base):
+    __tablename__ = "paths"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+    origin_id: Mapped[int] = mapped_column(
+        ForeignKey("localities.id"),
+        nullable=False,
+    )
+
+    destination_id: Mapped[int] = mapped_column(
+        ForeignKey("localities.id"),
+        nullable=False,
+    )
+
+    distance_km: Mapped[float] = mapped_column(Float, nullable=False)
+    description: Mapped[str | None] = mapped_column(String)
+    data: Mapped[dict | None] = mapped_column(JSON)
+
+    # relationships defined AFTER Locality class exists
+    origin: Mapped["Locality"] = relationship(
+        back_populates="outgoing_paths",
+        foreign_keys=[origin_id],
+    )
+
+    destination: Mapped["Locality"] = relationship(
+        back_populates="incoming_paths",
+        foreign_keys=[destination_id],
+    )
+
+    point_conditions: Mapped[list["PointCondition"]] = relationship(
+        back_populates="path",
+        cascade="all, delete-orphan",
+        order_by="PointCondition.position",
+    )
+
+    segment_conditions: Mapped[list["SegmentCondition"]] = relationship(
+        back_populates="path",
+        cascade="all, delete-orphan",
+        order_by="SegmentCondition.start",
+    )
+
+    def __repr__(self):
+        return f"<Path {self.origin_id} -> {self.destination_id}>"
+
+
+class Locality(Base):
+    __tablename__ = "localities"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    description: Mapped[str | None] = mapped_column(String)
+    data: Mapped[dict | None] = mapped_column(JSON)
+
+    outgoing_paths: Mapped[list[Path]] = relationship(
+        back_populates="origin",
+        foreign_keys=[Path.origin_id],
+        cascade="all, delete-orphan",
+    )
+
+    incoming_paths: Mapped[list[Path]] = relationship(
+        back_populates="destination",
+        foreign_keys=[Path.destination_id],
+        cascade="all, delete-orphan",
+    )
+
+    def __repr__(self):
+        return f"{self.name}"
+
+
+class PointCondition(Base):
+    __tablename__ = "point_conditions"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    path_id: Mapped[int] = mapped_column(
+        ForeignKey("paths.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    position: Mapped[float] = mapped_column(Float, nullable=False)
+    kind: Mapped[str] = mapped_column(String, nullable=False)
+    data: Mapped[dict | None] = mapped_column(JSON)
+    path: Mapped[Path] = relationship(back_populates="point_conditions")
+
+
+class SegmentCondition(Base):
+    __tablename__ = "segment_conditions"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    path_id: Mapped[int] = mapped_column(
+        ForeignKey("paths.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    start: Mapped[float] = mapped_column(Float, nullable=False)
+    end: Mapped[float] = mapped_column(Float, nullable=False)
+    kind: Mapped[str] = mapped_column(String, nullable=False)
+    data: Mapped[dict | None] = mapped_column(JSON)
+    path: Mapped[Path] = relationship(back_populates="segment_conditions")
+
+
 class ParamSpec(Base):
     __tablename__ = "mold_param_specs"
-    id = Column(Integer, primary_key=True)
-    mold_id = Column(
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    mold_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("molds.id"), nullable=False
     )
-    param = Column(String, nullable=False)
-    base = Column(Integer, nullable=False)
-    variance = Column(Integer, default=0)
-    mold = relationship(
-        "Mold", back_populates="param_specs"
-    )
+    param: Mapped[str] = mapped_column(String, nullable=False)
+    base: Mapped[int] = mapped_column(Integer, nullable=False)
+    variance: Mapped[int] = mapped_column(Integer, default=0)
+    mold: Mapped["Mold"] = relationship(back_populates="param_specs")
     __table_args__ = (UniqueConstraint("mold_id", "param"),)
 
 
 class Mold(Base):
     __tablename__ = "molds"
-    id = Column(Integer, primary_key=True)
-    name = Column(String, unique=True)
-    tags = Column(String, nullable=False)
-    description = Column(String)
-    occupied_slots = Column(JSON, nullable=True)
-    param_specs = relationship(
-        "ParamSpec", cascade="all, delete-orphan"
-    )
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String, unique=True)
+    tags: Mapped[str] = mapped_column(String, nullable=False)
+    description: Mapped[str | None] = mapped_column(String)
+    occupied_slots: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    param_specs: Mapped[list[ParamSpec]] = relationship(back_populates="mold", cascade="all, delete-orphan")
 
 
 class ItemSlotOccupancy(Base):
     __tablename__ = "item_slot_occupancy"
-    id = Column(Integer, primary_key=True)
-    item_id = Column(
-        Integer, ForeignKey("items.id"), nullable=False
-    )
-    equipment_slot_id = Column(
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    item_id: Mapped[int] = mapped_column(Integer, ForeignKey("items.id"), nullable=False)
+    equipment_slot_id: Mapped[int] = mapped_column(
         Integer,
         ForeignKey("equipment_slots.id"),
         nullable=False,
@@ -59,33 +161,27 @@ class ItemSlotOccupancy(Base):
     )
 
 
+class ItemParam(Base):
+    __tablename__ = "item_params"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    item_id: Mapped[int] = mapped_column(Integer, ForeignKey("items.id"), nullable=False)
+    name: Mapped[str] = mapped_column(String, nullable=False)
+    value: Mapped[int] = mapped_column(Integer, nullable=False)
+    parent_item: Mapped["Item"] = relationship(back_populates="param_list")
+
+
 class Item(Base):
     __tablename__ = "items"
-    id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
-    original_mold_id = Column(
-        Integer,
-        ForeignKey("molds.id"),
-        nullable=False,
-    )
-    owner_id = Column(Integer, nullable=False)
-    description = Column(String, nullable=True)
-    param_list = relationship(
-        "ItemParam",
-        cascade="all, delete-orphan",
-        back_populates="parent_item",
-    )
-    container_item_id = Column(
-        Integer, ForeignKey("items.id"), nullable=True
-    )
-    container_item = relationship(
-        "Item", back_populates="contained_items"
-    )
-    contained_items = relationship(
-        "Item",
-        back_populates="container_item",
-        remote_side=[id],
-    )
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String, nullable=False)
+    original_mold_id: Mapped[int] = mapped_column(Integer,ForeignKey("molds.id"),nullable=False,)
+    owner_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    description: Mapped[str | None] = mapped_column(String, nullable=True)
+    destroyed: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    param_list: Mapped[list[ItemParam]] = relationship(cascade="all, delete-orphan",back_populates="parent_item")
+    container_item_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("items.id"), nullable=True)
+    container_item: Mapped[Item] = relationship(back_populates="contained_items")
+    contained_items: Mapped[list[Item]] = relationship(back_populates="container_item",remote_side=[id])
 
     def __repr__(self):
         return (
@@ -95,92 +191,56 @@ class Item(Base):
         )
 
 
-class ItemParam(Base):
-    __tablename__ = "item_params"
-    id = Column(Integer, primary_key=True)
-    item_id = Column(
-        Integer, ForeignKey("items.id"), nullable=False
-    )
-    name = Column(String, nullable=False)
-    value = Column(Integer, nullable=False)
-    parent_item = relationship(
-        "Item", back_populates="param_list"
-    )
-
-
 class Character(Base):
     __tablename__ = "characters"
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
 
 class BodyNode(Base):
     __tablename__ = "body_nodes"
-    id = Column(Integer, primary_key=True)
-    health = Column(Integer, nullable=False)
-    owner_id = Column(Integer, nullable=False)
-    name = Column(String, nullable=False)
-    parent_id = Column(
-        Integer, ForeignKey("body_nodes.id"), nullable=True
-    )
-    parent = relationship(
-        "BodyNode",
-        remote_side=[id],
-        back_populates="children",
-    )
-    children = relationship(
-        "BodyNode", back_populates="parent"
-    )
-    slots = relationship(
-        "EquipmentSlot", cascade="all, delete-orphan"
-    )
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    health: Mapped[int] = mapped_column(Integer, nullable=False)
+    owner_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    name: Mapped[str] = mapped_column(String, nullable=False)
+    parent_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("body_nodes.id"), nullable=True)
+    parent: Mapped[BodyNode | None] = relationship(remote_side=[id], back_populates="children")
+    children: Mapped[list[BodyNode]] = relationship(back_populates="parent")
+    slots: Mapped[list["EquipmentSlot"]] = relationship(cascade="all, delete-orphan")
 
 
 class EquipmentSlot(Base):
     __tablename__ = "equipment_slots"
-    id = Column(Integer, primary_key=True)
-    body_node_id = Column(
-        Integer, ForeignKey("body_nodes.id"), nullable=False
-    )
-    slot_type = Column(String, nullable=False)
-    slot_index = Column(Integer, default=0)
-    item_id = Column(
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    body_node_id: Mapped[int] = mapped_column(Integer, ForeignKey("body_nodes.id"), nullable=False)
+    slot_type: Mapped[str] = mapped_column(String, nullable=False)
+    slot_index: Mapped[int] = mapped_column(Integer, default=0)
+    item_id: Mapped[int | None] = mapped_column(
         Integer, ForeignKey("items.id"), nullable=True
     )
 
 
 class PlayerRecord(Base):
     __tablename__ = "players"
-    id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String, nullable=False)
 
 
 class PlayerStat(Base):
     __tablename__ = "player_stats"
-    id = Column(Integer, primary_key=True)
-    player_id = Column(
-        Integer, ForeignKey("players.id"), nullable=False
-    )
-    name = Column(String, nullable=False)
-    value = Column(Integer, nullable=False)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    player_id: Mapped[int] = mapped_column(Integer, ForeignKey("players.id"), nullable=False)
+    name: Mapped[str] = mapped_column(String, nullable=False)
+    value: Mapped[int] = mapped_column(Integer, nullable=False)
     __table_args__ = (
         UniqueConstraint("player_id", "name"),
     )
 
 
-class Location(Base):
-    __tablename__ = "locations"
-    id = Column(Integer, primary_key=True)
-    toponym = Column(String, nullable=False)
-    arrival = Column(Integer, nullable=False)
-    departure = Column(Integer)
-    description = Column(String)
-
-
 class EventRecord(Base):
     __tablename__ = "events"
-    id = Column(Integer, primary_key=True)
-    type = Column(String, nullable=False)
-    payload = Column(JSON, nullable=False)
-    due_tick = Column(Integer, nullable=False)
-    executed = Column(Boolean, default=False)
-    origin = Column(String, nullable=False)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    type: Mapped[str] = mapped_column(String, nullable=False)
+    payload: Mapped[dict | None] = mapped_column(JSON, nullable=False)
+    due_tick: Mapped[int] = mapped_column(Integer, nullable=False)
+    executed: Mapped[bool] = mapped_column(Boolean, default=False)
+    origin: Mapped[str] = mapped_column(String, nullable=False)

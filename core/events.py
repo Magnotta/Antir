@@ -28,16 +28,23 @@ class EquipItemEvent(Event):
     signals = [Signal.equipment]
 
     def apply(self, state: GameState):
-        item = state.item_repo.get_item_by_id(
-            self.payload["item_id"]
-        )
+        item = state.item_repo.get_item_by_id(self.payload["item_id"])
         player = state.get_player_by_id(item.owner_id)
         player.equip_item(item, self.payload["slot_ids"])
         return []
 
 
+class ItemOwnershipEvent(Event):
+    type = "change item ownership"
+    signals = [Signal.inventory]
+
+    def apply(self, state):
+        state.item_repo.item_chown(self.payload["item_id"], self.payload["new_owner_id"])
+        return []
+
+
 class PutItemInContainerEvent(Event):
-    def apply(self, engine):
+    def apply(self, state):
         session = engine.session
         inv = engine.inventory
         item = session.get(Item, self.payload["item_id"])

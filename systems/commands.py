@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Callable, Sequence
 from enum import Enum, auto
-from core.events import HungerEvent, EquipItemEvent
+import core.events as e
 
 
 class DecisonType(Enum):
@@ -30,44 +30,59 @@ def advance_time(engine, minutes: int):
         engine.step()
 
 
-def player_hunger(engine):
+def player_hunger(engine, message="none"):
     engine.schedule(
-        HungerEvent(engine.state.time, {"amount": 1}),
+        e.HungerEvent(engine.state.time, {"amount": 1, "message": message}),
         "command",
     )
 
 
-def move_item(engine, target_list, new_owner_id):
-    item = engine.state.item_repo.get_item_by_id(
-        target_list[0]
+def move_item(engine, target, new_owner_id, message="none"):
+    engine.schedule(
+        e.ItemOwnershipEvent(engine.state.time, {"item_id": target, "new_owner_id": new_owner_id, "message": message}),
+        "command"
     )
-    item.owner_id = new_owner_id
 
-
-def equip_item(engine, target_list):
+def equip_item(engine, target, message="none"):
     item = engine.state.item_repo.get_item_by_id(
-        target_list[0]
+        target
     )
     mold = engine.state.item_repo.get_original_mold(item)
-    payload = {"item_id": item.id}
+    if "eq" not in mold.tags:
+            raise ValueError(
+                f"{item.name} is not equippable!"
+            )
+            return
     if any(
         [
-            True if "right" in slot else False
+            True if "_" in slot else False
             for slot in mold.occupied_slots
         ]
     ):
         choice_dict = engine.signals.choice_required(
             PendingDecision(
                 DecisonType.slot_choice,
-                {"mold_id": mold.id, "item_id": item.id},
+                {"mold": mold, "item": item},
             )
         )
         if choice_dict is not None:
-            payload["slot_ids"] = choice_dict["slot_ids"]
+            selected_slot_strings = choice_dict["slots_str"]
+        else:
+            raise ValueError("No slots selected!")
     else:
-        payload["slot_ids"] = mold.occupied_slots
+        selected_slot_strings = mold.occupied_slots
+    player = engine.state.get_player_by_id(
+                item.owner_id
+            )
+    selected_slots = [
+        player.anatomy.get_slot_by_description(
+            string.split()[0], string.split()[1]
+        )
+        for string in selected_slot_strings
+    ]
+    payload = {"item_id": item.id, "slot_ids": [slot.id for slot in selected_slots], "message": message}
     engine.schedule(
-        EquipItemEvent(engine.state.time, payload),
+        e.EquipItemEvent(engine.state.time, payload),
         "command",
     )
 

@@ -4,7 +4,9 @@ from db.repository import (
     EventRepository,
     ItemRepository,
     PlayerRepository,
+    LocationRepository,
 )
+from db.models import Locality
 
 
 class GameState:
@@ -13,25 +15,27 @@ class GameState:
         event_repo: EventRepository,
         item_repo: ItemRepository,
         player_repo: PlayerRepository,
+        loc_repo: LocationRepository,
         players: list[Player],
     ):
         self.players = players
         self.event_repo = event_repo
         self.item_repo = item_repo
         self.player_repo = player_repo
+        self.loc_repo = loc_repo
         self.time = Time()
-        self.location = 'Dentro da consciência'
+        self.locality: Locality = self.loc_repo.get_locality_by_id(1)
 
     @classmethod
     def from_dict(cls, data: dict):
         state = cls()
         state.time = data["tick"]
-        state.location = data["location"]
+        state.locality = data["locality"]
         state.player = data["player"]
         return state
 
     def get_placedatetime_string(self):
-        return f"{self.location}, {str(self.time)}"
+        return f"{str(self.locality)}, {str(self.time)}"
 
     def get_player_by_id(self, id: int) -> Player:
         for p in self.players:
