@@ -28,7 +28,9 @@ class Player:
         mold = self.inventory.repo.get_original_mold(item)
         for slot_id in slot_id_list:
             slot = self.anatomy.get_slot_by_id(slot_id)
-            self.anatomy.repo.occupy_equipment_slot(slot, item)
+            self.anatomy.repo.occupy_equipment_slot(
+                slot, item
+            )
 
     def get_slot_id(self, slot_dict):
         slot = self.anatomy.repo.get_slot_id(

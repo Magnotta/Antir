@@ -1,3 +1,4 @@
+import shlex
 from systems.commands import COMMANDS
 
 
@@ -6,7 +7,7 @@ class CommandParser:
         self.commands = {c.key: c for c in COMMANDS}
 
     def tokenize(self, text: str) -> list[str]:
-        return [t for t in text.strip().split() if t]
+        return shlex.split(text)
 
     def parse_target(
         self, target_type: str, token: str
@@ -16,7 +17,7 @@ class CommandParser:
         elif target_type == "Item":
             return int(token)
         elif target_type is None:
-            return 
+            return
         raise ValueError(
             f"Unknown target type: {target_type}"
         )
@@ -27,7 +28,7 @@ class CommandParser:
         except Exception:
             raise ValueError(
                 "Invalid value for"
-                "{arg_type.__name__}:{token}"
+                f"{arg_type.__name__}:{token}"
             )
 
     def parse(self, text: str):
@@ -55,7 +56,11 @@ class CommandParser:
                 self.parse_arg(arg_type, tokens[idx])
             )
             idx += 1
-        return spec, targets, args
+        kwargs = {}
+        if idx < len(tokens):
+            trailing = tokens[idx]
+            kwargs["message"] = trailing
+        return spec, targets, args, kwargs
 
 
 class CommandService:
@@ -65,11 +70,15 @@ class CommandService:
 
     def execute(self, text: str) -> list[str]:
         try:
-            spec, target, args = self.parser.parse(text)
+            spec, target, args, kwargs = self.parser.parse(
+                text
+            )
             if target is not None:
-                spec.handler(self.engine, target, *args)
+                spec.handler(
+                    self.engine, target, *args, **kwargs
+                )
             else:
-                spec.handler(self.engine, *args)
+                spec.handler(self.engine, *args, **kwargs)
             return ["✔ Command executed"]
         except Exception as e:
             return [f"✖ {e}"]

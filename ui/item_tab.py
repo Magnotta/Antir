@@ -239,10 +239,18 @@ class ItemTab(QWidget):
         self.mold_table = QTableView()
         self.mold_table.setModel(self.mold_table_model)
         header = self.mold_table.horizontalHeader()
-        header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
-        header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
-        header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
-        header.setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(
+            0, QHeaderView.ResizeMode.ResizeToContents
+        )
+        header.setSectionResizeMode(
+            1, QHeaderView.ResizeMode.ResizeToContents
+        )
+        header.setSectionResizeMode(
+            2, QHeaderView.ResizeMode.ResizeToContents
+        )
+        header.setSectionResizeMode(
+            3, QHeaderView.ResizeMode.Stretch
+        )
         self.mold_table.setSelectionBehavior(
             QTableView.SelectionBehavior.SelectRows
         )
@@ -288,10 +296,18 @@ class ItemTab(QWidget):
         self.item_table_model = ItemTableModel()
         self.item_table.setModel(self.item_table_model)
         header = self.item_table.horizontalHeader()
-        header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
-        header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
-        header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
-        header.setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(
+            0, QHeaderView.ResizeMode.ResizeToContents
+        )
+        header.setSectionResizeMode(
+            1, QHeaderView.ResizeMode.ResizeToContents
+        )
+        header.setSectionResizeMode(
+            2, QHeaderView.ResizeMode.ResizeToContents
+        )
+        header.setSectionResizeMode(
+            3, QHeaderView.ResizeMode.Stretch
+        )
         self.item_table.setSelectionBehavior(
             QTableView.SelectionBehavior.SelectRows
         )
@@ -370,7 +386,9 @@ class ItemTab(QWidget):
         self.mold_table.setColumnWidth(0, 5)
 
     def refresh_items(self, search: str | None = None):
-        items = self.item_repo.get_extant_items(search=search)
+        items = self.item_repo.get_extant_items(
+            search=search
+        )
         self.item_table_model = ItemTableModel(items)
         self.item_table.setModel(self.item_table_model)
         (
@@ -601,10 +619,14 @@ class ParamSpecEditor(QDialog):
         self.setWindowTitle("Edit Parameter Spec")
         self.param_edit = QLineEdit()
         self.base_edit = QDoubleSpinBox()
-        self.base_edit.setRange(0, ITEM_PARAM_MAXES[spec.param])
+        self.base_edit.setRange(
+            0, ITEM_PARAM_MAXES[spec.param]
+        )
         self.base_edit.setDecimals(0)
         self.var_edit = QDoubleSpinBox()
-        self.var_edit.setRange(0, ITEM_PARAM_MAXES[spec.param])
+        self.var_edit.setRange(
+            0, ITEM_PARAM_MAXES[spec.param]
+        )
         self.var_edit.setDecimals(0)
         form = QFormLayout()
         form.addRow("Param", self.param_edit)

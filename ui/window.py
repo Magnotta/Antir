@@ -23,7 +23,9 @@ class SlotChoiceDialog(QDialog):
         self.mold = mold
         self.repo = repo
         self.setModal(True)
-        self.setWindowTitle(f"Select slots from – {mold.name} to equip")
+        self.setWindowTitle(
+            f"Select slots from – {mold.name} to equip"
+        )
         self.all_slots = QListWidget()
         self.used_slots = QListWidget()
         for slot in mold.occupied_slots:
@@ -135,7 +137,9 @@ class Window(QMainWindow):
             self,
         )
         self.player_tab = PlayersTab(engine.state.players)
-        self.loc_tab = LocalityTab(self.engine.state.loc_repo, self.engine.state)
+        self.loc_tab = LocalityTab(
+            self.engine.state.loc_repo, self.engine.state
+        )
         self.tabs.addTab(self.home_tab, "Home")
         self.tabs.addTab(self.item_tab, "Items")
         self.tabs.addTab(self.player_tab, "Players")
@@ -162,12 +166,14 @@ class Window(QMainWindow):
 
     def slot_choice_required(self, payload):
         dlg = SlotChoiceDialog(
-            payload["mold"], self.engine.state.item_repo, parent=self
+            payload["mold"],
+            self.engine.state.item_repo,
+            parent=self,
         )
         if dlg.exec():
             selected_slot_strings = dlg.selected_slots()
             item = payload["item"]
             return {
                 "item": item,
-                "slots_str": selected_slot_strings
+                "slots_str": selected_slot_strings,
             }

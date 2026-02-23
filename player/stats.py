@@ -1,5 +1,4 @@
 from db.repository import PlayerRepository
-from core.defs import BASE_PLAYER_STATS
 
 
 class Stats:

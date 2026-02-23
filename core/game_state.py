@@ -24,7 +24,9 @@ class GameState:
         self.player_repo = player_repo
         self.loc_repo = loc_repo
         self.time = Time()
-        self.locality: Locality = self.loc_repo.get_locality_by_id(1)
+        self.locality: Locality = (
+            self.loc_repo.get_locality_by_id(1)
+        )
 
     @classmethod
     def from_dict(cls, data: dict):

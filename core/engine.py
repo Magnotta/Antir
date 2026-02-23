@@ -21,7 +21,11 @@ class Engine:
         players: list[Player],
     ):
         self.state = GameState(
-            event_repo, item_repo, player_repo, loc_repo, players
+            event_repo,
+            item_repo,
+            player_repo,
+            loc_repo,
+            players,
         )
         self.cmd = CommandService(self)
         self.signals = SignalBus()

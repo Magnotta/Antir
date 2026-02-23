@@ -2,7 +2,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from core.defs import (
     BASE_PLAYER_STATS,
-    BODY_SCHEMA,
     SLOT_MAX_INDEX,
 )
 from db.models import (

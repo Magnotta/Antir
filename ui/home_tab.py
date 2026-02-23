@@ -5,12 +5,13 @@ from PyQt6.QtWidgets import (
     QLineEdit,
     QLabel,
 )
+from core.engine import Engine
 
 from PyQt6.QtCore import Qt
 
 
 class HomeTab(QWidget):
-    def __init__(self, engine):
+    def __init__(self, engine: Engine):
         super().__init__()
         self.engine = engine
         self.output = QTextEdit()
