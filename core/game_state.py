@@ -6,7 +6,7 @@ from db.repository import (
     PlayerRepository,
     LocationRepository,
 )
-from db.models import Locality
+from db.models.world import Locality
 
 
 class GameState:

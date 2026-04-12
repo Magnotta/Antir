@@ -31,7 +31,9 @@ class EquipItemEvent(Event):
             self.payload["item_id"]
         )
         player = state.get_player_by_id(item.owner_id)
-        player.equip_item(item, self.payload["slot_ids"])
+        player.equip_item_event(
+            item, self.payload["slot_ids"]
+        )
         return []
 
 

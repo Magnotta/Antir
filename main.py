@@ -2,7 +2,7 @@ from PyQt6.QtWidgets import QApplication
 import sys
 from ui.window import Window
 from db.database import init_metadata, init_db
-from db.models import PlayerRecord
+from db.models.player_record import PlayerRecord
 from db.repository import (
     EventRepository,
     ItemRepository,

@@ -32,6 +32,30 @@ class EclipticSunRule(Rule):
     pass
 
 
+class ShitRule(Rule):
+    """
+    Uma cagada forte resolve o problema pelo dia inteiro
+    Duas cagadas fracas resolvem também, mas cada uma faz o triplo da sujeira
+    Cagada acumulada causa incômodo, eventualmente dor
+    Vontade de cagar é uma benção
+    """
+
+    pass
+
+
+class ThirstRule(Rule):
+    """
+    Suar causa sede
+    Dormir causa sede
+    Comer causa sede
+    Sede causa preguiça
+    Dormir com sede causa desidratação
+    Beber pouca água elimina a sede momentânea mas não previne desidratação
+    """
+
+    pass
+
+
 class DayHungerRule(Rule):
     listens_to = [Signal.day]
     name = 'daily hunger rule'

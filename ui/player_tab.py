@@ -45,18 +45,14 @@ class InventoryTableModel(QAbstractTableModel):
             return item.id
         if col == 1:
             return (
-                item.mold.name
+                item.name
                 if hasattr(item, "mold")
                 else str(item.original_mold_id)
             )
         if col == 2:
-            return (
-                item.mold.type
-                if hasattr(item, "mold")
-                else ""
-            )
-        if col == 3:
             return self._location_text(item)
+        if col == 3:
+            return item.description
 
     def _location_text(self, item):
         if item.container_item_id:
@@ -75,10 +71,10 @@ class InventoryPanel(QWidget):
         self.table = QTableView()
         layout.addWidget(self.table)
         self.inventory = inventory
-        # self.refresh()
+        self.refresh()
 
     def refresh(self):
-        items = None
+        items = self.inventory.get_items()
         self.model = InventoryTableModel(items)
         self.table.setModel(self.model)
         self.table.resizeColumnsToContents()
@@ -117,7 +113,7 @@ class SinglePlayerTab(QWidget):
 
     def refresh(self):
         self.stats_panel.refresh(self.player.stats)
-        # self.inventory_panel.refresh()
+        self.inventory_panel.refresh()
 
 
 class PlayersTab(QWidget):

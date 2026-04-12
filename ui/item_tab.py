@@ -26,7 +26,7 @@ from PyQt6.QtCore import (
     QStringListModel,
     pyqtSlot,
 )
-from db.models import Mold, Item, ItemParam, ParamSpec
+from db.models.mold import Mold, ParamSpec, Item, ItemParam
 from db.repository import (
     ItemRepository,
 )

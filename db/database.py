@@ -4,13 +4,12 @@ from core.defs import (
     BASE_PLAYER_STATS,
     SLOT_MAX_INDEX,
 )
-from db.models import (
-    Base,
-    PlayerRecord,
-    PlayerStat,
-    BodyNode,
-    EquipmentSlot,
-)
+from db.models.base import Base
+from db.models.player_record import PlayerRecord
+from db.models.player_stat import PlayerStat
+from db.models.body_node import BodyNode
+from db.models.equipment_slot import EquipmentSlot
+
 
 DATABASE_URL = "sqlite:///db/antir_db.db"
 

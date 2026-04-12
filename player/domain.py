@@ -1,4 +1,5 @@
-from db.models import PlayerRecord, Item
+from db.models.mold import Item
+from db.models.player_record import PlayerRecord
 from db.repository import (
     ItemRepository,
     PlayerRepository,
@@ -24,7 +25,7 @@ class Player:
         )
         self.stats = Stats(self.player_rec.id, player_repo)
 
-    def equip_item(self, item: Item, slot_id_list):
+    def equip_item_event(self, item: Item, slot_id_list):
         mold = self.inventory.repo.get_original_mold(item)
         for slot_id in slot_id_list:
             slot = self.anatomy.get_slot_by_id(slot_id)

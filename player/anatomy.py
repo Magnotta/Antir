@@ -1,4 +1,4 @@
-from db.models import BodyNode, EquipmentSlot
+from db.models.body_node import BodyNode, EquipmentSlot
 from db.repository import PlayerRepository
 
 

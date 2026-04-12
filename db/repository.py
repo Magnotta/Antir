@@ -1,24 +1,21 @@
 import pprint
 from random import randint
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from typing import Optional
-from db.models import (
-    EventRecord,
-    PlayerRecord,
+from db.models.event_record import EventRecord
+from db.models.player_record import PlayerRecord
+from db.models.world import (
     Locality,
     Path,
     PointCondition,
     SegmentCondition,
-    BodyNode,
-    EquipmentSlot,
-    ParamSpec,
-    Mold,
-    ItemParam,
-    Item,
-    PlayerStat,
-    ItemSlotOccupancy,
 )
+from db.models.body_node import BodyNode
+from db.models.equipment_slot import EquipmentSlot
+from db.models.mold import Mold, ParamSpec, Item, ItemParam
+from db.models.player_stat import PlayerStat
+from db.models.item_slot_occupancy import ItemSlotOccupancy
 from core.defs import (
     TAG_TO_PARAMS,
     ITEM_PARAM_MAXES,
@@ -568,14 +565,15 @@ class ItemRepository:
     def get_extant_items(
         self, search: str | None = None
     ) -> list[Item]:
-        stmt = select(Item)
+        stmt = select(Item).options(joinedload(Item.mold))
         if search:
             stmt = stmt.where(
                 Item.name.ilike(f"%{search}%")
             )
-        return self.session.scalars(
+        a = self.session.scalars(
             stmt.where(Item.destroyed.is_(False))
         ).all()
+        return a
 
     def get_item_by_id(self, item_id: int) -> Item:
         return self.session.get(Item, item_id)

@@ -17,7 +17,7 @@ from PyQt6.QtWidgets import (
     QFormLayout,
 )
 from PyQt6.QtCore import Qt
-from db.models import (
+from db.models.world import (
     Locality,
     PointCondition,
     SegmentCondition,

@@ -32,7 +32,7 @@ class CommandParser:
             )
 
     def parse(self, text: str):
-        tokens = self.tokenize(text)
+        tokens = shlex.split(text)
         if not tokens:
             return None
         key = tokens[0]
