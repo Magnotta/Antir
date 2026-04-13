@@ -1,11 +1,9 @@
 from systems.time_service import Time
 from player.domain import Player
-from db.repository import (
-    EventRepository,
-    ItemRepository,
-    PlayerRepository,
-    LocationRepository,
-)
+from db.repository.item import ItemRepository
+from db.repository.event import EventRepository
+from db.repository.location import LocationRepository
+from db.repository.player import PlayerRepository
 from db.models.world import Locality
 
 

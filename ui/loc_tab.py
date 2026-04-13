@@ -22,7 +22,7 @@ from db.models.world import (
     PointCondition,
     SegmentCondition,
 )
-from db.repository import LocationRepository
+from db.repository.location import LocationRepository
 from core.defs import (
     PATH_CONDITION_KINDS,
     STR_PATH_COND_PARAMS,

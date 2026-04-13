@@ -1,4 +1,4 @@
-from db.repository import PlayerRepository
+from db.repository.player import PlayerRepository
 
 
 class Stats:

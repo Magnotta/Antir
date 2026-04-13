@@ -1,9 +1,7 @@
-from db.models.mold import Item
+from db.models.item import Item
 from db.models.player_record import PlayerRecord
-from db.repository import (
-    ItemRepository,
-    PlayerRepository,
-)
+from db.repository.item import ItemRepository
+from db.repository.player import PlayerRepository
 from player.anatomy import Anatomy
 from player.inventory import Inventory
 from player.stats import Stats

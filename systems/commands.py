@@ -85,9 +85,18 @@ def equip_item(engine, target, message="none"):
         )
         for string in selected_slot_strings
     ]
+    for param in item.param_list:
+        if param.name == "delay":
+            delay = param.value
+            break
+    else:
+        raise ValueError(
+            f"Item {item.id} doesn't have a delay param!"
+        )
     payload = {
         "item_id": item.id,
         "slot_ids": [slot.id for slot in selected_slots],
+        "equip_delay": delay,
         "message": message,
     }
     engine.schedule(

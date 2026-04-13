@@ -3,12 +3,10 @@ import sys
 from ui.window import Window
 from db.database import init_metadata, init_db
 from db.models.player_record import PlayerRecord
-from db.repository import (
-    EventRepository,
-    ItemRepository,
-    PlayerRepository,
-    LocationRepository,
-)
+from db.repository.item import ItemRepository
+from db.repository.event import EventRepository
+from db.repository.location import LocationRepository
+from db.repository.player import PlayerRepository
 from player.domain import Player
 from core.engine import Engine
 from core.defs import BASE_PLAYER_STATS

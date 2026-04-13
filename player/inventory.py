@@ -1,5 +1,5 @@
-from db.repository import ItemRepository
-from db.models.mold import Item
+from db.repository.item import ItemRepository
+from db.models.item import Item
 
 
 class Inventory:

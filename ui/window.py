@@ -28,7 +28,7 @@ class SlotChoiceDialog(QDialog):
         )
         self.all_slots = QListWidget()
         self.used_slots = QListWidget()
-        for slot in mold.occupied_slots:
+        for slot in self.mold.occupied_slots:
             self.all_slots.addItem(slot)
         add_btn = QPushButton("→")
         remove_btn = QPushButton("←")
@@ -59,7 +59,6 @@ class SlotChoiceDialog(QDialog):
         item = self.all_slots.currentItem()
         if not item:
             return
-
         text = item.text()
         if not self._exists(self.used_slots, text):
             self.used_slots.addItem(text)
@@ -119,7 +118,6 @@ class SlotChoiceDialog(QDialog):
                                 "Cannot have left and right of the same body part!",
                             )
                             return
-        self.mold.occupied_slots = slot_strings
         self.accept()
 
 

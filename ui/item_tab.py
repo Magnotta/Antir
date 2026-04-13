@@ -26,10 +26,8 @@ from PyQt6.QtCore import (
     QStringListModel,
     pyqtSlot,
 )
-from db.models.mold import Mold, ParamSpec, Item, ItemParam
-from db.repository import (
-    ItemRepository,
-)
+from db.models.item import Mold, ParamSpec, Item, ItemParam
+from db.repository.item import ItemRepository
 from core.defs import (
     MOLD_TAG_DICTS,
     TAG_NAMES,

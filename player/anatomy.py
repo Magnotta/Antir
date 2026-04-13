@@ -1,5 +1,5 @@
 from db.models.body_node import BodyNode, EquipmentSlot
-from db.repository import PlayerRepository
+from db.repository.player import PlayerRepository
 
 
 class Anatomy:
