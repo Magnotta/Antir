@@ -49,3 +49,6 @@ class Anatomy:
         raise ValueError(
             f"Slot '{slot_name}' is over-encumbered!"
         )
+
+    def get_head_health(self):
+        return self.by_name["head"].health

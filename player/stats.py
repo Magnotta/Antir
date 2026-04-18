@@ -11,6 +11,11 @@ class Stats:
     def get(self, stat_name: str):
         return self.repo.get_stat(self.player_id, stat_name)
 
+    def set(self, stat_name: str, stat_value):
+        self.repo.set_stat(
+            self.player_id, stat_name, stat_value
+        )
+
     def get_all(self) -> dict:
         return self.repo.get_all_stats(self.player_id)
 

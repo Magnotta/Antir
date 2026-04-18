@@ -57,9 +57,7 @@ class PlayerRepository:
         )
         return row.value
 
-    def set_stat(
-        self, player_id: int, stat: str, value: float
-    ):
+    def set_stat(self, player_id: int, stat: str, value):
         row = (
             self.session.query(PlayerStat)
             .filter(

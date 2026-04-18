@@ -9,6 +9,7 @@ from db.models.player_record import PlayerRecord
 from db.models.player_stat import PlayerStat
 from db.models.body_node import BodyNode
 from db.models.equipment_slot import EquipmentSlot
+from db.models.global_var import GlobalVar
 
 
 DATABASE_URL = "sqlite:///db/antir_db.db"
@@ -60,6 +61,19 @@ def create_body_node_recursive(
             parent=node,
         )
     return node
+
+
+def init_time(session):
+    var = (
+        session.query(GlobalVar)
+        .filter(GlobalVar.key == "simulation_ticks")
+        .first()
+    )
+    if var is None:
+        var = GlobalVar(key="simulation_ticks", value=0)
+        session.add(var)
+        session.commit()
+    return var.value
 
 
 def init_players(session):

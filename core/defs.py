@@ -420,6 +420,28 @@ ITEM_PARAM_DEFAULTS = {
 }
 
 
+PLAYER_STATS = [
+    "height",
+    "weight",
+    "arm_strength",
+    "leg_strength",
+    "dexterity",
+    "vitality",
+    "blood",
+    "blood_change",
+    "pneuma",
+    "pneuma_change",
+    "stamina",
+    "exhaustion_level",
+    "hunger",
+    "thirst",
+    "awake",
+    "stress",
+    "right_hand_occupied",
+    "left_hand_occupied",
+]
+
+
 BASE_PLAYER_STATS = {
     "Joao": {
         "height": 180,
@@ -438,6 +460,8 @@ BASE_PLAYER_STATS = {
         "thirst": 0,
         "awake": 1000,
         "stress": 0,
+        "right_hand_occupied": 0,
+        "left_hand_occupied": 0,
     },
     "Jose": {
         "height": 175,
@@ -456,6 +480,8 @@ BASE_PLAYER_STATS = {
         "thirst": 0,
         "awake": 1000,
         "stress": 0,
+        "right_hand_occupied": 0,
+        "left_hand_occupied": 0,
     },
     "Malina": {
         "height": 180,
@@ -474,6 +500,8 @@ BASE_PLAYER_STATS = {
         "thirst": 0,
         "awake": 1000,
         "stress": 0,
+        "right_hand_occupied": 0,
+        "left_hand_occupied": 0,
     },
     "Estranha": {
         "height": 180,
@@ -492,6 +520,8 @@ BASE_PLAYER_STATS = {
         "thirst": 0,
         "awake": 1000,
         "stress": 0,
+        "right_hand_occupied": 0,
+        "left_hand_occupied": 0,
     },
     "Ricardo": {
         "height": 180,
@@ -510,6 +540,8 @@ BASE_PLAYER_STATS = {
         "thirst": 0,
         "awake": 1000,
         "stress": 0,
+        "right_hand_occupied": 0,
+        "left_hand_occupied": 0,
     },
 }
 

@@ -28,6 +28,7 @@ class CommandSpec:
 def advance_time(engine, minutes: int, message="none"):
     for _ in range(minutes):
         engine.step()
+    engine.state.update_time()
 
 
 def player_hunger(engine, message="none"):

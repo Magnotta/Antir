@@ -9,6 +9,9 @@ class Time:
         self.m = tm % 60
         self.day_change = False
         self.hour_change = False
+        if self.tick == 0:
+            self.day_change = True
+            self.hour_change = True
 
     def __add__(self, other):
         if isinstance(other, Time):

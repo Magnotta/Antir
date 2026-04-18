@@ -7,6 +7,7 @@ from db.repository.item import ItemRepository
 from db.repository.event import EventRepository
 from db.repository.location import LocationRepository
 from db.repository.player import PlayerRepository
+from db.repository.global_var import GlobalVarRepository
 from player.domain import Player
 from core.engine import Engine
 from core.defs import BASE_PLAYER_STATS
@@ -21,6 +22,7 @@ if __name__ == "__main__":
     player_repo = PlayerRepository(session)
     event_repo = EventRepository(session)
     loc_repo = LocationRepository(session)
+    var_repo = GlobalVarRepository(session)
     player_recs = (
         session.query(PlayerRecord)
         .order_by(PlayerRecord.id)
@@ -40,6 +42,7 @@ if __name__ == "__main__":
         item_repo,
         player_repo,
         loc_repo,
+        var_repo,
         players,
     )
     app = QApplication(sys.argv)

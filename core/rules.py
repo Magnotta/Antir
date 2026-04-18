@@ -1,7 +1,5 @@
 from enum import IntEnum, auto
-from core.events import (
-    HungerEvent,
-)
+from core.events import HungerEvent, ThirstEvent
 from systems.signal_service import Signal
 
 
@@ -34,6 +32,7 @@ class EclipticSunRule(Rule):
 
 class ShitRule(Rule):
     """
+    SENSAÇÃO
     Uma cagada forte resolve o problema pelo dia inteiro
     Duas cagadas fracas resolvem também, mas cada uma faz o triplo da sujeira
     Cagada acumulada causa incômodo, eventualmente dor
@@ -45,6 +44,7 @@ class ShitRule(Rule):
 
 class ThirstRule(Rule):
     """
+    SENSAÇÃO
     Suar causa sede
     Dormir causa sede
     Comer causa sede
@@ -53,6 +53,31 @@ class ThirstRule(Rule):
     Beber pouca água elimina a sede momentânea mas não previne desidratação
     """
 
+    listens_to = [Signal.hour]
+    name = 'hourly thirst rule'
+    category = RuleStrictness.FIRM
+
+    def fulfill(self, state):
+        return [
+            ThirstEvent(
+                state.time, {"target": 1, "amount": 10}
+            ),
+            ThirstEvent(
+                state.time, {"target": 2, "amount": 10}
+            ),
+            ThirstEvent(
+                state.time, {"target": 3, "amount": 10}
+            ),
+            ThirstEvent(
+                state.time, {"target": 4, "amount": 10}
+            ),
+            ThirstEvent(
+                state.time, {"target": 5, "amount": 10}
+            ),
+        ]
+
+
+class DehydrationRule(Rule):
     pass
 
 
@@ -148,4 +173,5 @@ class MidnightHungerRule(Rule):
 RULES = [
     DayHungerRule(),
     MidnightHungerRule(),
+    ThirstRule(),
 ]

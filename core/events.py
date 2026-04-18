@@ -1,5 +1,5 @@
 from core.game_state import GameState
-from systems.time_service import Time
+from systems.time import Time
 from systems.signal_service import Signal
 
 EVENTS = {}
@@ -7,7 +7,7 @@ EVENTS = {}
 
 class Event:
     type: str = "base"
-    signals: list[Signal] = []
+    emits_signals: list[Signal] = []
 
     def __init__(
         self, due_time: Time, payload: dict | None = None
@@ -27,14 +27,14 @@ class Event:
 
 class EquipItemEvent(Event):
     type = "equip item"
-    signals = [Signal.equipment]
+    emits_signals = [Signal.equipment]
 
     def begin(self, state: GameState) -> list:
-        # item = state.item_repo.get_item_by_id(
-        #     self.payload["item_id"]
-        # )
-        # player = state.get_player_by_id(item.owner_id)
-        # player.occupy_both_hands()
+        item = state.item_repo.get_item_by_id(
+            self.payload["item_id"]
+        )
+        player = state.get_player_by_id(item.owner_id)
+        player.occupy_both_hands()
         return [
             EquipItemEvent(
                 state.time + self.payload["equip_delay"],
@@ -50,11 +50,12 @@ class EquipItemEvent(Event):
         player.equip_item_event(
             item, self.payload["slot_ids"]
         )
+        player.free_both_hands()
 
 
 class ItemOwnershipEvent(Event):
     type = "change item ownership"
-    signals = [Signal.inventory]
+    emits_signals = [Signal.inventory]
 
     def begin(self, state: GameState) -> list:
         self.apply(state)
@@ -81,7 +82,7 @@ class ItemOwnershipEvent(Event):
 
 class HungerEvent(Event):
     type = "player hunger"
-    signals = [Signal.stats]
+    emits_signals = [Signal.stats]
 
     def __init__(self, due_time: Time, payload=None):
         super().__init__(due_time, payload)
@@ -95,3 +96,21 @@ class HungerEvent(Event):
             self.payload["target"]
         )
         player.stats.add("hunger", self.payload["amount"])
+
+
+class ThirstEvent(Event):
+    type = "player thirst"
+    emits_signals = [Signal.stats]
+
+    def __init__(self, due_time: Time, payload=None):
+        super().__init__(due_time, payload)
+
+    def begin(self, state):
+        self.apply(state)
+        return []
+
+    def apply(self, state):
+        player = state.get_player_by_id(
+            self.payload["target"]
+        )
+        player.stats.add("thirst", self.payload["amount"])

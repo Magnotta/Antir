@@ -31,6 +31,24 @@ class Player:
                 slot, item
             )
 
+    def is_alive(self):
+        life_bool = (
+            self.stats.get("pneuma") > 0
+            and self.stats.get("blood") > 0
+            and self.anatomy.get_head_health() > 0
+        )
+        return life_bool
+
+    def occupy_both_hands(self):
+        # if self.weapon_drawn?
+        # if self.
+        self.stats.set("right_hand_occupied", 1)
+        self.stats.set("left_hand_occupied", 1)
+
+    def free_both_hands(self):
+        self.stats.set("right_hand_occupied", 0)
+        self.stats.set("right_hand_occupied", 0)
+
     def get_slot_id(self, slot_dict):
         slot = self.anatomy.repo.get_slot_id(
             self.player_rec.id,

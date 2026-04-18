@@ -2,6 +2,7 @@ from db.repository.item import ItemRepository
 from db.repository.event import EventRepository
 from db.repository.location import LocationRepository
 from db.repository.player import PlayerRepository
+from db.repository.global_var import GlobalVarRepository
 from core.game_state import GameState
 from core.rules import RULES
 from player.domain import Player
@@ -16,6 +17,7 @@ class Engine:
         item_repo: ItemRepository,
         player_repo: PlayerRepository,
         loc_repo: LocationRepository,
+        var_repo: GlobalVarRepository,
         players: list[Player],
     ):
         self.state = GameState(
@@ -23,6 +25,7 @@ class Engine:
             item_repo,
             player_repo,
             loc_repo,
+            var_repo,
             players,
         )
         self.cmd = CommandService(self)
@@ -61,7 +64,7 @@ class Engine:
         ]
         for event in due:
             if event.condition(self.state):
-                self.signals.store(event.signals)
+                self.signals.store(event.emits_signals)
                 followups = event.begin(self.state)
                 self.scheduled_events.remove(event)
                 for e in followups:
@@ -74,7 +77,7 @@ class Engine:
             if e.due_time <= self.state.time
         ]
         for event in running:
-            self.signals.store(event.signals)
+            self.signals.store(event.emits_signals)
             event.apply(self.state)
             self.current_events.remove(event)
         self._fulfill_rules()
