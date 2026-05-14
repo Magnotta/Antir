@@ -7,6 +7,8 @@ from sqlalchemy import (
     Integer,
     String,
     ForeignKey,
+    Boolean,
+    Text,
 )
 from .base import Base
 from .equipment_slot import EquipmentSlot
@@ -17,9 +19,40 @@ class BodyNode(Base):
     id: Mapped[int] = mapped_column(
         Integer, primary_key=True
     )
-    health: Mapped[int] = mapped_column(
+    broken_bone: Mapped[bool] = mapped_column(
+        Boolean, nullable=False
+    )
+    torn_ligament: Mapped[bool] = mapped_column(
+        Boolean, nullable=False
+    )
+    dislocated_joint: Mapped[bool] = mapped_column(
+        Boolean, nullable=False
+    )
+    severed: Mapped[bool] = mapped_column(
+        Boolean, nullable=False
+    )
+    venomous_bite: Mapped[bool] = mapped_column(
+        Boolean, nullable=False
+    )
+    insect_bite: Mapped[bool] = mapped_column(
+        Boolean, nullable=False
+    )
+    poison_sting: Mapped[bool] = mapped_column(
+        Boolean, nullable=False
+    )
+    swollen_joint: Mapped[int] = mapped_column(
         Integer, nullable=False
     )
+    sliced: Mapped[int] = mapped_column(
+        Integer, nullable=False
+    )
+    pierced: Mapped[int] = mapped_column(
+        Integer, nullable=False
+    )
+    bludgeoned: Mapped[int] = mapped_column(
+        Integer, nullable=False
+    )
+    notes: Mapped[str] = mapped_column(Text, nullable=False)
     owner_id: Mapped[int] = mapped_column(
         Integer, nullable=False
     )

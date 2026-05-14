@@ -35,7 +35,6 @@ class Player:
         life_bool = (
             self.stats.get("pneuma") > 0
             and self.stats.get("blood") > 0
-            and self.anatomy.get_head_health() > 0
         )
         return life_bool
 

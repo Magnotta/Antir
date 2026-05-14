@@ -114,3 +114,21 @@ class ThirstEvent(Event):
             self.payload["target"]
         )
         player.stats.add("thirst", self.payload["amount"])
+
+
+class BoneBreakEvent(Event):
+    type = "player bone breaking"
+    emits_signals = [Signal.anatomical]
+
+    def __init__(self, due_time, payload=None):
+        super().__init__(due_time, payload)
+
+    def begin(self, state):
+        self.apply(state)
+        return []
+
+    def apply(self, state):
+        player = state.get_player_by_id(
+            self.payload["target"]
+        )
+        player.stats.set("thirst", self.payload["amount"])

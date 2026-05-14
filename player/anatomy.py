@@ -1,3 +1,4 @@
+from core.defs import INJURY_TYPES
 from db.models.body_node import BodyNode, EquipmentSlot
 from db.repository.player import PlayerRepository
 
@@ -23,6 +24,16 @@ class Anatomy:
         self, name: str
     ) -> BodyNode | None:
         return self.by_name[name]
+
+    def set_bodynode_stat(
+        self, node_str, stat, val, add=False
+    ):
+        node = self.get_bodynode_by_name(node_str)
+        if not add:
+            setattr(node, stat, val)
+        else:
+            old_val = getattr(node, stat)
+            setattr(node, stat, old_val + val)
 
     def get_slot_by_id(self, slot_id):
         return self.repo.get_slot_by_id(slot_id)
@@ -51,4 +62,15 @@ class Anatomy:
         )
 
     def get_head_health(self):
-        return self.by_name["head"].health
+        raise NotImplementedError()
+
+    def get_injury_data(self, player_id):
+        nodes = self.repo.get_complete_body(player_id)
+        return {
+            node.name: {
+                k: v
+                for k, v in node.__dict__.items()
+                if v and k in INJURY_TYPES
+            }
+            for node in nodes
+        }

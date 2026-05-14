@@ -37,12 +37,10 @@ class Engine:
     def schedule(self, event, org: str):
         self.state.event_repo.add_record(event, org)
         self.scheduled_events.append(event)
-        # self.scheduled_events.sort(key=lambda e: e.due_time)
 
     def _follow_up(self, event, org: str):
         self.state.event_repo.add_record(event, org)
         self.current_events.append(event)
-        # self.current_events.sort(key=lambda e: e.due_time)
 
     def step(self):
         self._advance_time()

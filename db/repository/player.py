@@ -1,3 +1,4 @@
+from sqlalchemy import select
 from db.models.player_record import PlayerRecord
 from db.models.player_stat import PlayerStat
 from db.models.item_slot_occupancy import ItemSlotOccupancy
@@ -100,13 +101,35 @@ class PlayerRepository:
     ):
         if parent_id == -1:
             new_node = BodyNode(
-                health=1000,
+                broken_bone=False,
+                torn_ligament=False,
+                dislocated_joint=False,
+                severed=False,
+                venomous_bite=False,
+                insect_bite=False,
+                poison_sting=False,
+                swollen_joint=False,
+                sliced=0,
+                pierced=0,
+                bludgeoned=0,
+                notes="",
                 owner_id=player_id,
                 name=node_name,
             )
         else:
             new_node = BodyNode(
-                health=1000,
+                broken_bone=False,
+                torn_ligament=False,
+                dislocated_joint=False,
+                severed=False,
+                venomous_bite=False,
+                insect_bite=False,
+                poison_sting=False,
+                swollen_joint=False,
+                sliced=0,
+                pierced=0,
+                bludgeoned=0,
+                notes="",
                 owner_id=player_id,
                 name=node_name,
                 parent_id=parent_id,
@@ -173,3 +196,11 @@ class PlayerRepository:
         except Exception as e:
             self.session.rollback()
             raise e
+
+    def get_complete_body(
+        self, player_id
+    ) -> list[BodyNode]:
+        stmt = select(BodyNode).where(
+            BodyNode.owner_id == player_id
+        )
+        return self.session.scalars(stmt).all()

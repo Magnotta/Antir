@@ -7,6 +7,7 @@ class Signal(Enum):
     inventory = auto()
     equipment = auto()
     stats = auto()
+    anatomical = auto()
     minute = auto()
     hour = auto()
     day = auto()

@@ -6,6 +6,7 @@ import core.events as e
 
 class DecisonType(Enum):
     slot_choice = auto()
+    bodynode_choice = auto()
 
 
 class PendingDecision:
@@ -114,6 +115,23 @@ def import_world(engine, message="none"):
     engine.state.loc_repo.import_world_from_file()
 
 
+def break_bone(engine, target, message="none"):
+    player = engine.state.get_player_by_id(target)
+    choice_dict = engine.signals.choice_required(
+        PendingDecision(
+            DecisonType.bodynode_choice, {"player": player}
+        )
+    )
+    if choice_dict is not None:
+        selected_node_strings = choice_dict["nodes_str"]
+    else:
+        raise ValueError("No body nodes selected!")
+    for string in selected_node_strings:
+        player.anatomy.set_bodynode_stat(
+            string, "broken_bone", True
+        )
+
+
 COMMANDS = [
     CommandSpec(
         key="tm",
@@ -131,14 +149,14 @@ COMMANDS = [
     ),
     CommandSpec(
         key="ie",
-        target_type="Item",
+        target_type="item",
         arg_types=[],
         description="equip item",
         handler=equip_item,
     ),
     CommandSpec(
         key="im",
-        target_type="Item",
+        target_type="item",
         arg_types=[int],
         description="item chown",
         handler=move_item,
@@ -156,5 +174,12 @@ COMMANDS = [
         arg_types=[],
         description="import world",
         handler=import_world,
+    ),
+    CommandSpec(
+        key="pbb",
+        target_type="player",
+        arg_types=[],
+        description="break a bone",
+        handler=break_bone,
     ),
 ]

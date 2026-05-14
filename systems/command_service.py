@@ -12,9 +12,9 @@ class CommandParser:
     def parse_target(
         self, target_type: str, token: str
     ) -> int:
-        if target_type == "Player":
+        if target_type == "player":
             return int(token)
-        elif target_type == "Item":
+        elif target_type == "item":
             return int(token)
         elif target_type is None:
             return

@@ -17,107 +17,111 @@ from ui.player_tab import PlayersTab
 from ui.loc_tab import LocalityTab
 
 
-class SlotChoiceDialog(QDialog):
-    def __init__(self, mold, repo, parent=None):
+class ChoiceDialog(QDialog):
+    def __init__(
+        self,
+        all_options,
+        selected_options=[],
+        title="Make a selection",
+        validation_func=None,
+        parent=None,
+    ):
         super().__init__(parent)
-        self.mold = mold
-        self.repo = repo
         self.setModal(True)
-        self.setWindowTitle(
-            f"Select slots from – {mold.name} to equip"
-        )
-        self.all_slots = QListWidget()
-        self.used_slots = QListWidget()
-        for slot in self.mold.occupied_slots:
-            self.all_slots.addItem(slot)
+        self.setWindowTitle(title)
+
+        # Convert all options to strings for display; keep original values internally
+        self.all_options = all_options
+        self.validation_func = validation_func
+
+        # Create the two list widgets
+        self.available_list = QListWidget()
+        self.selected_list = QListWidget()
+
+        # Populate available list (all options)
+        for opt in self.all_options:
+            self.available_list.addItem(str(opt))
+
+        # Populate selected list with pre‑selected options, and do not duplicate
+        # them in the available list (they remain in available but are not shown there.
+        # However, for clarity we leave them in available – the user can still see them,
+        # but trying to add them again is prevented by duplicate checking.)
+        for opt in selected_options:
+            self.selected_list.addItem(str(opt))
+
+        # Buttons
         add_btn = QPushButton("→")
         remove_btn = QPushButton("←")
-        add_btn.clicked.connect(self.add_slot)
-        remove_btn.clicked.connect(self.remove_slot)
-        arrows = QVBoxLayout()
-        arrows.addStretch()
-        arrows.addWidget(add_btn)
-        arrows.addWidget(remove_btn)
-        arrows.addStretch()
-        lists = QHBoxLayout()
-        lists.addWidget(self.all_slots)
-        lists.addLayout(arrows)
-        lists.addWidget(self.used_slots)
-        accept = QPushButton("Accept")
-        cancel = QPushButton("Cancel")
-        accept.clicked.connect(self.on_accept)
-        cancel.clicked.connect(self.reject)
-        btns = QHBoxLayout()
-        btns.addStretch()
-        btns.addWidget(cancel)
-        btns.addWidget(accept)
-        layout = QVBoxLayout(self)
-        layout.addLayout(lists)
-        layout.addLayout(btns)
+        add_btn.clicked.connect(self._add_selected)
+        remove_btn.clicked.connect(self._remove_selected)
 
-    def add_slot(self):
-        item = self.all_slots.currentItem()
-        if not item:
+        # Layout for arrow buttons
+        arrows_layout = QVBoxLayout()
+        arrows_layout.addStretch()
+        arrows_layout.addWidget(add_btn)
+        arrows_layout.addWidget(remove_btn)
+        arrows_layout.addStretch()
+
+        # Layout for the two lists
+        lists_layout = QHBoxLayout()
+        lists_layout.addWidget(self.available_list)
+        lists_layout.addLayout(arrows_layout)
+        lists_layout.addWidget(self.selected_list)
+
+        # Accept / Cancel buttons
+        accept_btn = QPushButton("Accept")
+        cancel_btn = QPushButton("Cancel")
+        accept_btn.clicked.connect(self._on_accept)
+        cancel_btn.clicked.connect(self.reject)
+
+        button_layout = QHBoxLayout()
+        button_layout.addStretch()
+        button_layout.addWidget(cancel_btn)
+        button_layout.addWidget(accept_btn)
+
+        # Main layout
+        main_layout = QVBoxLayout(self)
+        main_layout.addLayout(lists_layout)
+        main_layout.addLayout(button_layout)
+
+    def _add_selected(self):
+        """Move the currently selected item from available to selected."""
+        current = self.available_list.currentItem()
+        if not current:
             return
-        text = item.text()
-        if not self._exists(self.used_slots, text):
-            self.used_slots.addItem(text)
+        text = current.text()
+        if not self._exists(self.selected_list, text):
+            self.selected_list.addItem(text)
 
-    def remove_slot(self):
-        row = self.used_slots.currentRow()
+    def _remove_selected(self):
+        """Remove the currently selected item from the selected list."""
+        row = self.selected_list.currentRow()
         if row >= 0:
-            self.used_slots.takeItem(row)
+            self.selected_list.takeItem(row)
 
-    def _exists(self, list_widget, text):
+    @staticmethod
+    def _exists(list_widget, text):
+        """Check if an item with the given text already exists in the list widget."""
         for i in range(list_widget.count()):
             if list_widget.item(i).text() == text:
                 return True
         return False
 
-    def selected_slots(self):
-        slot_strings = [
-            self.used_slots.item(i).text()
-            for i in range(self.used_slots.count())
+    def selected_options(self):
+        return [
+            self.selected_list.item(i).text()
+            for i in range(self.selected_list.count())
         ]
-        return slot_strings
 
-    def on_accept(self):
-        slot_strings = [
-            self.used_slots.item(i).text()
-            for i in range(self.used_slots.count())
-        ]
-        body_parts = [
-            string.split()[0] for string in slot_strings
-        ]
-        for part in body_parts:
-            if "_" in part:
-                body_side, body_part = part.split("_")
-                for part_aux in body_parts:
-                    if body_side == "left":
-                        if (
-                            part_aux.split("_")[0]
-                            == "right"
-                            and part_aux.split("_")[1]
-                            == body_part
-                        ):
-                            QMessageBox.critical(
-                                self,
-                                "Error",
-                                "Cannot have left and right of the same body part!",
-                            )
-                            return
-                    else:
-                        if (
-                            part_aux.split("_")[0] == "left"
-                            and part_aux.split("_")[1]
-                            == body_part
-                        ):
-                            QMessageBox.critical(
-                                self,
-                                "Error",
-                                "Cannot have left and right of the same body part!",
-                            )
-                            return
+    def _on_accept(self):
+        selected = self.selected_options()
+        if self.validation_func:
+            ok, error_msg = self.validation_func(selected)
+            if not ok:
+                QMessageBox.critical(
+                    self, "Validation Error", error_msg
+                )
+                return
         self.accept()
 
 
@@ -161,17 +165,55 @@ class Window(QMainWindow):
             DecisonType.slot_choice,
             self.slot_choice_required,
         )
+        self.engine.signals.create_decision_path(
+            DecisonType.bodynode_choice,
+            self.bodynode_choice_required,
+        )
 
     def slot_choice_required(self, payload):
-        dlg = SlotChoiceDialog(
-            payload["mold"],
-            self.engine.state.item_repo,
+        mold = payload["mold"]
+
+        dlg = ChoiceDialog(
+            mold.occupied_slots,
+            validation_func=validate_body_parts,
             parent=self,
         )
+
         if dlg.exec():
-            selected_slot_strings = dlg.selected_slots()
+            selected_slot_strings = dlg.selected_options()
             item = payload["item"]
             return {
                 "item": item,
                 "slots_str": selected_slot_strings,
             }
+
+    def bodynode_choice_required(self, payload):
+        player = payload["player"]
+
+        dlg = ChoiceDialog(
+            player.anatomy.by_name.keys(), parent=self
+        )
+
+        if dlg.exec():
+            selected_bodynode_strings = (
+                dlg.selected_options()
+            )
+            return {
+                "player": player,
+                "nodes_str": selected_bodynode_strings,
+            }
+
+
+def validate_body_parts(selected: list) -> tuple[bool, str]:
+    body_parts = [s.split()[0] for s in selected]
+    for part in body_parts:
+        if "_" in part:
+            side, bp = part.split("_")
+            opposite = "right" if side == "left" else "left"
+            opposite_part = f"{opposite}_{bp}"
+            if opposite_part in body_parts:
+                return (
+                    False,
+                    f"Cannot have both {part} and {opposite_part}!",
+                )
+    return True, ""

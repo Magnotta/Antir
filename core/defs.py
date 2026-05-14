@@ -726,6 +726,25 @@ BODY_SCHEMA = {
 }
 
 
+def flatten_body_schema(schema, parent=None):
+    parts = []
+    for name, info in schema.items():
+        parts.append(
+            {
+                "name": name,
+                "depth": info["depth"],
+                "parent": parent,
+                "slots": info["slots"],
+                "children": list(info["children"].keys()),
+            }
+        )
+        for child in flatten_body_schema(
+            info["children"], name
+        ):
+            parts.append(child)
+    return parts
+
+
 def enumerate_slots(node_name, node_dict, initial=0):
     results = []
     for slot in node_dict["slots"]:
@@ -747,6 +766,21 @@ def enumerate_slots(node_name, node_dict, initial=0):
 SLOTS_LIST = enumerate_slots(
     "head", BODY_SCHEMA["head"], initial=1
 )
+
+
+INJURY_TYPES = [
+    "broken_bone",
+    "torn_ligament",
+    "dislocated_joint",
+    "severed",
+    "venomous_bite",
+    "insect_bite",
+    "poison_sting",
+    "swollen_joint",
+    "sliced",
+    "pierced",
+    "bludgeoned",
+]
 
 
 PATH_CONDITION_KINDS = {

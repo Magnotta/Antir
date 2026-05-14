@@ -11,6 +11,7 @@ from PyQt6.QtWidgets import (
 )
 from player.domain import Player
 from player.stats import Stats
+from .body_widget import BodyWidget
 
 
 class InventoryTableModel(QAbstractTableModel):
@@ -40,6 +41,8 @@ class InventoryTableModel(QAbstractTableModel):
         ):
             return None
         item = self.items[index.row()]
+        if item.destroyed:
+            return None
         col = index.column()
         if col == 0:
             return item.id
@@ -106,7 +109,12 @@ class SinglePlayerTab(QWidget):
         self.inventory_panel = InventoryPanel(
             self.player.inventory
         )
+        self.body = BodyWidget(
+            self.player.player_rec.id,
+            self.player.anatomy.repo,
+        )
         layout = QHBoxLayout()
+        layout.addWidget(self.body, stretch=1)
         layout.addWidget(self.stats_panel, stretch=1)
         layout.addWidget(self.inventory_panel, stretch=2)
         self.setLayout(layout)
@@ -114,6 +122,9 @@ class SinglePlayerTab(QWidget):
     def refresh(self):
         self.stats_panel.refresh(self.player.stats)
         self.inventory_panel.refresh()
+
+    def anatomical_update(self):
+        self.body.paintEvent()
 
 
 class PlayersTab(QWidget):
