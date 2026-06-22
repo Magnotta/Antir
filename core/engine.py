@@ -4,10 +4,12 @@ from db.repository.location import LocationRepository
 from db.repository.player import PlayerRepository
 from db.repository.global_var import GlobalVarRepository
 from core.game_state import GameState
-from core.rules import RULES
+from core.rules import Rule, RULES
+from core.events import Event
 from player.domain import Player
 from systems.command_service import CommandService
 from systems.signal_service import SignalBus, Signal
+from systems.summary_service import Summarizer
 
 
 class Engine:
@@ -30,15 +32,16 @@ class Engine:
         )
         self.cmd = CommandService(self)
         self.signals = SignalBus()
-        self.scheduled_events = []
-        self.current_events = []
-        self.rules = RULES
+        self.summarizer = Summarizer(self.state)
+        self.scheduled_events: list[Event] = []
+        self.current_events: list[Event] = []
+        self.rules: list[Rule] = RULES
 
-    def schedule(self, event, org: str):
+    def schedule(self, event: Event, org: str):
         self.state.event_repo.add_record(event, org)
         self.scheduled_events.append(event)
 
-    def _follow_up(self, event, org: str):
+    def _follow_up(self, event: Event, org: str):
         self.state.event_repo.add_record(event, org)
         self.current_events.append(event)
 

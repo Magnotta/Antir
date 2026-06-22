@@ -1,12 +1,14 @@
+<a href="https://www.flaticon.com/free-icons/cupid" title="cupid icons">Cupid icons created by Freepik - Flaticon</a>
+<a href="https://www.flaticon.com/free-icons/scar" title="scar icons">Scar icons created by Freepik - Flaticon</a>
+<a href="https://www.flaticon.com/free-icons/cold" title="cold icons">Cold icons created by Freepik - Flaticon</a>
+<a href="https://www.flaticon.com/free-icons/sleep" title="sleep icons">Sleep icons created by Freepik - Flaticon</a>
 <a href="https://www.flaticon.com/free-icons/poop" title="poop icons">Poop icons created by Yuluck - Flaticon</a>
 <a href="https://www.flaticon.com/free-icons/scorpion" title="scorpion icons">Scorpion icons created by afif fudin - Flaticon</a>
 <a href="https://www.flaticon.com/free-icons/mosquito" title="mosquito icons">Mosquito icons created by Smashicons - Flaticon</a>
-<a href="https://www.flaticon.com/free-icons/cupid" title="cupid icons">Cupid icons created by Freepik - Flaticon</a>
 <a href="https://www.flaticon.com/free-icons/wound" title="wound icons">Wound icons created by adrianadam - Flaticon</a>
 <a href="https://www.flaticon.com/free-icons/broken-bone" title="broken bone icons">Broken bone icons created by kerismaker - Flaticon</a>
 <a href="https://www.flaticon.com/free-icons/dislocation" title="dislocation icons">Dislocation icons created by Prashanth Rapolu 15 - Flaticon</a>
 <a href="https://www.flaticon.com/free-icons/serpent" title="serpent icons">Serpent icons created by Unknown Depths - Flaticon</a>
-<a href="https://www.flaticon.com/free-icons/scar" title="scar icons">Scar icons created by Freepik - Flaticon</a>
 <a href="https://www.flaticon.com/free-icons/water-drop" title="water drop icons">Water drop icons created by Creative Stall Premium - Flaticon</a>
 <a href="https://www.flaticon.com/free-icons/chicken-leg" title="chicken leg icons">Chicken leg icons created by Wahyu Adam - Flaticon</a>
 <a href="https://www.flaticon.com/free-icons/urinary-system" title="urinary system icons">Urinary system icons created by HAJICON - Flaticon</a>
@@ -14,5 +16,5 @@
 <a href="https://www.flaticon.com/free-icons/back-pain" title="back pain icons">Back pain icons created by Vector Stall - Flaticon</a>
 <a href="https://www.flaticon.com/free-icons/vomiting" title="vomiting icons">Vomiting icons created by riajulislam - Flaticon</a>
 <a href="https://www.flaticon.com/free-icons/heat-wave" title="heat wave icons">Heat wave icons created by Frey Wazza - Flaticon</a>
-<a href="https://www.flaticon.com/free-icons/cold" title="cold icons">Cold icons created by Freepik - Flaticon</a>
 <a href="https://www.flaticon.com/free-icons/low-battery" title="low battery icons">Low battery icons created by Us and Up - Flaticon</a>
+<a href="https://www.flaticon.com/free-icons/depression" title="depression icons">Depression icons created by kornkun - Flaticon</a>

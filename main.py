@@ -10,7 +10,7 @@ from db.repository.player import PlayerRepository
 from db.repository.global_var import GlobalVarRepository
 from player.domain import Player
 from core.engine import Engine
-from core.defs import BASE_PLAYER_STATS
+from core.defs import BASE_PLAYER_ATTRIBUTES
 
 
 if __name__ == "__main__":
@@ -32,7 +32,7 @@ if __name__ == "__main__":
         raise RuntimeError("No players found in DB")
     players = []
     for player, player_stat_dict in zip(
-        player_recs, BASE_PLAYER_STATS.items()
+        player_recs, BASE_PLAYER_ATTRIBUTES.items()
     ):
         players.append(
             Player(player, player_repo, item_repo)

@@ -3,9 +3,6 @@ from systems.commands import COMMANDS
 
 
 class CommandParser:
-    def __init__(self):
-        self.commands = {c.key: c for c in COMMANDS}
-
     def tokenize(self, text: str) -> list[str]:
         return shlex.split(text)
 
@@ -36,9 +33,9 @@ class CommandParser:
         if not tokens:
             return None
         key = tokens[0]
-        if key not in self.commands:
+        if key not in COMMANDS:
             raise ValueError(f"Unknown command '{key}'")
-        spec = self.commands[key]
+        spec = COMMANDS[key]
         idx = 1
         targets = None
         if spec.target_type:

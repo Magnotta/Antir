@@ -29,11 +29,7 @@ class Anatomy:
         self, node_str, stat, val, add=False
     ):
         node = self.get_bodynode_by_name(node_str)
-        if not add:
-            setattr(node, stat, val)
-        else:
-            old_val = getattr(node, stat)
-            setattr(node, stat, old_val + val)
+        self.repo.set_node_stat(node, stat, val, add)
 
     def get_slot_by_id(self, slot_id):
         return self.repo.get_slot_by_id(slot_id)

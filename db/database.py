@@ -1,12 +1,22 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, scoped_session
+from sqlalchemy.orm import (
+    sessionmaker,
+    scoped_session,
+    Session,
+)
 from core.defs import (
     BASE_PLAYER_STATS,
     SLOT_MAX_INDEX,
+    CHARACTER_STAT_BASE_THRESHOLDS,
 )
+
 from db.models.base import Base
 from db.models.player_record import PlayerRecord
-from db.models.player_stat import PlayerStat
+from db.models.player_stat import (
+    PlayerStat,
+    StatThreshold,
+    HistoricalStat,
+)
 from db.models.body_node import BodyNode
 from db.models.equipment_slot import EquipmentSlot
 from db.models.global_var import GlobalVar
@@ -28,7 +38,7 @@ def init_metadata():
 
 
 def create_body_node_recursive(
-    session,
+    session: Session,
     owner_id: int,
     name: str,
     schema: dict,
@@ -63,7 +73,7 @@ def create_body_node_recursive(
     return node
 
 
-def init_time(session):
+def init_time(session: Session):
     var = (
         session.query(GlobalVar)
         .filter(GlobalVar.key == "simulation_ticks")
@@ -76,10 +86,16 @@ def init_time(session):
     return var.value
 
 
-def init_players(session):
-    existing = session.query(PlayerRecord).count()
-    if existing >= 5:
+def init_players(session: Session):
+    existing_players = session.query(PlayerRecord).count()
+    if existing_players >= 5:
         return
+
+    existing_historicals = [
+        hist.stat_name
+        for hist in session.query(HistoricalStat).all()
+    ]
+
     for pname, stat_dict in BASE_PLAYER_STATS.items():
         player = PlayerRecord(name=pname)
         session.add(player)
@@ -92,8 +108,57 @@ def init_players(session):
                     value=stat_value,
                 )
             )
+            if stat_name in existing_historicals:
+                continue
+            session.add(
+                HistoricalStat(
+                    player_id=player.id,
+                    stat_name=stat_name,
+                    all_time_max=stat_value,
+                    last_updated=0,
+                )
+            )
     session.commit()
 
 
-def init_db(session):
+def init_stat_thresholds(session: Session) -> None:
+    """
+    Populate the stat_thresholds table with initial values.
+    Safe to call multiple times - skips existing entries.
+    """
+    # Check if thresholds already exist
+    existing = session.query(StatThreshold.stat_name).all()
+    existing_names = {row[0] for row in existing}
+
+    # Track how many were inserted
+    inserted_count = 0
+
+    for stat_name, (
+        caution_high,
+        critical_high,
+        lose_control_high,
+    ) in CHARACTER_STAT_BASE_THRESHOLDS.items():
+
+        # Skip if this stat already has thresholds
+        if stat_name in existing_names:
+            continue
+
+        threshold = StatThreshold(
+            stat_name=stat_name,
+            caution_high=caution_high,
+            critical_high=critical_high,
+            lose_control_high=lose_control_high,
+        )
+        session.add(threshold)
+        inserted_count += 1
+
+    if inserted_count > 0:
+        session.commit()
+        print(f"Inserted {inserted_count} stat thresholds.")
+    else:
+        print("All thresholds already exist. Skipped.")
+
+
+def init_db(session: Session):
     init_players(session)
+    init_stat_thresholds(session)

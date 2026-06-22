@@ -1,6 +1,7 @@
 from collections import defaultdict
 from typing import Callable
 from enum import Enum, auto
+from .pending_decision import DecisonType, PendingDecision
 
 
 class Signal(Enum):
@@ -12,6 +13,7 @@ class Signal(Enum):
     hour = auto()
     day = auto()
     location = auto()
+    summary = auto()
 
 
 class SignalBus:
@@ -20,7 +22,9 @@ class SignalBus:
             defaultdict(list)
         )
         self._stored_signals: set[Signal] = set()
-        self.decision_paths: dict = {}
+        self.decision_paths: dict[DecisonType, Callable] = (
+            {}
+        )
 
     def connect(self, signal: Signal, callback: Callable):
         self._listeners[signal].append(callback)
@@ -40,11 +44,11 @@ class SignalBus:
         self._stored_signals = set()
 
     def create_decision_path(
-        self, decision_type, callback: Callable
+        self, decision_type: DecisonType, callback: Callable
     ):
         self.decision_paths[decision_type] = callback
 
-    def choice_required(self, pending):
+    def choice_required(self, pending: PendingDecision):
         return self.decision_paths[pending.type](
             pending.payload
         )

@@ -1,20 +1,9 @@
 from dataclasses import dataclass
 from typing import Callable, Sequence
-from enum import Enum, auto
 import core.events as e
-
-
-class DecisonType(Enum):
-    slot_choice = auto()
-    bodynode_choice = auto()
-
-
-class PendingDecision:
-    def __init__(
-        self, decision_type: DecisonType, payload: dict
-    ):
-        self.type = decision_type
-        self.payload = payload
+from .pending_decision import DecisonType, PendingDecision
+from .engine_interface import EngineProtocol
+from .signal_service import Signal
 
 
 @dataclass(frozen=True)
@@ -26,13 +15,21 @@ class CommandSpec:
     handler: Callable
 
 
-def advance_time(engine, minutes: int, message="none"):
+def advance_time(
+    engine: EngineProtocol, minutes: int, message="none"
+):
+    if minutes > 60:
+        engine.summarizer.start_batch()
     for _ in range(minutes):
         engine.step()
     engine.state.update_time()
+    if minutes > 60:
+        engine.summarizer.end_batch(minutes)
+        engine.signals.store([Signal.summary])
+        engine.signals.notify()
 
 
-def player_hunger(engine, message="none"):
+def player_hunger(engine: EngineProtocol, message="none"):
     engine.schedule(
         e.HungerEvent(
             engine.state.time,
@@ -42,7 +39,12 @@ def player_hunger(engine, message="none"):
     )
 
 
-def move_item(engine, target, new_owner_id, message="none"):
+def move_item(
+    engine: EngineProtocol,
+    target,
+    new_owner_id,
+    message="none",
+):
     engine.schedule(
         e.ItemOwnershipEvent(
             engine.state.time,
@@ -56,7 +58,9 @@ def move_item(engine, target, new_owner_id, message="none"):
     )
 
 
-def equip_item(engine, target, message="none"):
+def equip_item(
+    engine: EngineProtocol, target, message="none"
+):
     item = engine.state.item_repo.get_item_by_id(target)
     mold = engine.state.item_repo.get_original_mold(item)
     if "eq" not in mold.tags:
@@ -107,15 +111,17 @@ def equip_item(engine, target, message="none"):
     )
 
 
-def export_world(engine, message="none"):
+def export_world(engine: EngineProtocol, message="none"):
     engine.state.loc_repo.export_world_to_file()
 
 
-def import_world(engine, message="none"):
+def import_world(engine: EngineProtocol, message="none"):
     engine.state.loc_repo.import_world_from_file()
 
 
-def break_bone(engine, target, message="none"):
+def break_bone(
+    engine: EngineProtocol, target, message="none"
+):
     player = engine.state.get_player_by_id(target)
     choice_dict = engine.signals.choice_required(
         PendingDecision(
@@ -127,59 +133,66 @@ def break_bone(engine, target, message="none"):
     else:
         raise ValueError("No body nodes selected!")
     for string in selected_node_strings:
-        player.anatomy.set_bodynode_stat(
-            string, "broken_bone", True
+        engine.schedule(
+            e.BoneBreakEvent(
+                engine.state.time,
+                payload={
+                    "bodynode": string,
+                    "target": target,
+                },
+            ),
+            "command",
         )
 
 
-COMMANDS = [
-    CommandSpec(
+COMMANDS = {
+    "tm": CommandSpec(
         key="tm",
         target_type=None,
         arg_types=[int],
         description="advance time",
         handler=advance_time,
     ),
-    CommandSpec(
+    "ph": CommandSpec(
         key="ph",
         target_type=None,
         arg_types=[],
         description="increase hunger",
         handler=player_hunger,
     ),
-    CommandSpec(
+    "ie": CommandSpec(
         key="ie",
         target_type="item",
         arg_types=[],
         description="equip item",
         handler=equip_item,
     ),
-    CommandSpec(
+    "im": CommandSpec(
         key="im",
         target_type="item",
         arg_types=[int],
         description="item chown",
         handler=move_item,
     ),
-    CommandSpec(
+    "ew": CommandSpec(
         key="ew",
         target_type=None,
         arg_types=[],
         description="export world",
         handler=export_world,
     ),
-    CommandSpec(
+    "iw": CommandSpec(
         key="iw",
         target_type=None,
         arg_types=[],
         description="import world",
         handler=import_world,
     ),
-    CommandSpec(
+    "pbb": CommandSpec(
         key="pbb",
         target_type="player",
         arg_types=[],
         description="break a bone",
         handler=break_bone,
     ),
-]
+}

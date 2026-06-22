@@ -44,10 +44,6 @@ class GameState:
     def get_player_by_id(self, id: int) -> Player:
         for p in self.players:
             if p.player_rec.id == id:
-                if not p.is_alive():
-                    raise ValueError(
-                        f"Player {id} is dead!"
-                    )
                 return p
         raise ValueError(f"Invalid player ID: {id}")
 

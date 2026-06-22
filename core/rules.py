@@ -1,6 +1,7 @@
 from enum import IntEnum, auto
-from core.events import HungerEvent, ThirstEvent
+from core.events import Event, HungerEvent, ThirstEvent
 from systems.signal_service import Signal
+from .game_state import GameState
 
 
 class RuleStrictness(IntEnum):
@@ -13,16 +14,18 @@ class RuleStrictness(IntEnum):
 
 class Rule:
     listens_to: list[Signal] = []
-    name = 'rulebase'
+    name = "rulebase"
     strictness = RuleStrictness.PERMISSIVE
 
     def __init__(self):
         self._state_dict = dict()
 
-    def applies(self, event, state) -> bool:
+    def applies(
+        self, event: Event, state: GameState
+    ) -> bool:
         return True
 
-    def fulfill(self, state) -> list:
+    def fulfill(self, state: GameState) -> list:
         return []
 
 
@@ -54,7 +57,7 @@ class ThirstRule(Rule):
     """
 
     listens_to = [Signal.hour]
-    name = 'hourly thirst rule'
+    name = "hourly thirst rule"
     category = RuleStrictness.FIRM
 
     def fulfill(self, state):
@@ -78,7 +81,12 @@ class ThirstRule(Rule):
 
 
 class DehydrationRule(Rule):
-    pass
+    listens_to = [Signal.hour]
+    name = "player dehydration"
+    category = RuleStrictness.FIRM
+
+    def fulfill(self, state):
+        return []
 
 
 class DayHungerRule(Rule):
@@ -160,7 +168,7 @@ class MidnightHungerRule(Rule):
         targets = [
             p.player_rec.id
             for p in state.players
-            if p.stats.get("awake") > 0
+            if p.stats.get("sleepyness") > 0
         ]
         return [
             HungerEvent(

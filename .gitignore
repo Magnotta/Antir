@@ -125,3 +125,4 @@ dmypy.json
 
 # user
 db/antir_db.db
+logs/

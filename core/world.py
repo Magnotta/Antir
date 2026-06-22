@@ -26,8 +26,8 @@ PATHS = [
         'point_conditions': [
             {
                 'data': {'angle': 89},
-                'description': '',
-                'id': 2,
+                'description': None,
+                'id': 1,
                 'kind': 'inclination_change',
                 'path_id': 1,
                 'position': 0.2,

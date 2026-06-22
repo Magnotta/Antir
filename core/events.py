@@ -1,11 +1,13 @@
+from abc import ABC, abstractmethod
 from core.game_state import GameState
 from systems.time import Time
 from systems.signal_service import Signal
 
+
 EVENTS = {}
 
 
-class Event:
+class Event(ABC):
     type: str = "base"
     emits_signals: list[Signal] = []
 
@@ -18,18 +20,20 @@ class Event:
     def condition(self, state: GameState):
         return True
 
+    @abstractmethod
     def begin(self, state: GameState) -> list:
-        raise NotImplementedError
+        pass
 
+    @abstractmethod
     def apply(self, state: GameState):
-        raise NotImplementedError
+        pass
 
 
 class EquipItemEvent(Event):
     type = "equip item"
     emits_signals = [Signal.equipment]
 
-    def begin(self, state: GameState) -> list:
+    def begin(self, state) -> list:
         item = state.item_repo.get_item_by_id(
             self.payload["item_id"]
         )
@@ -42,7 +46,7 @@ class EquipItemEvent(Event):
             )
         ]
 
-    def apply(self, state: GameState):
+    def apply(self, state):
         item = state.item_repo.get_item_by_id(
             self.payload["item_id"]
         )
@@ -57,27 +61,15 @@ class ItemOwnershipEvent(Event):
     type = "change item ownership"
     emits_signals = [Signal.inventory]
 
-    def begin(self, state: GameState) -> list:
+    def begin(self, state) -> list:
         self.apply(state)
         return []
 
-    def apply(self, state: GameState):
+    def apply(self, state):
         state.item_repo.item_chown(
             self.payload["item_id"],
             self.payload["new_owner_id"],
         )
-
-
-# class PutItemInContainerEvent(Event):
-#     def apply(self, state):
-#         session = engine.session
-#         inv = engine.inventory
-#         item = session.get(Item, self.payload["item_id"])
-#         container = session.get(
-#             Item, self.payload["container_id"]
-#         )
-#         inv.put_in_container(item, container)
-#         return []
 
 
 class HungerEvent(Event):
@@ -87,11 +79,11 @@ class HungerEvent(Event):
     def __init__(self, due_time: Time, payload=None):
         super().__init__(due_time, payload)
 
-    def begin(self, state: GameState) -> list:
+    def begin(self, state) -> list:
         self.apply(state)
         return []
 
-    def apply(self, state: GameState):
+    def apply(self, state):
         player = state.get_player_by_id(
             self.payload["target"]
         )
@@ -131,4 +123,6 @@ class BoneBreakEvent(Event):
         player = state.get_player_by_id(
             self.payload["target"]
         )
-        player.stats.set("thirst", self.payload["amount"])
+        player.anatomy.set_bodynode_stat(
+            self.payload["bodynode"], "broken_bone", True
+        )
