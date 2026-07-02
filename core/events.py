@@ -72,6 +72,26 @@ class ItemOwnershipEvent(Event):
         )
 
 
+class PneumaEvent(Event):
+    type = "physiological pneuma"
+    emits_signals = [Signal.anatomical]
+
+    def __init__(self, due_time, payload=None):
+        super().__init__(due_time, payload)
+
+    def begin(self, state):
+        self.apply(state)
+        return []
+
+    def apply(self, state):
+        player = state.get_player_by_id(
+            self.payload["target"]
+        )
+        player.stats.add(
+            "pneuma_lost", self.payload["amount"]
+        )
+
+
 class HungerEvent(Event):
     type = "player hunger"
     emits_signals = [Signal.stats]
@@ -79,7 +99,7 @@ class HungerEvent(Event):
     def __init__(self, due_time: Time, payload=None):
         super().__init__(due_time, payload)
 
-    def begin(self, state) -> list:
+    def begin(self, state):
         self.apply(state)
         return []
 

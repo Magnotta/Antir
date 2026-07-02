@@ -2,6 +2,8 @@
 <a href="https://www.flaticon.com/free-icons/scar" title="scar icons">Scar icons created by Freepik - Flaticon</a>
 <a href="https://www.flaticon.com/free-icons/cold" title="cold icons">Cold icons created by Freepik - Flaticon</a>
 <a href="https://www.flaticon.com/free-icons/sleep" title="sleep icons">Sleep icons created by Freepik - Flaticon</a>
+<a href="https://www.flaticon.com/free-icons/red-blood-cells" title="red blood cells icons">Red blood cells icons created by Freepik - Flaticon</a>
+<a href="https://www.flaticon.com/free-icons/flower" title="flower icons">Flower icons created by Freepik - Flaticon</a>
 <a href="https://www.flaticon.com/free-icons/poop" title="poop icons">Poop icons created by Yuluck - Flaticon</a>
 <a href="https://www.flaticon.com/free-icons/scorpion" title="scorpion icons">Scorpion icons created by afif fudin - Flaticon</a>
 <a href="https://www.flaticon.com/free-icons/mosquito" title="mosquito icons">Mosquito icons created by Smashicons - Flaticon</a>
@@ -18,3 +20,5 @@
 <a href="https://www.flaticon.com/free-icons/heat-wave" title="heat wave icons">Heat wave icons created by Frey Wazza - Flaticon</a>
 <a href="https://www.flaticon.com/free-icons/low-battery" title="low battery icons">Low battery icons created by Us and Up - Flaticon</a>
 <a href="https://www.flaticon.com/free-icons/depression" title="depression icons">Depression icons created by kornkun - Flaticon</a>
+<a href="https://www.flaticon.com/free-icons/breathing" title="breathing icons">Breathing icons created by Dewi Sari - Flaticon</a>
+<a href="https://www.flaticon.com/free-icons/sweat" title="sweat icons">Sweat icons created by Iconjam - Flaticon</a>

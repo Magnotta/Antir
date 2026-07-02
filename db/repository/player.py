@@ -146,7 +146,10 @@ class PlayerRepository:
             )
             .one()
         )
-        row.value += delta
+        if row.value + delta < 0:
+            row.value = 0
+        else:
+            row.value += delta
         self.session.commit()
 
     def create_body_tree(self, player_id):

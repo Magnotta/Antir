@@ -436,10 +436,10 @@ CHARACTER_ATTRIBUTES = [
 
 
 CHARACTER_STATS = [
-    "blood",
-    "pneuma",
-    "pneuma_change",
-    "composure",
+    "blood_lost",
+    "pneuma_lost",
+    "composure_lost",
+    "sweat",
     "anxiety",
     "tiredness",
     "hunger",
@@ -458,8 +458,8 @@ CHARACTER_STATS = [
 CHARACTER_STAT_BASE_THRESHOLDS = {
     "blood_lost": (1500, 3000, 5000),
     "pneuma_lost": (1000, 3000, 6200),
-    "pneuma_loss": (500, 1660, 10001),
     "composure_lost": (500, 1660, 3800),
+    "sweat": (7000, 9000, 9500),
     "anxiety": (4000, 7000, 9000),
     "tiredness": (6000, 8000, 9000),
     "hunger": (5000, 7500, 9500),
@@ -479,8 +479,8 @@ BASE_PLAYER_STATS = {
     "Joao": {
         "blood_lost": 0,
         "pneuma_lost": 0,
-        "pneuma_loss": 0,
         "composure_lost": 0,
+        "sweat": 0,
         "anxiety": 0,
         "tiredness": 0,
         "hunger": 0,
@@ -497,8 +497,8 @@ BASE_PLAYER_STATS = {
     "Jose": {
         "blood_lost": 0,
         "pneuma_lost": 0,
-        "pneuma_loss": 0,
         "composure_lost": 0,
+        "sweat": 0,
         "anxiety": 0,
         "tiredness": 0,
         "hunger": 0,
@@ -515,8 +515,8 @@ BASE_PLAYER_STATS = {
     "Estranha": {
         "blood_lost": 0,
         "pneuma_lost": 0,
-        "pneuma_loss": 0,
         "composure_lost": 0,
+        "sweat": 0,
         "anxiety": 0,
         "tiredness": 0,
         "hunger": 0,
@@ -533,8 +533,8 @@ BASE_PLAYER_STATS = {
     "Malina": {
         "blood_lost": 0,
         "pneuma_lost": 0,
-        "pneuma_loss": 0,
         "composure_lost": 0,
+        "sweat": 0,
         "anxiety": 0,
         "tiredness": 0,
         "hunger": 0,
@@ -551,8 +551,8 @@ BASE_PLAYER_STATS = {
     "Ricardo": {
         "blood_lost": 0,
         "pneuma_lost": 0,
-        "pneuma_loss": 0,
         "composure_lost": 0,
+        "sweat": 0,
         "anxiety": 0,
         "tiredness": 0,
         "hunger": 0,

@@ -1,10 +1,16 @@
 from enum import IntEnum, auto
-from core.events import Event, HungerEvent, ThirstEvent
+from core.events import (
+    Event,
+    HungerEvent,
+    ThirstEvent,
+    PneumaEvent,
+)
 from systems.signal_service import Signal
 from .game_state import GameState
 
 
 class RuleStrictness(IntEnum):
+    ALWAYS = auto()
     PERMISSIVE = auto()
     LENIENT = auto()
     FIRM = auto()
@@ -63,30 +69,38 @@ class ThirstRule(Rule):
     def fulfill(self, state):
         return [
             ThirstEvent(
-                state.time, {"target": 1, "amount": 10}
-            ),
-            ThirstEvent(
-                state.time, {"target": 2, "amount": 10}
-            ),
-            ThirstEvent(
-                state.time, {"target": 3, "amount": 10}
-            ),
-            ThirstEvent(
-                state.time, {"target": 4, "amount": 10}
-            ),
-            ThirstEvent(
-                state.time, {"target": 5, "amount": 10}
-            ),
+                state.time,
+                {"target": p.player_rec.id, "amount": 33},
+            )
+            for p in state.players
         ]
 
 
-class DehydrationRule(Rule):
-    listens_to = [Signal.hour]
-    name = "player dehydration"
-    category = RuleStrictness.FIRM
+class PhysioPneumaRule(Rule):
+    listens_to = [Signal.day]
+    name = "player physiological pneuma"
+    category = RuleStrictness.ALWAYS
 
     def fulfill(self, state):
-        return []
+        pneumas = [-250, -250, -250, -250, -250]
+        for player in state.players:
+            thirst = player.stats.get("thirst")
+            print(f"Got {thirst} thirst")
+            pneumas[player.player_rec.id - 1] += thirst // 5
+            hunger = player.stats.get("hunger")
+            print(f"Got {hunger} hunger")
+            pneumas[player.player_rec.id - 1] += hunger // 2
+            print(pneumas)
+        return [
+            PneumaEvent(
+                state.time,
+                {
+                    "target": p.player_rec.id,
+                    "amount": pneumas[p.player_rec.id - 1],
+                },
+            )
+            for p in state.players
+        ]
 
 
 class DayHungerRule(Rule):
@@ -95,67 +109,14 @@ class DayHungerRule(Rule):
     category = RuleStrictness.PERMISSIVE
 
     def fulfill(self, state):
+        meal_offsets = [480, 720, 1080]
         return [
             HungerEvent(
-                state.time + 480,
-                {"target": 1, "amount": 1},
-            ),
-            HungerEvent(
-                state.time + 480,
-                {"target": 2, "amount": 1},
-            ),
-            HungerEvent(
-                state.time + 480,
-                {"target": 3, "amount": 1},
-            ),
-            HungerEvent(
-                state.time + 480,
-                {"target": 4, "amount": 1},
-            ),
-            HungerEvent(
-                state.time + 480,
-                {"target": 5, "amount": 1},
-            ),
-            HungerEvent(
-                state.time + 720,
-                {"target": 1, "amount": 1},
-            ),
-            HungerEvent(
-                state.time + 720,
-                {"target": 2, "amount": 1},
-            ),
-            HungerEvent(
-                state.time + 720,
-                {"target": 3, "amount": 1},
-            ),
-            HungerEvent(
-                state.time + 720,
-                {"target": 4, "amount": 1},
-            ),
-            HungerEvent(
-                state.time + 720,
-                {"target": 5, "amount": 1},
-            ),
-            HungerEvent(
-                state.time + 1080,
-                {"target": 1, "amount": 1},
-            ),
-            HungerEvent(
-                state.time + 1080,
-                {"target": 2, "amount": 1},
-            ),
-            HungerEvent(
-                state.time + 1080,
-                {"target": 3, "amount": 1},
-            ),
-            HungerEvent(
-                state.time + 1080,
-                {"target": 4, "amount": 1},
-            ),
-            HungerEvent(
-                state.time + 1080,
-                {"target": 5, "amount": 1},
-            ),
+                state.time + offset,
+                {"target": p.player_rec.id, "amount": 100},
+            )
+            for offset in meal_offsets
+            for p in state.players
         ]
 
 
@@ -172,7 +133,7 @@ class MidnightHungerRule(Rule):
         ]
         return [
             HungerEvent(
-                state.time, {"target": t, "amount": 1}
+                state.time, {"target": t, "amount": 100}
             )
             for t in targets
         ]
@@ -182,4 +143,5 @@ RULES = [
     DayHungerRule(),
     MidnightHungerRule(),
     ThirstRule(),
+    PhysioPneumaRule(),
 ]

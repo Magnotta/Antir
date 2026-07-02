@@ -50,12 +50,12 @@ class Engine:
         self._dispatch_events()
 
     def _advance_time(self):
-        self.state.time += 1
         self.signals.store([Signal.minute])
         if self.state.time.hour_change:
             self.signals.store([Signal.hour])
         if self.state.time.day_change:
             self.signals.store([Signal.day])
+        self.state.time += 1
 
     def _dispatch_events(self):
         due = [

@@ -9,39 +9,29 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtGui import QPixmap
 import os
 from player.stats import Stats
+from core.defs import CHARACTER_STATS
+
+
+ICON_COLUMNS = 4
 
 
 class StatsPanel(QGroupBox):
     def __init__(self, stats: Stats):
         super().__init__()
 
-        self.stat_names = [
-            "anxiety",
-            "hunger",
-            "thirst",
-            "tiredness",
-            "poo",
-            "pee",
-            "sleepyness",
-            "pain",
-            "itch",
-            "nausea",
-            "heat",
-            "cold",
-        ]
+        self.stat_names = CHARACTER_STATS
 
-        # Set up grid layout - 3 columns, 4 rows
         grid_layout = QGridLayout()
-        grid_layout.setSpacing(12)
+        grid_layout.setSpacing(5)
         self.setLayout(grid_layout)
 
         self.labels: dict[str, QLabel] = {}
         self.icon_labels = {}
-        icon_size = 45
+        icon_size = 35
 
         for index, stat_name in enumerate(self.stat_names):
-            row = index // 3  # 3 columns
-            col = index % 3  # 3 columns
+            row = index // ICON_COLUMNS
+            col = index % ICON_COLUMNS
 
             # Container for each stat (icon + value)
             container = QWidget()
@@ -49,7 +39,7 @@ class StatsPanel(QGroupBox):
             container_layout.setAlignment(
                 Qt.AlignmentFlag.AlignCenter
             )
-            container_layout.setSpacing(3)
+            container_layout.setSpacing(1)
             container.setLayout(container_layout)
 
             # Icon
@@ -103,7 +93,7 @@ class StatsPanel(QGroupBox):
                 background-color: #f8f9fa;
                 border: 1px solid #dee2e6;
                 border-radius: 6px;
-                padding: 10px;
+                padding: 1px;
             }
         """
         )
