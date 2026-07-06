@@ -1,3 +1,4 @@
+from sqlalchemy.orm import Session
 from random import randint
 from typing import Optional
 from sqlalchemy import select
@@ -12,7 +13,7 @@ from core.defs import (
 
 
 class ItemRepository:
-    def __init__(self, session):
+    def __init__(self, session: Session):
         self.session = session
 
     def spawn(
@@ -36,7 +37,6 @@ class ItemRepository:
             item=new_item,
             manual_values=manual_params,
         )
-        self.session.commit()
         return new_item
 
     def get_param_max(self, param) -> int:
@@ -62,7 +62,6 @@ class ItemRepository:
 
     def destroy_item(self, item):
         item.destroyed = True
-        self.session.commit()
 
     def get_extant_items(
         self, search: str | None = None
@@ -89,7 +88,6 @@ class ItemRepository:
 
     def add_mold(self, mold: Mold):
         self.session.add(mold)
-        self.session.commit()
 
     def get_mold_by_id(self, mold_id: int):
         return self.session.get(Mold, mold_id)
@@ -99,11 +97,9 @@ class ItemRepository:
     ) -> Optional[Mold]:
         for key, value in fields.items():
             setattr(mold, key, value)
-        self.session.commit()
 
     def delete_mold(self, mold: Mold):
         self.session.delete(mold)
-        self.session.commit()
 
     def get_all_molds(
         self, search: str | None = None
@@ -121,7 +117,6 @@ class ItemRepository:
             raise ValueError("Specify a new owner!")
             return
         item.owner_id = new_owner_id
-        self.session.commit()
 
     def populate_item_params(
         self,

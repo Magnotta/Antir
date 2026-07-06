@@ -95,7 +95,11 @@ class Summarizer:
             )
             pct_change_per_hour = delta_per_hour / 100
 
-            if delta > 0 and pct_change_per_hour > 1.0:
+            if (
+                delta > 0
+                and pct_change_per_hour > 1.0
+                and stat_name not in ["sleepyness", "sweat"]
+            ):
                 # Estimate time to zero (in hours)
                 if delta_per_hour > 0:
                     hours_to_max = (

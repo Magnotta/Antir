@@ -1,53 +1,45 @@
-from db.repository.item import ItemRepository
-from db.repository.event import EventRepository
-from db.repository.location import LocationRepository
-from db.repository.player import PlayerRepository
-from db.repository.global_var import GlobalVarRepository
+from collections import defaultdict
+from sqlalchemy.orm import Session
 from core.game_state import GameState
 from core.rules import Rule, RULES
 from core.events import Event
-from player.domain import Player
+from db.repository.event import EventRepository
 from systems.command_service import CommandService
 from systems.signal_service import SignalBus, Signal
 from systems.summary_service import Summarizer
 
 
 class Engine:
-    def __init__(
-        self,
-        event_repo: EventRepository,
-        item_repo: ItemRepository,
-        player_repo: PlayerRepository,
-        loc_repo: LocationRepository,
-        var_repo: GlobalVarRepository,
-        players: list[Player],
-    ):
-        self.state = GameState(
-            event_repo,
-            item_repo,
-            player_repo,
-            loc_repo,
-            var_repo,
-            players,
-        )
+    def __init__(self, session: Session):
+        self.session = session
+        self.event_repo = EventRepository(session)
+        self.state = GameState(session)
         self.cmd = CommandService(self)
         self.signals = SignalBus()
         self.summarizer = Summarizer(self.state)
         self.scheduled_events: list[Event] = []
         self.current_events: list[Event] = []
-        self.rules: list[Rule] = RULES
+        self.signal_rule_map = defaultdict(list[Rule])
+        for rule in RULES:
+            for signal in rule.listens_to:
+                self.signal_rule_map[signal].append(rule)
 
     def schedule(self, event: Event, org: str):
-        self.state.event_repo.add_record(event, org)
+        self.event_repo.add_record(event, org)
         self.scheduled_events.append(event)
 
     def _follow_up(self, event: Event, org: str):
-        self.state.event_repo.add_record(event, org)
+        self.event_repo.add_record(event, org)
         self.current_events.append(event)
 
     def step(self):
         self._advance_time()
         self._dispatch_events()
+        try:
+            self.session.commit()
+        except Exception:
+            self.session.rollback()
+            raise
 
     def _advance_time(self):
         self.signals.store([Signal.minute])
@@ -56,6 +48,7 @@ class Engine:
         if self.state.time.day_change:
             self.signals.store([Signal.day])
         self.state.time += 1
+        self.state.update_time()
 
     def _dispatch_events(self):
         due = [
@@ -85,10 +78,13 @@ class Engine:
         self.signals.notify()
 
     def _fulfill_rules(self):
-        for rule in self.rules:
-            for signal in self.signals._stored_signals:
-                if signal in rule.listens_to:
-                    for next_event in rule.fulfill(
-                        self.state
-                    ):
-                        self.schedule(next_event, rule.name)
+        triggered_rules = set()
+        for signal in self.signals._stored_signals:
+            for rule in self.signal_rule_map.get(
+                signal, []
+            ):
+                if rule in triggered_rules:
+                    continue
+                triggered_rules.add(rule)
+                for next_event in rule.fulfill(self.state):
+                    self.schedule(next_event, rule.name)

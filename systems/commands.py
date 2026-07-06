@@ -22,7 +22,6 @@ def advance_time(
         engine.summarizer.start_batch()
     for _ in range(minutes):
         engine.step()
-    engine.state.update_time()
     if minutes > 60:
         engine.summarizer.end_batch(minutes)
         engine.signals.store([Signal.summary])
@@ -145,6 +144,25 @@ def break_bone(
         )
 
 
+def go_to_sleep(
+    engine: EngineProtocol, target, message="none"
+):
+    player = engine.state.get_player_by_id(target)
+    delta = 0
+    engine.schedule(
+        e.SleepynessEvent(
+            engine.state.time + delta,
+            {
+                "target": target,
+                "amount": 0,
+                "incremental": False,
+            },
+        ),
+        "command",
+    )
+    # player.stats.set("sleepyness", 0)
+
+
 COMMANDS = {
     "tm": CommandSpec(
         key="tm",
@@ -194,5 +212,12 @@ COMMANDS = {
         arg_types=[],
         description="break a bone",
         handler=break_bone,
+    ),
+    "pgs": CommandSpec(
+        key="pgs",
+        target_type="player",
+        arg_types=[],
+        description="go to sleep",
+        handler=go_to_sleep,
     ),
 }

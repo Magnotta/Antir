@@ -29,7 +29,6 @@ class PlayerRepository:
             return None
         for key, value in fields.items():
             setattr(instance, key, value)
-        self.session.commit()
         return instance
 
     def delete_player(self, id: int) -> bool:
@@ -37,7 +36,6 @@ class PlayerRepository:
         if not instance:
             return False
         self.session.delete(instance)
-        self.session.commit()
         return True
 
     def get_all_stats(
@@ -98,7 +96,6 @@ class PlayerRepository:
                 if current_value > record.all_time_max:
                     record.all_time_max = current_value
                     record.last_updated = current_time
-        self.session.commit()
 
     def get_stat(
         self, player_id: int, statname: str
@@ -123,7 +120,6 @@ class PlayerRepository:
             .one()
         )
         row.value = value
-        self.session.commit()
 
     def set_node_stat(
         self, node: BodyNode, stat: str, val: int, add=False
@@ -133,7 +129,6 @@ class PlayerRepository:
         else:
             old_val = getattr(node, stat)
             setattr(node, stat, old_val + val)
-        self.session.commit()
 
     def add_to_stat(
         self, player_id: int, stat: str, delta: float
@@ -150,7 +145,6 @@ class PlayerRepository:
             row.value = 0
         else:
             row.value += delta
-        self.session.commit()
 
     def create_body_tree(self, player_id):
         exists = (
@@ -224,7 +218,6 @@ class PlayerRepository:
                     parent_id=new_node.id,
                 )
             )
-        self.session.commit()
         return new_node
 
     def get_slot_by_id(self, slot_id):
@@ -252,18 +245,13 @@ class PlayerRepository:
     def occupy_equipment_slot(
         self, slot: EquipmentSlot, item: Item
     ):
-        try:
-            self.session.add(
-                ItemSlotOccupancy(
-                    item_id=item.id,
-                    equipment_slot_id=slot.id,
-                )
+        self.session.add(
+            ItemSlotOccupancy(
+                item_id=item.id,
+                equipment_slot_id=slot.id,
             )
-            slot.item_id = item.id
-            self.session.commit()
-        except Exception as e:
-            self.session.rollback()
-            raise e
+        )
+        slot.item_id = item.id
 
     def get_complete_body(
         self, player_id

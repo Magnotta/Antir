@@ -14,4 +14,3 @@ class EventRepository:
             origin=org,
         )
         self.session.add(rec)
-        self.session.commit()

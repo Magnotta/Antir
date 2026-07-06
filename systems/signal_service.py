@@ -14,6 +14,7 @@ class Signal(Enum):
     day = auto()
     location = auto()
     summary = auto()
+    wake_up = auto()
 
 
 class SignalBus:

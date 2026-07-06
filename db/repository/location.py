@@ -1,3 +1,4 @@
+from sqlalchemy.orm import Session
 import pprint
 from core.world import LOCALITIES, PATHS
 from db.models.world import (
@@ -9,7 +10,7 @@ from db.models.world import (
 
 
 class LocationRepository:
-    def __init__(self, session):
+    def __init__(self, session: Session):
         self.session = session
 
     def update_locality(self, locality_id: int, **kwargs):
@@ -18,15 +19,12 @@ class LocationRepository:
             return None
         for key, value in kwargs.items():
             setattr(locality, key, value)
-        self.session.commit()
-        self.session.refresh(locality)
         return locality
 
     def delete_locality(self, locality_id: int):
         locality = self.session.get(Locality, locality_id)
         if locality:
             self.session.delete(locality)
-            self.session.commit()
 
     def add_locality(
         self, name: str, description=None, data=None
@@ -35,8 +33,6 @@ class LocationRepository:
             name=name, description=description, data=data
         )
         self.session.add(locality)
-        self.session.commit()
-        self.session.refresh(locality)
         return locality
 
     def get_locality_by_id(
@@ -80,8 +76,6 @@ class LocationRepository:
             data=data,
         )
         self.session.add(path)
-        self.session.commit()
-        self.session.refresh(path)
         return path
 
     def get_paths_from(
@@ -130,8 +124,6 @@ class LocationRepository:
         self.session.flush()
         path = self.get_path_by_id(path_id)
         path.point_conditions.append(cond)
-        self.session.commit()
-        self.session.refresh(cond)
         return cond
 
     def add_segment_condition(
@@ -156,23 +148,17 @@ class LocationRepository:
         self.session.flush()
         path = self.get_path_by_id(path_id)
         path.segment_conditions.append(cond)
-        self.session.commit()
-        self.session.refresh(cond)
-
         return cond
 
     def update_condition(self, condition, **kwargs):
         for key, value in kwargs.items():
             setattr(condition, key, value)
-        self.session.commit()
-        self.session.refresh(condition)
         return condition
 
     def delete_condition(
         self, condition: PointCondition | SegmentCondition
     ):
         self.session.delete(condition)
-        self.session.commit()
 
     def export_world_to_file(self):
         text = self._to_python_text()
@@ -286,7 +272,6 @@ class LocationRepository:
                     data=cond_data.get("data"),
                 )
                 self.session.add(cond)
-        self.session.commit()
 
     def import_world_from_file(self):
         self._import_data(

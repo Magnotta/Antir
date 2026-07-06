@@ -4,6 +4,7 @@ from core.events import (
     HungerEvent,
     ThirstEvent,
     PneumaEvent,
+    SleepynessEvent,
 )
 from systems.signal_service import Signal
 from .game_state import GameState
@@ -35,6 +36,38 @@ class Rule:
         return []
 
 
+class SleepyRule(Rule):
+    listens_to = [Signal.hour]
+    name = "hourly sleepyness rule"
+    category = RuleStrictness.ALWAYS
+
+    def fulfill(self, state):
+        return [
+            SleepynessEvent(
+                state.time,
+                {
+                    "target": t.player_rec.id,
+                    "amount": 150,
+                    "incremental": True,
+                },
+            )
+            for t in state.players
+        ]
+
+
+class WakeUpRule(Rule):
+    listens_to = [Signal.wake_up]
+    name = "wake up rule"
+    category = RuleStrictness.ALWAYS
+
+    def fulfill(self, state):
+        return [
+            SleepynessEvent(
+                state.time,
+            )
+        ]
+
+
 class EclipticSunRule(Rule):
     pass
 
@@ -52,16 +85,6 @@ class ShitRule(Rule):
 
 
 class ThirstRule(Rule):
-    """
-    SENSAÇÃO
-    Suar causa sede
-    Dormir causa sede
-    Comer causa sede
-    Sede causa preguiça
-    Dormir com sede causa desidratação
-    Beber pouca água elimina a sede momentânea mas não previne desidratação
-    """
-
     listens_to = [Signal.hour]
     name = "hourly thirst rule"
     category = RuleStrictness.FIRM
@@ -70,7 +93,10 @@ class ThirstRule(Rule):
         return [
             ThirstEvent(
                 state.time,
-                {"target": p.player_rec.id, "amount": 33},
+                {
+                    "target": p.player_rec.id,
+                    "amount": 33 + p.stats.get("sweat"),
+                },
             )
             for p in state.players
         ]
@@ -82,15 +108,12 @@ class PhysioPneumaRule(Rule):
     category = RuleStrictness.ALWAYS
 
     def fulfill(self, state):
-        pneumas = [-250, -250, -250, -250, -250]
+        pneumas = [-50, -50, -50, -50, -50]
         for player in state.players:
             thirst = player.stats.get("thirst")
-            print(f"Got {thirst} thirst")
             pneumas[player.player_rec.id - 1] += thirst // 5
             hunger = player.stats.get("hunger")
-            print(f"Got {hunger} hunger")
             pneumas[player.player_rec.id - 1] += hunger // 2
-            print(pneumas)
         return [
             PneumaEvent(
                 state.time,
@@ -139,9 +162,10 @@ class MidnightHungerRule(Rule):
         ]
 
 
-RULES = [
+RULES: list[Rule] = [
     DayHungerRule(),
     MidnightHungerRule(),
     ThirstRule(),
     PhysioPneumaRule(),
+    SleepyRule(),
 ]

@@ -77,7 +77,7 @@ class StatsPanel(QGroupBox):
                 Qt.AlignmentFlag.AlignCenter
             )
             value_label.setStyleSheet(
-                "font-size: 11pt; font-weight: bold; color: #2c3e50;"
+                "font-size: 10pt; font-weight: bold; color: #2c3e50;"
             )
             container_layout.addWidget(value_label)
 

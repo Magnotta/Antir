@@ -92,6 +92,31 @@ class PneumaEvent(Event):
         )
 
 
+class SleepynessEvent(Event):
+    type = "player sleepyness"
+    emits_signals = [Signal.stats]
+
+    def __init__(self, due_time, payload=None):
+        super().__init__(due_time, payload)
+
+    def begin(self, state):
+        self.apply(state)
+        return []
+
+    def apply(self, state):
+        player = state.get_player_by_id(
+            self.payload["target"]
+        )
+        if self.payload["incremental"]:
+            player.stats.add(
+                "sleepyness", self.payload["amount"]
+            )
+        else:
+            player.stats.set(
+                "sleepyness", self.payload["amount"]
+            )
+
+
 class HungerEvent(Event):
     type = "player hunger"
     emits_signals = [Signal.stats]

@@ -1,8 +1,9 @@
+from sqlalchemy.orm import Session
 from db.models.global_var import GlobalVar
 
 
 class GlobalVarRepository:
-    def __init__(self, session):
+    def __init__(self, session: Session):
         self.session = session
 
     def update_time(self, new_time):
@@ -12,4 +13,3 @@ class GlobalVarRepository:
             .one()
         )
         time.value = new_time
-        self.session.commit()

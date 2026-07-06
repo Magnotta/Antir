@@ -2,49 +2,15 @@ from PyQt6.QtWidgets import QApplication
 import sys
 from ui.window import Window
 from db.database import init_metadata, init_db
-from db.models.player_record import PlayerRecord
-from db.repository.item import ItemRepository
-from db.repository.event import EventRepository
-from db.repository.location import LocationRepository
-from db.repository.player import PlayerRepository
-from db.repository.global_var import GlobalVarRepository
-from player.domain import Player
 from core.engine import Engine
-from core.defs import BASE_PLAYER_ATTRIBUTES
 
 
 if __name__ == "__main__":
     sys.tracebacklimit = 1
-    db_eng, Session = init_metadata()
+    Session = init_metadata()
     session = Session()
     init_db(session)
-    item_repo = ItemRepository(session)
-    player_repo = PlayerRepository(session)
-    event_repo = EventRepository(session)
-    loc_repo = LocationRepository(session)
-    var_repo = GlobalVarRepository(session)
-    player_recs = (
-        session.query(PlayerRecord)
-        .order_by(PlayerRecord.id)
-        .all()
-    )
-    if not player_recs:
-        raise RuntimeError("No players found in DB")
-    players = []
-    for player, player_stat_dict in zip(
-        player_recs, BASE_PLAYER_ATTRIBUTES.items()
-    ):
-        players.append(
-            Player(player, player_repo, item_repo)
-        )
-    engine = Engine(
-        event_repo,
-        item_repo,
-        player_repo,
-        loc_repo,
-        var_repo,
-        players,
-    )
+    engine = Engine(session)
     app = QApplication(sys.argv)
     win = Window(engine)
     win.show()

@@ -34,7 +34,7 @@ def init_metadata():
         bind=engine, autoflush=False, autocommit=False
     )
     session = scoped_session(session_factory)
-    return (engine, session)
+    return session
 
 
 def create_body_node_recursive(
@@ -86,7 +86,7 @@ def init_time(session: Session):
     return var.value
 
 
-def init_players(session: Session):
+def init_player_recs(session: Session):
     existing_players = session.query(PlayerRecord).count()
     if existing_players >= 5:
         return
@@ -160,5 +160,5 @@ def init_stat_thresholds(session: Session) -> None:
 
 
 def init_db(session: Session):
-    init_players(session)
+    init_player_recs(session)
     init_stat_thresholds(session)

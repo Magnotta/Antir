@@ -1,42 +1,42 @@
+from sqlalchemy.orm import Session
+from core.defs import BASE_PLAYER_ATTRIBUTES
 from systems.time import Time
 from player.domain import Player
 from db.repository.item import ItemRepository
-from db.repository.event import EventRepository
 from db.repository.location import LocationRepository
 from db.repository.player import PlayerRepository
 from db.repository.global_var import GlobalVarRepository
 from db.models.world import Locality
+from db.models.player_record import PlayerRecord
 from db.database import init_time
 
 
 class GameState:
-    def __init__(
-        self,
-        event_repo: EventRepository,
-        item_repo: ItemRepository,
-        player_repo: PlayerRepository,
-        loc_repo: LocationRepository,
-        var_repo: GlobalVarRepository,
-        players: list[Player],
-    ):
-        self.players = players
-        self.event_repo = event_repo
-        self.item_repo = item_repo
-        self.player_repo = player_repo
-        self.loc_repo = loc_repo
-        self.var_repo = var_repo
-        self.time = Time(init_time(player_repo.session))
+    def __init__(self, session: Session):
+        self.item_repo = ItemRepository(session)
+        self.player_repo = PlayerRepository(session)
+        self.loc_repo = LocationRepository(session)
+        self.var_repo = GlobalVarRepository(session)
+        player_recs = (
+            session.query(PlayerRecord)
+            .order_by(PlayerRecord.id)
+            .all()
+        )
+        if not player_recs:
+            raise RuntimeError("No players found in DB")
+        self.players: list[Player] = []
+        for player, player_stat_dict in zip(
+            player_recs, BASE_PLAYER_ATTRIBUTES.items()
+        ):
+            self.players.append(
+                Player(
+                    player, self.player_repo, self.item_repo
+                )
+            )
+        self.time = Time(init_time(session))
         self.locality: Locality = (
             self.loc_repo.get_locality_by_id(1)
         )
-
-    @classmethod
-    def from_dict(cls, data: dict):
-        state = cls()
-        state.time = data["tick"]
-        state.locality = data["locality"]
-        state.player = data["player"]
-        return state
 
     def get_placedatetime_string(self):
         return f"{str(self.locality)}, {str(self.time)}"
@@ -46,15 +46,6 @@ class GameState:
             if p.player_rec.id == id:
                 return p
         raise ValueError(f"Invalid player ID: {id}")
-
-    def get_players_by_id(
-        self, ids: list[int]
-    ) -> list[Player]:
-        filtered_players = filter(
-            lambda player: player.player_rec.id in ids,
-            self.players,
-        )
-        return list(filtered_players)
 
     def update_time(self):
         """Updates the time entry in Global Vars table"""
