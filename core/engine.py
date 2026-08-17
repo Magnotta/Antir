@@ -5,7 +5,11 @@ from core.rules import Rule, RULES
 from core.events import Event
 from db.repository.event import EventRepository
 from systems.command_service import CommandService
-from systems.signal_service import SignalBus, Signal
+from systems.signal_service import (
+    SignalBus,
+    Signal,
+    SignalType,
+)
 from systems.summary_service import Summarizer
 
 
@@ -28,10 +32,6 @@ class Engine:
         self.event_repo.add_record(event, org)
         self.scheduled_events.append(event)
 
-    def _follow_up(self, event: Event, org: str):
-        self.event_repo.add_record(event, org)
-        self.current_events.append(event)
-
     def step(self):
         self._advance_time()
         self._dispatch_events()
@@ -42,11 +42,13 @@ class Engine:
             raise
 
     def _advance_time(self):
-        self.signals.store([Signal.minute])
+        self.signals.store([Signal(SignalType.minute, {})])
         if self.state.time.hour_change:
-            self.signals.store([Signal.hour])
+            self.signals.store(
+                [Signal(SignalType.hour, {})]
+            )
         if self.state.time.day_change:
-            self.signals.store([Signal.day])
+            self.signals.store([Signal(SignalType.day, {})])
         self.state.time += 1
         self.state.update_time()
 
@@ -58,33 +60,55 @@ class Engine:
         ]
         for event in due:
             if event.condition(self.state):
-                self.signals.store(event.emits_signals)
-                followups = event.begin(self.state)
+                apply_flag, concomitants = event.begin(
+                    self.state
+                )
                 self.scheduled_events.remove(event)
-                for e in followups:
-                    self._follow_up(
-                        e, f"follow-up from {event.type}"
+                if apply_flag:
+                    self.event_repo.add_record(
+                        event, f"{event.type} begin"
                     )
+                    self.current_events.append(event)
+                    for e in concomitants:
+                        self.current_events.append(e)
+                    if event.tag:
+                        self.scheduled_events = [
+                            e
+                            for e in self.scheduled_events
+                            if e.tag != event.tag
+                        ]
+                else:
+                    for e in concomitants:
+                        self.schedule(
+                            e,
+                            f"rescheduled from {event.type}",
+                        )
+
         running = [
             e
             for e in self.current_events
             if e.due_time <= self.state.time
         ]
         for event in running:
-            self.signals.store(event.emits_signals)
-            event.apply(self.state)
+            follow_ups = event.apply(self.state)
+            self.event_repo.add_record(
+                event, f"{event.type} apply"
+            )
+            self.signals.store(event.get_signals())
+            for e in follow_ups:
+                self.schedule(
+                    e, f"follow-up from {event.type}"
+                )
             self.current_events.remove(event)
         self._fulfill_rules()
         self.signals.notify()
 
     def _fulfill_rules(self):
-        triggered_rules = set()
         for signal in self.signals._stored_signals:
             for rule in self.signal_rule_map.get(
-                signal, []
+                signal.type, []
             ):
-                if rule in triggered_rules:
-                    continue
-                triggered_rules.add(rule)
-                for next_event in rule.fulfill(self.state):
+                for next_event in rule.fulfill(
+                    self.state, signal
+                ):
                     self.schedule(next_event, rule.name)

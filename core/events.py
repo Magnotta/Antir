@@ -1,7 +1,12 @@
 from abc import ABC, abstractmethod
+from core.defs import CHARACTER_STAT_MAX_RATES
 from core.game_state import GameState
-from systems.time import Time
-from systems.signal_service import Signal
+from core.time import Time
+from core.formulas.sleep_cycle import *
+from core.formulas.context_gatherers import (
+    gather_sleep_context,
+)
+from systems.signal_service import SignalType, Signal
 
 
 EVENTS = {}
@@ -9,42 +14,139 @@ EVENTS = {}
 
 class Event(ABC):
     type: str = "base"
-    emits_signals: list[Signal] = []
 
     def __init__(
-        self, due_time: Time, payload: dict | None = None
+        self,
+        due_time: Time,
+        payload: dict | None = None,
+        tag: str | None = None,
     ):
         self.payload = payload or {}
         self.due_time = due_time
+        self.tag = tag
 
-    def condition(self, state: GameState):
+    def condition(self, state: GameState) -> bool:
         return True
 
     @abstractmethod
-    def begin(self, state: GameState) -> list:
-        pass
+    def begin(
+        self, state: GameState
+    ) -> tuple[bool, list["Event"]]:
+        return (False, [])
 
     @abstractmethod
-    def apply(self, state: GameState):
-        pass
+    def apply(self, state: GameState) -> list["Event"]:
+        return []
+
+    @abstractmethod
+    def get_signals(self) -> list[Signal]:
+        return []
+
+
+class PlayerStatCheckEvent(Event, ABC):
+    type = "recurring check"
+
+    def begin(self, state):
+        player = state.get_player_by_id(
+            self.payload["target"]
+        )
+        remaining = self.payload[
+            "threshold"
+        ] - player.stats.get(self.payload["stat_name"])
+        if remaining < 0:
+            return (True, [])
+        safe_interval = Time(
+            remaining
+            // CHARACTER_STAT_MAX_RATES[
+                self.payload["stat_name"]
+            ]
+        )
+        next_due = self.due_time + max(safe_interval, 1)
+        return (
+            False,
+            [type(self)(next_due, self.payload, self.tag)],
+        )
+
+
+class WakeUpCheck(PlayerStatCheckEvent):
+    type = "player wake up early from stat check"
+
+    def __init__(self, due_time, payload=None, tag=None):
+        """
+        Payload keys = target
+        """
+        super().__init__(due_time, payload, tag)
+
+    def apply(self, state):
+        return [
+            WakeUpEvent(
+                state.time,
+                self.payload,
+                self.tag,
+            )
+        ]
+
+    def get_signals(self):
+        return []
+
+
+class StatEvent(Event):
+    type = "player stat altering event"
+
+    def __init__(self, due_time, payload=None, tag=None):
+        """
+        Payload keys = target, incremental, stat_name, amount
+        """
+        super().__init__(due_time, payload, tag)
+
+    def begin(self, state):
+        return (True, [])
+
+    def apply(self, state):
+        player = state.get_player_by_id(
+            self.payload["target"]
+        )
+        if self.payload["incremental"]:
+            player.stats.add(
+                self.payload["stat_name"],
+                self.payload["amount"],
+            )
+        else:
+            player.stats.set(
+                self.payload["stat_name"],
+                self.payload["amount"],
+            )
+        return []
+
+    def get_signals(self):
+        return [Signal(SignalType.stats, self.payload)]
 
 
 class EquipItemEvent(Event):
     type = "equip item"
-    emits_signals = [Signal.equipment]
+
+    def __init__(self, due_time, payload=None, tag=None):
+        """
+        Payload keys = item_id, slot_ids, equip_delay
+        """
+        super().__init__(due_time, payload, tag)
 
     def begin(self, state) -> list:
         item = state.item_repo.get_item_by_id(
             self.payload["item_id"]
         )
         player = state.get_player_by_id(item.owner_id)
-        player.occupy_both_hands()
-        return [
-            EquipItemEvent(
-                state.time + self.payload["equip_delay"],
-                payload=self.payload,
-            )
-        ]
+        # player.occupy_both_hands()
+        return (
+            True,
+            [
+                EquipItemEvent(
+                    state.time
+                    + self.payload["equip_delay"],
+                    payload=self.payload,
+                )
+            ],
+        )
 
     def apply(self, state):
         item = state.item_repo.get_item_by_id(
@@ -54,115 +156,182 @@ class EquipItemEvent(Event):
         player.equip_item_event(
             item, self.payload["slot_ids"]
         )
-        player.free_both_hands()
+        # player.free_both_hands()
+        return []
+
+    def get_signals(self):
+        return [Signal(SignalType.inventory, self.payload)]
 
 
 class ItemOwnershipEvent(Event):
     type = "change item ownership"
-    emits_signals = [Signal.inventory]
+
+    def __init__(self, due_time, payload=None, tag=None):
+        """
+        Payload keys = item_id, new_owner_id
+        """
+        super().__init__(due_time, payload, tag)
 
     def begin(self, state) -> list:
-        self.apply(state)
-        return []
+        return (True, [])
 
     def apply(self, state):
         state.item_repo.item_chown(
             self.payload["item_id"],
             self.payload["new_owner_id"],
         )
+        return []
+
+    def get_signals(self):
+        return [Signal(SignalType.inventory, self.payload)]
 
 
-class PneumaEvent(Event):
-    type = "physiological pneuma"
-    emits_signals = [Signal.anatomical]
+class SleepEvent(Event):
+    type = "player drift into sleep"
 
-    def __init__(self, due_time, payload=None):
-        super().__init__(due_time, payload)
+    def __init__(self, due_time, payload=None, tag=None):
+        """
+        Payload keys = target
+        """
+        super().__init__(due_time, payload, tag)
 
     def begin(self, state):
-        self.apply(state)
-        return []
+        return (True, [])
 
     def apply(self, state):
         player = state.get_player_by_id(
             self.payload["target"]
         )
-        player.stats.add(
-            "pneuma_lost", self.payload["amount"]
+        tag = f"wake_up_player_{player.player_rec.id}"
+        pee, poo, heat, cold, duration = wakeup_thresholds(
+            gather_sleep_context(player)
         )
+        player.sleeping_since = state.time
+        player.sleep_ref = state.time + duration
+        return [
+            WakeUpCheck(
+                state.time,
+                {
+                    "target": player.player_rec.id,
+                    "threshold": pee,
+                    "stat_name": "pee",
+                },
+                tag,
+            ),
+            WakeUpCheck(
+                state.time,
+                {
+                    "target": player.player_rec.id,
+                    "threshold": poo,
+                    "stat_name": "poo",
+                },
+                tag,
+            ),
+            WakeUpCheck(
+                state.time,
+                {
+                    "target": player.player_rec.id,
+                    "threshold": heat,
+                    "stat_name": "heat",
+                },
+                tag,
+            ),
+            WakeUpCheck(
+                state.time,
+                {
+                    "target": player.player_rec.id,
+                    "threshold": cold,
+                    "stat_name": "cold",
+                },
+                tag,
+            ),
+            WakeUpEvent(
+                player.sleep_ref,
+                {
+                    "target": player.player_rec.id,
+                },
+                tag,
+            ),
+        ]
+
+    def get_signals(self):
+        return [Signal(SignalType.sleep, self.payload)]
 
 
-class SleepynessEvent(Event):
-    type = "player sleepyness"
-    emits_signals = [Signal.stats]
+class WakeUpEvent(Event):
+    type = "player wake up"
 
-    def __init__(self, due_time, payload=None):
-        super().__init__(due_time, payload)
+    def __init__(self, due_time, payload=None, tag=None):
+        """
+        Payload keys = target
+        """
+        super().__init__(due_time, payload, tag)
 
     def begin(self, state):
-        self.apply(state)
-        return []
+        player = state.get_player_by_id(
+            self.payload["target"]
+        )
+        sleepyness, tiredness, anxiety = wakeup_replenish(
+            player.sleeping_since.tick,
+            state.time.tick,
+            player.sleep_ref.tick,
+            gather_sleep_context(player),
+        )
+        return (
+            True,
+            [
+                StatEvent(
+                    state.time,
+                    {
+                        "target": self.payload["target"],
+                        "stat_name": "sleepyness",
+                        "amount": sleepyness,
+                        "incremental": False,
+                    },
+                ),
+                StatEvent(
+                    state.time,
+                    {
+                        "target": self.payload["target"],
+                        "stat_name": "tiredness",
+                        "amount": tiredness,
+                        "incremental": False,
+                    },
+                ),
+                StatEvent(
+                    state.time,
+                    {
+                        "target": self.payload["target"],
+                        "stat_name": "anxiety",
+                        "amount": anxiety,
+                        "incremental": False,
+                    },
+                ),
+            ],
+        )
 
     def apply(self, state):
         player = state.get_player_by_id(
             self.payload["target"]
         )
-        if self.payload["incremental"]:
-            player.stats.add(
-                "sleepyness", self.payload["amount"]
-            )
-        else:
-            player.stats.set(
-                "sleepyness", self.payload["amount"]
-            )
-
-
-class HungerEvent(Event):
-    type = "player hunger"
-    emits_signals = [Signal.stats]
-
-    def __init__(self, due_time: Time, payload=None):
-        super().__init__(due_time, payload)
-
-    def begin(self, state):
-        self.apply(state)
+        player.sleeping_since = None
         return []
 
-    def apply(self, state):
-        player = state.get_player_by_id(
-            self.payload["target"]
-        )
-        player.stats.add("hunger", self.payload["amount"])
-
-
-class ThirstEvent(Event):
-    type = "player thirst"
-    emits_signals = [Signal.stats]
-
-    def __init__(self, due_time: Time, payload=None):
-        super().__init__(due_time, payload)
-
-    def begin(self, state):
-        self.apply(state)
-        return []
-
-    def apply(self, state):
-        player = state.get_player_by_id(
-            self.payload["target"]
-        )
-        player.stats.add("thirst", self.payload["amount"])
+    def get_signals(self):
+        return [Signal(SignalType.wake_up, self.payload)]
 
 
 class BoneBreakEvent(Event):
     type = "player bone breaking"
-    emits_signals = [Signal.anatomical]
 
-    def __init__(self, due_time, payload=None):
-        super().__init__(due_time, payload)
+    def __init__(self, due_time, payload=None, tag=None):
+        """
+        Payload keys = target, bodynode
+        """
+        super().__init__(due_time, payload, tag)
 
     def begin(self, state):
-        self.apply(state)
-        return []
+        return (True, [])
 
     def apply(self, state):
         player = state.get_player_by_id(
@@ -171,3 +340,7 @@ class BoneBreakEvent(Event):
         player.anatomy.set_bodynode_stat(
             self.payload["bodynode"], "broken_bone", True
         )
+        return []
+
+    def get_signals(self):
+        return [Signal(SignalType.anatomical, self.payload)]

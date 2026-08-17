@@ -5,6 +5,12 @@ from db.repository.player import PlayerRepository
 from player.anatomy import Anatomy
 from player.inventory import Inventory
 from player.stats import Stats
+from core.time import Time
+
+
+class PlayerProperty:
+    SLEEPING_SINCE = "sleeping_since"
+    SLEEP_REF = "sleep_ref"
 
 
 class Player:
@@ -38,3 +44,29 @@ class Player:
             slot_dict["slot"],
         )
         return slot.id
+
+    @property
+    def sleeping_since(self) -> Time | None:
+        raw = self.player_rec.properties.get(
+            PlayerProperty.SLEEPING_SINCE
+        )
+        return Time(raw) if raw is not None else None
+
+    @sleeping_since.setter
+    def sleeping_since(self, value: Time | None):
+        self.player_rec.properties[
+            PlayerProperty.SLEEPING_SINCE
+        ] = (value.tick if value else None)
+
+    @property
+    def sleep_ref(self) -> Time | None:
+        raw = self.player_rec.properties.get(
+            PlayerProperty.SLEEP_REF
+        )
+        return Time(raw) if raw is not None else None
+
+    @sleep_ref.setter
+    def sleep_ref(self, value: Time | None):
+        self.player_rec.properties[
+            PlayerProperty.SLEEP_REF
+        ] = (value.tick if value else None)

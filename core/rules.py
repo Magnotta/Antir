@@ -1,13 +1,10 @@
 from enum import IntEnum, auto
-from core.events import (
-    Event,
-    HungerEvent,
-    ThirstEvent,
-    PneumaEvent,
-    SleepynessEvent,
-)
-from systems.signal_service import Signal
+from core.events import Event, StatEvent
+from systems.signal_service import SignalType, Signal
 from .game_state import GameState
+from .formulas.sleep_cycle import *
+from .formulas.physiology import *
+from .formulas.context_gatherers import *
 
 
 class RuleStrictness(IntEnum):
@@ -20,52 +17,44 @@ class RuleStrictness(IntEnum):
 
 
 class Rule:
-    listens_to: list[Signal] = []
+    listens_to: list[SignalType] = []
     name = "rulebase"
     strictness = RuleStrictness.PERMISSIVE
-
-    def __init__(self):
-        self._state_dict = dict()
 
     def applies(
         self, event: Event, state: GameState
     ) -> bool:
         return True
 
-    def fulfill(self, state: GameState) -> list:
+    def fulfill(
+        self, state: GameState, signal: Signal
+    ) -> list:
         return []
 
 
 class SleepyRule(Rule):
-    listens_to = [Signal.hour]
+    listens_to = [SignalType.hour]
     name = "hourly sleepyness rule"
     category = RuleStrictness.ALWAYS
 
-    def fulfill(self, state):
+    def fulfill(self, state, signal):
         return [
-            SleepynessEvent(
+            StatEvent(
                 state.time,
                 {
                     "target": t.player_rec.id,
-                    "amount": 150,
+                    "stat_name": "sleepyness",
+                    "amount": baseline_sleepyness(),
                     "incremental": True,
                 },
             )
             for t in state.players
+            if not t.sleeping_since
         ]
 
 
-class WakeUpRule(Rule):
-    listens_to = [Signal.wake_up]
-    name = "wake up rule"
-    category = RuleStrictness.ALWAYS
-
-    def fulfill(self, state):
-        return [
-            SleepynessEvent(
-                state.time,
-            )
-        ]
+# class WakeUpRule(Rule):
+#     listens_to
 
 
 class EclipticSunRule(Rule):
@@ -85,17 +74,21 @@ class ShitRule(Rule):
 
 
 class ThirstRule(Rule):
-    listens_to = [Signal.hour]
+    listens_to = [SignalType.hour]
     name = "hourly thirst rule"
     category = RuleStrictness.FIRM
 
-    def fulfill(self, state):
+    def fulfill(self, state, signal):
         return [
-            ThirstEvent(
+            StatEvent(
                 state.time,
                 {
                     "target": p.player_rec.id,
-                    "amount": 33 + p.stats.get("sweat"),
+                    "stat_name": "thirst",
+                    "amount": base_thirst(
+                        gather_thirst_context(p)
+                    ),
+                    "incremental": True,
                 },
             )
             for p in state.players
@@ -103,60 +96,69 @@ class ThirstRule(Rule):
 
 
 class PhysioPneumaRule(Rule):
-    listens_to = [Signal.day]
+    listens_to = [SignalType.day]
     name = "player physiological pneuma"
     category = RuleStrictness.ALWAYS
 
-    def fulfill(self, state):
-        pneumas = [-50, -50, -50, -50, -50]
-        for player in state.players:
-            thirst = player.stats.get("thirst")
-            pneumas[player.player_rec.id - 1] += thirst // 5
-            hunger = player.stats.get("hunger")
-            pneumas[player.player_rec.id - 1] += hunger // 2
+    def fulfill(self, state, signal):
         return [
-            PneumaEvent(
+            StatEvent(
                 state.time,
                 {
-                    "target": p.player_rec.id,
-                    "amount": pneumas[p.player_rec.id - 1],
+                    "target": player.player_rec.id,
+                    "stat_name": "pneuma_lost",
+                    "amount": base_pneuma(
+                        gather_pneuma_context(player)
+                    ),
+                    "incremental": True,
                 },
             )
-            for p in state.players
+            for player in state.players
         ]
 
 
 class DayHungerRule(Rule):
-    listens_to = [Signal.day]
-    name = 'daily hunger rule'
+    listens_to = [SignalType.day]
+    name = "daily hunger rule"
     category = RuleStrictness.PERMISSIVE
 
-    def fulfill(self, state):
+    def fulfill(self, state, signal):
         meal_offsets = [480, 720, 1080]
         return [
-            HungerEvent(
+            StatEvent(
                 state.time + offset,
-                {"target": p.player_rec.id, "amount": 100},
+                {
+                    "target": p.player_rec.id,
+                    "stat_name": "hunger",
+                    "amount": base_hunger(),
+                    "incremental": True,
+                },
             )
-            for offset in meal_offsets
             for p in state.players
+            for offset in meal_offsets
         ]
 
 
 class MidnightHungerRule(Rule):
-    listens_to = [Signal.day]
+    listens_to = [SignalType.day]
     name = 'midnight hunger rule'
     category = RuleStrictness.PERMISSIVE
 
-    def fulfill(self, state):
+    def fulfill(self, state, signal):
         targets = [
             p.player_rec.id
             for p in state.players
-            if p.stats.get("sleepyness") > 0
+            if p.sleeping_since is None
         ]
         return [
-            HungerEvent(
-                state.time, {"target": t, "amount": 100}
+            StatEvent(
+                state.time,
+                {
+                    "target": t,
+                    "stat_name": "hunger",
+                    "amount": base_hunger(),
+                    "incremental": True,
+                },
             )
             for t in targets
         ]

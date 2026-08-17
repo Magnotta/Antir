@@ -455,16 +455,37 @@ CHARACTER_STATS = [
 ]
 
 
+CHARACTER_STAT_MAX_RATES = {
+    "blood_lost": 30,
+    "pneuma_lost": 30,
+    "composure_lost": 30,
+    "sweat": 30,
+    "anxiety": 30,
+    "tiredness": 30,
+    "hunger": 30,
+    "thirst": 30,
+    "sleepyness": 30,
+    "pee": 30,
+    "poo": 30,
+    "nausea": 30,
+    "pain": 30,
+    "itch": 30,
+    "cold": 30,
+    "heat": 30,
+}
+
+
 CHARACTER_STAT_BASE_THRESHOLDS = {
+    ''' "stat_name": (caution, critical, lose control) '''
     "blood_lost": (1500, 3000, 5000),
     "pneuma_lost": (1000, 3000, 6200),
     "composure_lost": (500, 1660, 3800),
     "sweat": (7000, 9000, 9500),
     "anxiety": (4000, 7000, 9000),
-    "tiredness": (6000, 8000, 9000),
+    "tiredness": (2500, 5000, 7000),
     "hunger": (5000, 7500, 9500),
     "thirst": (7000, 9000, 9500),
-    "sleepyness": (7000, 9000, 9500),
+    "sleepyness": (1800, 5400, 7200),
     "pee": (5000, 7000, 9000),
     "poo": (7000, 8500, 9500),
     "nausea": (2000, 5000, 8500),
@@ -482,7 +503,7 @@ BASE_PLAYER_STATS = {
         "composure_lost": 0,
         "sweat": 0,
         "anxiety": 0,
-        "tiredness": 0,
+        "tiredness": 1600,
         "hunger": 0,
         "thirst": 0,
         "sleepyness": 0,

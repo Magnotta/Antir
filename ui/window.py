@@ -3,7 +3,7 @@ from PyQt6.QtWidgets import (
     QTabWidget,
 )
 from core.engine import Engine
-from systems.signal_service import Signal
+from systems.signal_service import SignalType
 from systems.commands import DecisonType
 from .tabs.home import HomeTab
 from .tabs.item import ItemTab
@@ -35,22 +35,22 @@ class Window(QMainWindow):
         self.tabs.addTab(self.player_tab, "Players")
         self.tabs.addTab(self.loc_tab, "Locations")
         self.engine.signals.connect(
-            Signal.inventory, self.player_tab.refresh
+            SignalType.inventory, self.player_tab.refresh
         )
         self.engine.signals.connect(
-            Signal.equipment, self.player_tab.refresh
+            SignalType.equipment, self.player_tab.refresh
         )
         self.engine.signals.connect(
-            Signal.stats, self.player_tab.refresh
+            SignalType.stats, self.player_tab.refresh
         )
         self.engine.signals.connect(
-            Signal.minute, self.home_tab.refresh
+            SignalType.minute, self.home_tab.refresh
         )
         self.engine.signals.connect(
-            Signal.location, self.home_tab.refresh
+            SignalType.location, self.home_tab.refresh
         )
         self.engine.signals.connect(
-            Signal.summary, self.on_summary_ready
+            SignalType.summary, self.on_summary_ready
         )
         self.engine.signals.create_decision_path(
             DecisonType.slot_choice,

@@ -7,11 +7,8 @@ class Time:
         self.d = tm // 1440
         self.h = tm % 1440 // 60
         self.m = tm % 60
-        self.day_change = False
-        self.hour_change = False
-        if self.tick == 0:
-            self.day_change = True
-            self.hour_change = True
+        self.day_change = True if self.tick == 0 else False
+        self.hour_change = True if self.tick == 0 else False
 
     def __add__(self, other):
         if isinstance(other, Time):
@@ -25,6 +22,18 @@ class Time:
             )
         __r._day_change(self)
         __r._hour_change(self)
+        return __r
+
+    def __sub__(self, other):
+        if isinstance(other, Time):
+            __r = Time(self.tick - other.tick)
+        elif isinstance(other, int):
+            __r = Time(self.tick - other)
+        else:
+            raise TypeError(
+                "unsupported operand types for +:"
+                f"{type(self)} and {type(other)}"
+            )
         return __r
 
     def __str__(self) -> str:

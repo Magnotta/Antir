@@ -1,10 +1,12 @@
+from dataclasses import dataclass, field
+from typing import Any
 from collections import defaultdict
 from typing import Callable
 from enum import Enum, auto
 from .pending_decision import DecisonType, PendingDecision
 
 
-class Signal(Enum):
+class SignalType(Enum):
     inventory = auto()
     equipment = auto()
     stats = auto()
@@ -14,7 +16,15 @@ class Signal(Enum):
     day = auto()
     location = auto()
     summary = auto()
+    sleep = auto()
     wake_up = auto()
+    check = auto()
+
+
+@dataclass
+class Signal:
+    type: SignalType
+    payload: dict[str, Any] = field(default_factory=dict)
 
 
 class SignalBus:
@@ -22,27 +32,29 @@ class SignalBus:
         self._listeners: dict[Signal, list[Callable]] = (
             defaultdict(list)
         )
-        self._stored_signals: set[Signal] = set()
+        self._stored_signals: list[Signal] = []
         self.decision_paths: dict[DecisonType, Callable] = (
             {}
         )
 
-    def connect(self, signal: Signal, callback: Callable):
-        self._listeners[signal].append(callback)
+    def connect(
+        self, signal_type: SignalType, callback: Callable
+    ):
+        self._listeners[signal_type].append(callback)
 
     def store(self, signals: list[Signal]):
         for signal in signals:
-            self._stored_signals.add(signal)
+            self._stored_signals.append(signal)
 
     def notify(self):
         batch_callbacks = set()
         for signal in self._stored_signals:
-            for cb in self._listeners.get(signal, []):
+            for cb in self._listeners.get(signal.type, []):
                 batch_callbacks.add(cb)
         for cb in batch_callbacks:
             if cb is not None:
                 cb()
-        self._stored_signals = set()
+        self._stored_signals = []
 
     def create_decision_path(
         self, decision_type: DecisonType, callback: Callable

@@ -25,6 +25,12 @@ from db.models.global_var import GlobalVar
 DATABASE_URL = "sqlite:///db/antir_db.db"
 
 
+class StateProperties:
+    LAST_SIMULATED_TICK = "last_simulated_tick"
+    TEMPERATURE = "temperature"
+    NEXT_EVENT_TAG = "next_event_tag"
+
+
 def init_metadata():
     engine = create_engine(
         DATABASE_URL, echo=False, future=True
@@ -73,17 +79,19 @@ def create_body_node_recursive(
     return node
 
 
-def init_time(session: Session):
-    var = (
-        session.query(GlobalVar)
-        .filter(GlobalVar.key == "simulation_ticks")
-        .first()
-    )
+def init_globals(session: Session):
+    var = session.query(GlobalVar).first()
     if var is None:
-        var = GlobalVar(key="simulation_ticks", value=0)
-        session.add(var)
+        keys = [
+            value
+            for name, value in vars(StateProperties).items()
+            if not name.startswith('_')
+            and isinstance(value, str)
+        ]
+        session.add_all(
+            [GlobalVar(key=k, value=0) for k in keys]
+        )
         session.commit()
-    return var.value
 
 
 def init_player_recs(session: Session):

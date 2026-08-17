@@ -3,7 +3,11 @@ from typing import Callable, Sequence
 import core.events as e
 from .pending_decision import DecisonType, PendingDecision
 from .engine_interface import EngineProtocol
-from .signal_service import Signal
+from .signal_service import Signal, SignalType
+from core.formulas.sleep_cycle import sleep_delay
+from core.formulas.context_gatherers import (
+    gather_sleep_context,
+)
 
 
 @dataclass(frozen=True)
@@ -24,18 +28,10 @@ def advance_time(
         engine.step()
     if minutes > 60:
         engine.summarizer.end_batch(minutes)
-        engine.signals.store([Signal.summary])
+        engine.signals.store(
+            [Signal(SignalType.summary, {})]
+        )
         engine.signals.notify()
-
-
-def player_hunger(engine: EngineProtocol, message="none"):
-    engine.schedule(
-        e.HungerEvent(
-            engine.state.time,
-            {"amount": 1, "message": message},
-        ),
-        "command",
-    )
 
 
 def move_item(
@@ -44,12 +40,14 @@ def move_item(
     new_owner_id,
     message="none",
 ):
+    item = engine.state.item_repo.get_item_by_id(target)
     engine.schedule(
         e.ItemOwnershipEvent(
             engine.state.time,
             {
                 "item_id": target,
                 "new_owner_id": new_owner_id,
+                "old_owner_id": item.owner_id,
                 "message": message,
             },
         ),
@@ -98,14 +96,19 @@ def equip_item(
         raise ValueError(
             f"Item {item.id} doesn't have a delay param!"
         )
-    payload = {
-        "item_id": item.id,
-        "slot_ids": [slot.id for slot in selected_slots],
-        "equip_delay": delay,
-        "message": message,
-    }
     engine.schedule(
-        e.EquipItemEvent(engine.state.time, payload),
+        e.EquipItemEvent(
+            engine.state.time,
+            {
+                "player_id": player.player_rec.id,
+                "item_id": item.id,
+                "slot_ids": [
+                    slot.id for slot in selected_slots
+                ],
+                "equip_delay": delay,
+                "message": message,
+            },
+        ),
         "command",
     )
 
@@ -148,19 +151,28 @@ def go_to_sleep(
     engine: EngineProtocol, target, message="none"
 ):
     player = engine.state.get_player_by_id(target)
-    delta = 0
+    delta = sleep_delay(gather_sleep_context(player))
+    print(
+        f"Player {player.player_rec.id} will sleep after {delta} minutes"
+    )
     engine.schedule(
-        e.SleepynessEvent(
-            engine.state.time + delta,
-            {
-                "target": target,
-                "amount": 0,
-                "incremental": False,
-            },
+        e.SleepEvent(
+            engine.state.time + delta, {"target": target}
         ),
         "command",
     )
-    # player.stats.set("sleepyness", 0)
+
+
+def wake_up(engine: EngineProtocol, target, message="none"):
+    player = engine.state.get_player_by_id(target)
+    if not player.sleeping_since:
+        return
+    engine.schedule(
+        e.WakeUpEvent(
+            engine.state.time, {"target": target}
+        ),
+        "command",
+    )
 
 
 COMMANDS = {
@@ -170,13 +182,6 @@ COMMANDS = {
         arg_types=[int],
         description="advance time",
         handler=advance_time,
-    ),
-    "ph": CommandSpec(
-        key="ph",
-        target_type=None,
-        arg_types=[],
-        description="increase hunger",
-        handler=player_hunger,
     ),
     "ie": CommandSpec(
         key="ie",
@@ -219,5 +224,12 @@ COMMANDS = {
         arg_types=[],
         description="go to sleep",
         handler=go_to_sleep,
+    ),
+    "pwu": CommandSpec(
+        key="pwu",
+        target_type="player",
+        arg_types=[],
+        description="wake up",
+        handler=wake_up,
     ),
 }
