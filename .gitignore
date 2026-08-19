@@ -126,3 +126,4 @@ dmypy.json
 # user
 db/antir_db.db
 logs/
+tests/test_output.txt

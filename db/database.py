@@ -6,6 +6,7 @@ from sqlalchemy.orm import (
 )
 from core.defs import (
     BASE_PLAYER_STATS,
+    BASE_PLAYER_ATTRIBUTES,
     SLOT_MAX_INDEX,
     CHARACTER_STAT_BASE_THRESHOLDS,
 )
@@ -13,6 +14,7 @@ from core.defs import (
 from db.models.base import Base
 from db.models.player_record import PlayerRecord
 from db.models.player_stat import (
+    PlayerAttr,
     PlayerStat,
     StatThreshold,
     HistoricalStat,
@@ -126,6 +128,17 @@ def init_player_recs(session: Session):
                     last_updated=0,
                 )
             )
+        for attr_name, attr_value in BASE_PLAYER_ATTRIBUTES[
+            pname
+        ].items():
+            session.add(
+                PlayerAttr(
+                    player_id=player.id,
+                    name=attr_name,
+                    value=attr_value,
+                )
+            )
+
     session.commit()
 
 

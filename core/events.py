@@ -3,9 +3,7 @@ from core.defs import CHARACTER_STAT_MAX_RATES
 from core.game_state import GameState
 from core.time import Time
 from core.formulas.sleep_cycle import *
-from core.formulas.context_gatherers import (
-    gather_sleep_context,
-)
+from core.formulas.context_gatherers import *
 from systems.signal_service import SignalType, Signal
 
 
@@ -204,7 +202,8 @@ class SleepEvent(Event):
         )
         tag = f"wake_up_player_{player.player_rec.id}"
         pee, poo, heat, cold, duration = wakeup_thresholds(
-            gather_sleep_context(player)
+            SleepContext.gather(player),
+            WakeupThreshCoefficients.calculate(player),
         )
         player.sleeping_since = state.time
         player.sleep_ref = state.time + duration
@@ -272,10 +271,7 @@ class WakeUpEvent(Event):
             self.payload["target"]
         )
         sleepyness, tiredness, anxiety = wakeup_replenish(
-            player.sleeping_since.tick,
-            state.time.tick,
-            player.sleep_ref.tick,
-            gather_sleep_context(player),
+            AsleepContext.gather(state, player),
         )
         return (
             True,

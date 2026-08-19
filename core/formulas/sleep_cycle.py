@@ -1,9 +1,13 @@
 from numpy import pow
 from .math import clamp
 from .context_gatherers import *
+from .coefficients import *
 
 
-def sleep_delay(ctx: SleepContext) -> int:
+def sleep_delay(
+    ctx: SleepContext,
+    coeffs: SleepDelayCoefficients = SleepDelayCoefficients(),
+) -> int:
     """
     tiredness contribution is capped at 6300
     expects daily normal tiredness of around 1500
@@ -14,40 +18,31 @@ def sleep_delay(ctx: SleepContext) -> int:
     55 - 1250/70 - 2400/100 + 900²/80000 + 900/100
     55 - 18 - 24 + 10 + 9 = 32
     """
-    BASE_DELAY = 55
-    TIREDNESS_DIVIDER_ON_DELAY = 70
-    TIREDNESS_CAP_ON_DELAY = 90
-    SLEEPYNESS_DIVIDER_ON_DELAY = 100
-    ANXIETY_DIVIDER_ON_DELAY_1 = 80000
-    ANXIETY_DIVIDER_ON_DELAY_2 = 100
-    ANXIETY_CAP_ON_DELAY = 180
-    HEAT_DIVIDER_ON_DELAY = 40
-    HEAT_CAP_ON_DELAY = 60
     return int(
-        BASE_DELAY
+        coeffs.base_delay
         - clamp(
-            ctx.tiredness // TIREDNESS_DIVIDER_ON_DELAY,
+            ctx.tiredness // coeffs.tiredness_divider,
             0,
-            TIREDNESS_CAP_ON_DELAY,
+            coeffs.tiredness_cap,
         )
-        - ctx.sleepyness // SLEEPYNESS_DIVIDER_ON_DELAY
+        - ctx.sleepyness // coeffs.sleepyness_divider
         + clamp(
-            pow(ctx.anxiety, 2)
-            // ANXIETY_DIVIDER_ON_DELAY_1
-            + ctx.anxiety // ANXIETY_DIVIDER_ON_DELAY_2,
+            pow(ctx.anxiety, 2) // coeffs.anxiety_divider_1
+            + ctx.anxiety // coeffs.anxiety_divider_2,
             0,
-            ANXIETY_CAP_ON_DELAY,
+            coeffs.anxiety_cap,
         )
         + clamp(
-            ctx.heat // HEAT_DIVIDER_ON_DELAY,
+            ctx.heat // coeffs.heat_divider,
             1,
-            HEAT_CAP_ON_DELAY,
+            coeffs.heat_cap,
         )
     )
 
 
 def wakeup_thresholds(
     sleep_ctx: SleepContext,
+    coeffs: WakeupThreshCoefficients,
 ) -> tuple[int, int, int, int, int]:
     """
     pee expects about 2000 pee per 8 hours
@@ -58,23 +53,25 @@ def wakeup_thresholds(
     BASE_HEAT_WAKEUP_THRESH = 2000
     BASE_COLD_WAKEUP_THRESH = 1500
     pee = (
-        BASE_PEE_WAKEUP_THRESH
-        + sleep_ctx.tiredness
-        // TIREDNESS_DIVIDER_ON_WAKEUP_THRESH
+        coeffs.base_pee
+        + sleep_ctx.tiredness // coeffs.tiredness_divider_1
     )
     print(f"Pee wakeup threshold = {pee}")
-    poo = BASE_POO_WAKEUP_THRESH
+    poo = coeffs.base_poo
     print(f"Poo wakeup threshold = {poo}")
-    heat = BASE_HEAT_WAKEUP_THRESH
+    heat = coeffs.base_heat
     print(f"Heatwakeup threshold = {heat}")
-    cold = BASE_COLD_WAKEUP_THRESH
+    cold = coeffs.base_cold
     print(f"Cold wakeup threshold = {cold}")
-    duration = clamp(
-        pow(sleep_ctx.tiredness, 2) // 415000
-        + sleep_ctx.tiredness // 50
-        + 420,
-        420,
-        720,
+    duration = int(
+        min(
+            pow(sleep_ctx.tiredness, 2)
+            // coeffs.tiredness_divider_2
+            + sleep_ctx.tiredness
+            // coeffs.tiredness_divider_3
+            + coeffs.base_duration,
+            coeffs.duration_cap,
+        )
     )
     print(f"Expected sleep duration = {duration}")
     return (pee, poo, heat, cold, duration)
@@ -86,18 +83,15 @@ def baseline_sleepyness() -> int:
 
 
 def wakeup_replenish(
-    sleeping_since: int,
-    cur_time: int,
-    ref_time: int,
-    ctx: SleepContext,
+    ctx: AsleepContext,
 ) -> tuple[int, int, int]:
     """
     expects that 8 hours of sleep will restore 1500 tiredness
     """
     DELTA_DIVIDER_ON_SLEEPYNESS_REPLENISH = 50
     DELTA_MULTIPLIER_ON_SLEEPYNESS_REPLENISH = 2
-    delta = abs(ref_time - cur_time)
-    sleep_ref = ref_time - sleeping_since
+    delta = abs(ctx.sleep_until - ctx.time_now)
+    sleep_ref = ctx.sleep_until - ctx.sleeping_since
     print(f"sleep delta: {delta}")
     sleepyness = clamp(
         pow(delta, 2)

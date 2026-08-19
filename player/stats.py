@@ -8,6 +8,9 @@ class Stats:
         self.player_id = player_id
         self.repo = player_repo
 
+    def get_attr(self, attr_name: str):
+        return self.repo.get_attr(self.player_id, attr_name)
+
     def get(self, stat_name: str):
         return self.repo.get_stat(self.player_id, stat_name)
 

@@ -86,7 +86,7 @@ class ThirstRule(Rule):
                     "target": p.player_rec.id,
                     "stat_name": "thirst",
                     "amount": base_thirst(
-                        gather_thirst_context(p)
+                        ThirstContext.gather(p)
                     ),
                     "incremental": True,
                 },
@@ -108,7 +108,7 @@ class PhysioPneumaRule(Rule):
                     "target": player.player_rec.id,
                     "stat_name": "pneuma_lost",
                     "amount": base_pneuma(
-                        gather_pneuma_context(player)
+                        PneumaContext.gather(player)
                     ),
                     "incremental": True,
                 },

@@ -2,6 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 from db.models.player_record import PlayerRecord
 from db.models.player_stat import (
+    PlayerAttr,
     PlayerStat,
     StatThreshold,
     HistoricalStat,
@@ -97,14 +98,24 @@ class PlayerRepository:
                     record.all_time_max = current_value
                     record.last_updated = current_time
 
+    def get_attr(
+        self, player_id: int, attr_name: str
+    ) -> int:
+        stmt = (
+            select(PlayerAttr)
+            .where(PlayerAttr.player_id == player_id)
+            .where(PlayerAttr.name == attr_name)
+        )
+        return self.session.scalars(stmt).one().value
+
     def get_stat(
-        self, player_id: int, statname: str
+        self, player_id: int, stat_name: str
     ) -> int:
         row = (
             self.session.query(PlayerStat)
             .filter(
                 PlayerStat.player_id == player_id,
-                PlayerStat.name == statname,
+                PlayerStat.name == stat_name,
             )
             .one()
         )

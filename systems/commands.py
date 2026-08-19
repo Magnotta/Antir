@@ -5,9 +5,8 @@ from .pending_decision import DecisonType, PendingDecision
 from .engine_interface import EngineProtocol
 from .signal_service import Signal, SignalType
 from core.formulas.sleep_cycle import sleep_delay
-from core.formulas.context_gatherers import (
-    gather_sleep_context,
-)
+from core.formulas.context_gatherers import *
+from core.formulas.coefficients import *
 
 
 @dataclass(frozen=True)
@@ -151,7 +150,7 @@ def go_to_sleep(
     engine: EngineProtocol, target, message="none"
 ):
     player = engine.state.get_player_by_id(target)
-    delta = sleep_delay(gather_sleep_context(player))
+    delta = sleep_delay(SleepContext.gather(player))
     print(
         f"Player {player.player_rec.id} will sleep after {delta} minutes"
     )
