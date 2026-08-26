@@ -30,9 +30,9 @@ class Weather:
         self.sunlight = weather_dict["sunlight"]
         self.cloud_coverage = weather_dict["cloud_coverage"]
 
-    def to_snapshot(self) -> WeatherSnapshot:
+    def to_snapshot(self, tick) -> WeatherSnapshot:
         return WeatherSnapshot(
-            tick=self.sim_time,
+            tick=tick,
             temperature=self.temperature,
             wind_latent=self.wind_latent,
             precip_latent=self.precip_latent,

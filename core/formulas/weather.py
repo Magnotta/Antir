@@ -58,7 +58,9 @@ def derive_weather(
     wind_latent = ctx.wind_latent
     precip_latent = ctx.precip_latent
     precip = int(max(precip_latent, 0))
-    clouds = precip_latent - coeffs.precip_mu
+    clouds = clamp(
+        precip_latent - coeffs.precip_mu, 0, 10_000
+    )
     wind = clamp(wind_latent + precip / 2, 0, 10_000)
     return {
         "temperature": temp,

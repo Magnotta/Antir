@@ -144,7 +144,7 @@ class WeatherEvent(Event):
         return []
 
     def get_signals(self):
-        return []
+        return [Signal(SignalType.weather, {})]
 
 
 class EquipItemEvent(Event):

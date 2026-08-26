@@ -44,13 +44,18 @@ class Window(QMainWindow):
             SignalType.stats, self.player_tab.refresh
         )
         self.engine.signals.connect(
-            SignalType.minute, self.home_tab.refresh
+            SignalType.minute,
+            self.home_tab.refresh_location,
         )
         self.engine.signals.connect(
-            SignalType.location, self.home_tab.refresh
+            SignalType.location,
+            self.home_tab.refresh_location,
         )
         self.engine.signals.connect(
             SignalType.summary, self.on_summary_ready
+        )
+        self.engine.signals.connect(
+            SignalType.weather, self.update_home_background
         )
         self.engine.signals.create_decision_path(
             DecisonType.slot_choice,
@@ -79,7 +84,9 @@ class Window(QMainWindow):
             }
 
     def bodynode_choice_required(self, payload):
-        player = payload["player"]
+        player = self.engine.state.get_player_by_id(
+            payload["player"]
+        )
 
         dlg = ChoiceDialog(
             player.anatomy.by_name.keys(), parent=self
@@ -104,6 +111,9 @@ class Window(QMainWindow):
             summary_text, current_tick, parent=self
         )
         popup.exec()
+
+    def update_home_background(self):
+        self.home_tab.update()
 
 
 def validate_body_parts(selected: list) -> tuple[bool, str]:
