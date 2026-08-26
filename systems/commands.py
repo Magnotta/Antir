@@ -5,7 +5,7 @@ from .pending_decision import DecisonType, PendingDecision
 from .engine_interface import EngineProtocol
 from .signal_service import Signal, SignalType
 from core.formulas.sleep_cycle import sleep_delay
-from core.formulas.context_gatherers import *
+from core.formulas.contexts import *
 from core.formulas.coefficients import *
 
 

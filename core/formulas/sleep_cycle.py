@@ -1,6 +1,6 @@
 from numpy import pow
 from .math import clamp
-from .context_gatherers import *
+from .contexts import *
 from .coefficients import *
 
 
@@ -90,7 +90,7 @@ def wakeup_replenish(
     """
     DELTA_DIVIDER_ON_SLEEPYNESS_REPLENISH = 50
     DELTA_MULTIPLIER_ON_SLEEPYNESS_REPLENISH = 2
-    delta = abs(ctx.sleep_until - ctx.time_now)
+    delta = abs(ctx.sleep_until - ctx.sim_time)
     sleep_ref = ctx.sleep_until - ctx.sleeping_since
     print(f"sleep delta: {delta}")
     sleepyness = clamp(

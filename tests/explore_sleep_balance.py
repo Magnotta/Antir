@@ -21,7 +21,7 @@ from core.formulas.sleep_cycle import (
     sleep_delay,
     wakeup_thresholds,
 )
-from core.formulas.context_gatherers import SleepContext
+from core.formulas.contexts import SleepContext
 
 
 def fmt_minutes(total_minutes: int) -> str:

@@ -1,11 +1,14 @@
 from sqlalchemy.orm import Session
 from core.defs import BASE_PLAYER_ATTRIBUTES
 from core.time import Time
+from core.weather import Weather
+from core.math_interface import calculate_weather_coeffs
 from player.domain import Player
 from db.repository.item import ItemRepository
 from db.repository.location import LocationRepository
 from db.repository.player import PlayerRepository
 from db.repository.global_var import GlobalVarRepository
+from db.repository.weather import WeatherRepository
 from db.models.world import Locality
 from db.models.player_record import PlayerRecord
 from db.database import init_globals, StateProperties
@@ -24,9 +27,6 @@ class StateProperty:
 
 class GameState:
     def __init__(self, session: Session):
-        self.item_repo = ItemRepository(session)
-        self.player_repo = PlayerRepository(session)
-        self.loc_repo = LocationRepository(session)
         self.globals = StateProperty(session)
         init_globals(session)
         self.time = Time(
@@ -34,6 +34,13 @@ class GameState:
                 StateProperties.LAST_SIMULATED_TICK
             ]
         )
+        self.weather = Weather(
+            WeatherRepository(session),
+            calculate_weather_coeffs(self.time.tick),
+        )
+        self.item_repo = ItemRepository(session)
+        self.player_repo = PlayerRepository(session)
+        self.loc_repo = LocationRepository(session)
         player_recs = (
             session.query(PlayerRecord)
             .order_by(PlayerRecord.id)

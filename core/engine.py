@@ -43,6 +43,10 @@ class Engine:
 
     def _advance_time(self):
         self.signals.store([Signal(SignalType.minute, {})])
+        if self.state.time.tick % 5 == 0:
+            self.signals.store(
+                [Signal(SignalType.minutes_5, {})]
+            )
         if self.state.time.hour_change:
             self.signals.store(
                 [Signal(SignalType.hour, {})]

@@ -1,10 +1,11 @@
 from enum import IntEnum, auto
-from core.events import Event, StatEvent
+from core.events import Event, StatEvent, WeatherEvent
+from core.math_interface import *
 from systems.signal_service import SignalType, Signal
 from .game_state import GameState
 from .formulas.sleep_cycle import *
 from .formulas.physiology import *
-from .formulas.context_gatherers import *
+from .formulas.contexts import *
 
 
 class RuleStrictness(IntEnum):
@@ -61,6 +62,15 @@ class EclipticSunRule(Rule):
     pass
 
 
+class WeatherRule(Rule):
+    listens_to = [SignalType.minutes_5]
+    name = "timely weather oscillation"
+    category = RuleStrictness.ALWAYS
+
+    def fulfill(self, state, signal):
+        return [WeatherEvent(state.time)]
+
+
 class ShitRule(Rule):
     """
     SENSAÇÃO
@@ -86,7 +96,7 @@ class ThirstRule(Rule):
                     "target": p.player_rec.id,
                     "stat_name": "thirst",
                     "amount": base_thirst(
-                        ThirstContext.gather(p)
+                        gather_thirst_context(p)
                     ),
                     "incremental": True,
                 },
@@ -108,7 +118,7 @@ class PhysioPneumaRule(Rule):
                     "target": player.player_rec.id,
                     "stat_name": "pneuma_lost",
                     "amount": base_pneuma(
-                        PneumaContext.gather(player)
+                        gather_pneuma_context(player)
                     ),
                     "incremental": True,
                 },
@@ -170,4 +180,5 @@ RULES: list[Rule] = [
     ThirstRule(),
     PhysioPneumaRule(),
     SleepyRule(),
+    WeatherRule(),
 ]

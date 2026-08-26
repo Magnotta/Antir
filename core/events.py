@@ -3,7 +3,9 @@ from core.defs import CHARACTER_STAT_MAX_RATES
 from core.game_state import GameState
 from core.time import Time
 from core.formulas.sleep_cycle import *
-from core.formulas.context_gatherers import *
+from core.formulas.contexts import *
+from core.math_interface import *
+from core.formulas.weather import *
 from systems.signal_service import SignalType, Signal
 
 
@@ -120,6 +122,31 @@ class StatEvent(Event):
         return [Signal(SignalType.stats, self.payload)]
 
 
+class WeatherEvent(Event):
+    type = "temperature drift event"
+
+    def __init__(self, due_time, payload=None, tag=None):
+        """
+        Payload keys =
+        """
+        super().__init__(due_time, payload, tag)
+
+    def begin(self, state: GameState):
+        return (True, [])
+
+    def apply(self, state: GameState):
+        state.weather.apply(
+            step_weather(
+                gather_weather_context(state),
+                calculate_weather_coeffs(state.time.tick),
+            )
+        )
+        return []
+
+    def get_signals(self):
+        return []
+
+
 class EquipItemEvent(Event):
     type = "equip item"
 
@@ -202,8 +229,8 @@ class SleepEvent(Event):
         )
         tag = f"wake_up_player_{player.player_rec.id}"
         pee, poo, heat, cold, duration = wakeup_thresholds(
-            SleepContext.gather(player),
-            WakeupThreshCoefficients.calculate(player),
+            gather_sleep_context(player),
+            calculate_wakeupthresh_coeffs(player),
         )
         player.sleeping_since = state.time
         player.sleep_ref = state.time + duration

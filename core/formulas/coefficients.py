@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from player.domain import Player
 
 
 @dataclass(frozen=True)
@@ -14,10 +13,6 @@ class SleepDelayCoefficients:
     heat_divider: int = 40  # c_18
     heat_cap: int = 60  # c_19
 
-    @classmethod
-    def calculate(cls, player: Player):
-        return cls()
-
 
 @dataclass(frozen=True)
 class WakeupThreshCoefficients:
@@ -31,10 +26,31 @@ class WakeupThreshCoefficients:
     base_heat: int = 2000  # c_4
     base_cold: int = 1500  # c_5
 
-    @classmethod
-    def calculate(cls, player: Player):
-        base_dur = (
-            450 - player.stats.get_attr("vitality") // 167
-        )
-        print(f"base sleep duration = {base_dur}")
-        return cls(base_duration=base_dur)
+
+@dataclass(frozen=True)
+class WeatherCoefficients:
+    dt: float = 5.0
+
+    sunlight_duration: int = 720
+    sunlight_divider: int = 13
+    sunlight_offset: int = (1440 - sunlight_duration) // 2
+
+    temp_mu: float = 0000.0  # Long-term average
+    temp_theta: float = (
+        0.0035  # Speed of reversion (higher = faster return to average)
+    )
+    temp_sigma: float = (
+        60.0  # Volatility (magnitude of random swings)
+    )
+
+    wind_mu: float = 1000.0
+    wind_theta: float = 0.001
+    wind_sigma: float = 25.0
+
+    precip_mu: float = -4000.0  # Average intensity
+    precip_theta: float = (
+        0.0004  # Reversion speed for moisture
+    )
+    precip_sigma: float = (
+        70.0  # High volatility allows sudden storms
+    )

@@ -12,6 +12,7 @@ class SignalType(Enum):
     stats = auto()
     anatomical = auto()
     minute = auto()
+    minutes_5 = auto()
     hour = auto()
     day = auto()
     location = auto()
