@@ -17,7 +17,7 @@ from db.models.world import (
     SegmentCondition,
 )
 from core.defs import (
-    PATH_CONDITION_KINDS,
+    PATH_CONDITION_KINDS_DICT,
     STR_PATH_COND_PARAMS,
     SEGM_COND_KINDS,
 )
@@ -46,7 +46,7 @@ class ConditionEditorDialog(QDialog):
         self.layout.addWidget(QLabel("Condition Type:"))
         self.kind_combo = QComboBox()
         self.kind_combo.addItems(
-            PATH_CONDITION_KINDS.keys()
+            PATH_CONDITION_KINDS_DICT.keys()
         )
         self.layout.addWidget(self.kind_combo)
         self.position_container = QWidget()
@@ -133,7 +133,7 @@ class ConditionEditorDialog(QDialog):
         self._clear_form_layout(self.param_form)
         self.param_widgets.clear()
         kind = self.kind_combo.currentText()
-        params = PATH_CONDITION_KINDS.get(kind, [])
+        params = PATH_CONDITION_KINDS_DICT.get(kind, [])
         for param in params:
             if param in STR_PATH_COND_PARAMS.keys():
                 widget = QComboBox()

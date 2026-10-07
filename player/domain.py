@@ -2,9 +2,11 @@ from db.models.item import Item
 from db.models.player_record import PlayerRecord
 from db.repository.item import ItemRepository
 from db.repository.player import PlayerRepository
+from db.repository.location import LocationRepository
 from player.anatomy import Anatomy
 from player.inventory import Inventory
 from player.stats import Stats
+from player.location import Location
 from core.time import Time
 
 
@@ -19,6 +21,7 @@ class Player:
         player: PlayerRecord,
         player_repo: PlayerRepository,
         item_repo: ItemRepository,
+        loc_repo: LocationRepository,
     ):
         self.player_rec = player
         self.inventory = Inventory(
@@ -28,6 +31,9 @@ class Player:
             self.player_rec.id, player_repo
         )
         self.stats = Stats(self.player_rec.id, player_repo)
+        self.location = Location(
+            self.player_rec.id, loc_repo
+        )
 
     def equip_item_event(self, item: Item, slot_id_list):
         mold = self.inventory.repo.get_original_mold(item)

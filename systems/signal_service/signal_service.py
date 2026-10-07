@@ -21,6 +21,7 @@ class SignalType(Enum):
     wake_up = auto()
     check = auto()
     weather = auto()
+    new_task = auto()
 
 
 @dataclass

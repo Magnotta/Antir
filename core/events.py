@@ -6,7 +6,10 @@ from core.formulas.sleep_cycle import *
 from core.formulas.contexts import *
 from core.math_interface import *
 from core.formulas.weather import *
-from systems.signal_service import SignalType, Signal
+from systems.signal_service.signal_service import (
+    SignalType,
+    Signal,
+)
 
 
 EVENTS = {}

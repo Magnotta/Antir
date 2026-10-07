@@ -1,6 +1,7 @@
 from collections import defaultdict
 from db.models.player_stat import HistoricalStat
 from core.game_state import GameState
+from core.time import Time
 
 
 class Summarizer:
@@ -87,7 +88,9 @@ class Summarizer:
             if delta == 0:
                 continue
 
-            hours_elapsed = minutes_elapsed / 60.0
+            hours_elapsed = (
+                minutes_elapsed / Time.TICKS_PER_HOUR
+            )
             delta_per_hour = (
                 delta / hours_elapsed
                 if hours_elapsed > 0

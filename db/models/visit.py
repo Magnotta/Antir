@@ -7,7 +7,7 @@ from sqlalchemy import (
     String,
     Text,
 )
-from .base import Base
+from db.models.base import Base
 
 
 class Visit(Base):

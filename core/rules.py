@@ -1,7 +1,10 @@
 from enum import IntEnum, auto
 from core.events import Event, StatEvent, WeatherEvent
 from core.math_interface import *
-from systems.signal_service import SignalType, Signal
+from systems.signal_service.signal_service import (
+    SignalType,
+    Signal,
+)
 from .game_state import GameState
 from .formulas.sleep_cycle import *
 from .formulas.physiology import *
@@ -33,10 +36,14 @@ class Rule:
         return []
 
 
+class WetRainRule(Rule):
+    pass
+
+
 class SleepyRule(Rule):
     listens_to = [SignalType.hour]
     name = "hourly sleepyness rule"
-    category = RuleStrictness.ALWAYS
+    strictness = RuleStrictness.ALWAYS
 
     def fulfill(self, state, signal):
         return [
@@ -58,6 +65,10 @@ class SleepyRule(Rule):
 #     listens_to
 
 
+class InventoryDevilRule(Rule):
+    pass
+
+
 class EclipticSunRule(Rule):
     pass
 
@@ -65,7 +76,7 @@ class EclipticSunRule(Rule):
 class WeatherRule(Rule):
     listens_to = [SignalType.minutes_5]
     name = "timely weather oscillation"
-    category = RuleStrictness.ALWAYS
+    strictness = RuleStrictness.ALWAYS
 
     def fulfill(self, state, signal):
         return [WeatherEvent(state.time)]
@@ -86,7 +97,7 @@ class ShitRule(Rule):
 class ThirstRule(Rule):
     listens_to = [SignalType.hour]
     name = "hourly thirst rule"
-    category = RuleStrictness.FIRM
+    strictness = RuleStrictness.FIRM
 
     def fulfill(self, state, signal):
         return [
@@ -108,7 +119,7 @@ class ThirstRule(Rule):
 class PhysioPneumaRule(Rule):
     listens_to = [SignalType.day]
     name = "player physiological pneuma"
-    category = RuleStrictness.ALWAYS
+    strictness = RuleStrictness.ALWAYS
 
     def fulfill(self, state, signal):
         return [
@@ -130,7 +141,7 @@ class PhysioPneumaRule(Rule):
 class DayHungerRule(Rule):
     listens_to = [SignalType.day]
     name = "daily hunger rule"
-    category = RuleStrictness.PERMISSIVE
+    strictness = RuleStrictness.PERMISSIVE
 
     def fulfill(self, state, signal):
         meal_offsets = [480, 720, 1080]
@@ -152,7 +163,7 @@ class DayHungerRule(Rule):
 class MidnightHungerRule(Rule):
     listens_to = [SignalType.day]
     name = 'midnight hunger rule'
-    category = RuleStrictness.PERMISSIVE
+    strictness = RuleStrictness.PERMISSIVE
 
     def fulfill(self, state, signal):
         targets = [

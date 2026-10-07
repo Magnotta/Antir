@@ -3,13 +3,14 @@ from PyQt6.QtWidgets import (
     QTabWidget,
 )
 from core.engine import Engine
-from systems.signal_service import SignalType
-from systems.commands import DecisonType
+from systems.signal_service.signal_service import SignalType
+from systems.command_service.commands import DecisonType
 from .tabs.home import HomeTab
 from .tabs.item import ItemTab
 from .tabs.player import PlayersTab
 from .tabs.loc import LocalityTab
 from .dialogs.choice_answer import ChoiceDialog
+from .dialogs.task_spec_dialog import TaskSpecDialog
 from .widgets.summarizer_popup import SummarizerPopup
 
 
@@ -56,6 +57,9 @@ class Window(QMainWindow):
         )
         self.engine.signals.connect(
             SignalType.weather, self.update_home_background
+        )
+        self.engine.signals.connect(
+            SignalType.new_task, self.create_task
         )
         self.engine.signals.create_decision_path(
             DecisonType.slot_choice,
@@ -114,6 +118,15 @@ class Window(QMainWindow):
 
     def update_home_background(self):
         self.home_tab.update()
+
+    def create_task(self):
+        spec = TaskSpecDialog.get_task_spec(
+            item_repository=self.engine.state.item_repo,
+            participant_ids=[],
+            parent=self,
+        )
+        if spec is not None:
+            return
 
 
 def validate_body_parts(selected: list) -> tuple[bool, str]:

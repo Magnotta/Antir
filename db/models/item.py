@@ -11,7 +11,7 @@ from sqlalchemy import (
     ForeignKey,
     UniqueConstraint,
 )
-from .base import Base
+from db.models.base import Base
 
 
 class ItemParam(Base):
@@ -102,6 +102,55 @@ class ParamSpec(Base):
     __table_args__ = (UniqueConstraint("mold_id", "param"),)
 
 
+class ToolActivityProfile(Base):
+    __tablename__ = "mold_activity_profiles"
+    id: Mapped[int] = mapped_column(
+        Integer, primary_key=True
+    )
+    mold_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("molds.id"), nullable=False
+    )
+    activity: Mapped[str] = mapped_column(
+        String, nullable=False
+    )
+    coefficients: Mapped[dict] = mapped_column(
+        JSON, nullable=False
+    )
+    mold: Mapped["Mold"] = relationship(
+        back_populates="activity_profiles",
+        foreign_keys=[mold_id],
+    )
+    __table_args__ = (
+        UniqueConstraint("mold_id", "activity"),
+    )
+
+
+class LightSourceProfile(Base):
+    __tablename__ = "mold_light_profiles"
+    id: Mapped[int] = mapped_column(
+        Integer, primary_key=True
+    )
+    mold_id: Mapped[int] = mapped_column(
+        ForeignKey("molds.id"), unique=True
+    )
+    light_output: Mapped[int] = mapped_column(
+        Integer, nullable=False
+    )
+    fuel_capacity: Mapped[int] = mapped_column(
+        Integer, nullable=False
+    )
+    burn_rate: Mapped[int] = mapped_column(
+        Integer, nullable=False
+    )
+    refillable: Mapped[bool] = mapped_column(
+        Boolean, nullable=False
+    )
+    mold: Mapped["Mold"] = relationship(
+        back_populates="lighting_profile",
+        foreign_keys=[mold_id],
+    )
+
+
 class Mold(Base):
     __tablename__ = "molds"
     id: Mapped[int] = mapped_column(
@@ -121,3 +170,18 @@ class Mold(Base):
     spawned_items: Mapped[list[Item]] = relationship(
         back_populates="mold", cascade="all, delete-orphan"
     )
+    activity_profiles: Mapped[
+        list["ToolActivityProfile"]
+    ] = relationship(
+        back_populates="mold", cascade="all, delete-orphan"
+    )
+    lighting_profile: Mapped[LightSourceProfile] = (
+        relationship(
+            back_populates="mold",
+            cascade="all, delete-orphan",
+        )
+    )
+
+    def is_tool_or_weapon(self) -> bool:
+        tag_set = {t.strip() for t in self.tags.split(",")}
+        return bool(tag_set & {"to", "we"})

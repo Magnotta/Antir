@@ -1,9 +1,15 @@
 from dataclasses import dataclass
 from typing import Callable, Sequence
 import core.events as e
-from .pending_decision import DecisonType, PendingDecision
-from .engine_interface import EngineProtocol
-from .signal_service import Signal, SignalType
+from ..signal_service.pending_decision import (
+    DecisonType,
+    PendingDecision,
+)
+from ..engine_interface import EngineProtocol
+from ..signal_service.signal_service import (
+    Signal,
+    SignalType,
+)
 from core.formulas.sleep_cycle import sleep_delay
 from core.formulas.contexts import *
 from core.formulas.coefficients import *
@@ -174,6 +180,11 @@ def wake_up(engine: EngineProtocol, target, message="none"):
     )
 
 
+def new_task(engine: EngineProtocol, message="none"):
+    engine.signals.store([Signal(SignalType.new_task, {})])
+    engine.signals.notify()
+
+
 COMMANDS = {
     "tm": CommandSpec(
         key="tm",
@@ -230,5 +241,12 @@ COMMANDS = {
         arg_types=[],
         description="wake up",
         handler=wake_up,
+    ),
+    "task": CommandSpec(
+        key="task",
+        target_type=None,
+        arg_types=[],
+        description="start new task",
+        handler=new_task,
     ),
 }

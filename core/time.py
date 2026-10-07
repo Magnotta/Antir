@@ -2,11 +2,17 @@ from __future__ import annotations
 
 
 class Time:
+    TICKS_PER_HOUR = 60
+    TICKS_PER_DAY = 1440
+    TICKS_PER_YEAR = 525600
+
     def __init__(self, tm: int = 0) -> None:
         self.tick = tm
-        self.d = tm // 1440
-        self.h = tm % 1440 // 60
-        self.m = tm % 60
+        self.d = tm // self.TICKS_PER_DAY
+        self.h = (
+            tm % self.TICKS_PER_DAY // self.TICKS_PER_HOUR
+        )
+        self.m = tm % self.TICKS_PER_HOUR
         self.day_change = True if self.tick == 0 else False
         self.hour_change = True if self.tick == 0 else False
 

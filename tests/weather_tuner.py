@@ -2,9 +2,9 @@ import matplotlib.pyplot as plt
 from core.math_interface import calculate_weather_coeffs
 from core.formulas.contexts import WeatherContext
 from core.formulas.weather import step_weather
+from core.time import Time
 import numpy as np
 
-TICKS_PER_YEAR = 525600
 
 # ---------------------------------------------------------------------
 # Simulation Loop
@@ -12,10 +12,10 @@ TICKS_PER_YEAR = 525600
 
 
 def simulate_and_plot(
-    total_ticks: int = TICKS_PER_YEAR * 2,
+    total_ticks: int = Time.TICKS_PER_YEAR * 2,
 ):
     # Initialize at tick 0 with neutral values.
-    init_time = 1440 * 15
+    init_time = Time.TICKS_PER_DAY * 15
 
     times = []
     temps = []
@@ -63,7 +63,7 @@ def simulate_and_plot(
         clouds.append(dict["cloud_coverage"])
 
     # --- Plotting ---
-    times_days = np.array(times) / 1440.0
+    times_days = np.array(times) / Time.TICKS_PER_DAY
     fig, axes = plt.subplots(
         4, 1, figsize=(16, 12), sharex=True
     )
@@ -159,4 +159,4 @@ def simulate_and_plot(
 # ---------------------------------------------------------------------
 if __name__ == "__main__":
     # Simulate 2 full years to see seasonal behavior.
-    simulate_and_plot(1440 * 30 * 6)
+    simulate_and_plot(Time.TICKS_PER_DAY * 30 * 6)

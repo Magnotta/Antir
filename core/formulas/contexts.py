@@ -37,3 +37,12 @@ class WeatherContext:
     temperature: int = 0
     wind_latent: int = 0
     precip_latent: int = 0
+
+
+@dataclass
+class LightingContext:
+    enclosure: float
+    weather_sunlight: int
+    active_sources: list[
+        tuple[int, int]
+    ]  # (light_output, fuel_remaining) per lit source

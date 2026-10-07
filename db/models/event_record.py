@@ -8,7 +8,7 @@ from sqlalchemy import (
     String,
     JSON,
 )
-from .base import Base
+from db.models.base import Base
 
 
 class EventRecord(Base):

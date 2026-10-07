@@ -1,5 +1,5 @@
 import shlex
-from systems.commands import COMMANDS
+from systems.command_service.commands import COMMANDS
 
 
 class CommandParser:

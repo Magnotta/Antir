@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from core.time import Time
 
 
 @dataclass(frozen=True)
@@ -33,7 +34,9 @@ class WeatherCoefficients:
 
     sunlight_duration: int = 720
     sunlight_divider: int = 13
-    sunlight_offset: int = (1440 - sunlight_duration) // 2
+    sunlight_offset: int = (
+        Time.TICKS_PER_DAY - sunlight_duration
+    ) // 2
 
     temp_mu: float = 0000.0  # Long-term average
     temp_theta: float = (

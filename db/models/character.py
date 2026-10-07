@@ -5,7 +5,7 @@ from sqlalchemy.orm import (
 from sqlalchemy import (
     Integer,
 )
-from .base import Base
+from db.models.base import Base
 
 
 class Character(Base):

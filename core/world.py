@@ -3,36 +3,36 @@
 LOCALITIES = [
     {
         'data': None,
-        'description': '',
+        'description': 'A small trading village.',
         'id': 1,
-        'name': 'Vila Cron',
+        'name': 'Millbrook',
     },
     {
         'data': None,
-        'description': '',
+        'description': 'b',
         'id': 2,
-        'name': 'Petra',
+        'name': 'a',
+    },
+    {
+        'data': None,
+        'description': 'a',
+        'id': 3,
+        'name': 'b',
     },
 ]
 
-PATHS = [
+SITES = [
     {
-        'data': None,
-        'description': '',
-        'destination_id': 2,
-        'distance_km': 115.0,
+        'description': 'The open square at the village center.',
+        'end': None,
         'id': 1,
-        'origin_id': 1,
-        'point_conditions': [
-            {
-                'data': {'angle': 89},
-                'description': None,
-                'id': 1,
-                'kind': 'inclination_change',
-                'path_id': 1,
-                'position': 0.2,
-            }
-        ],
-        'segment_conditions': [],
+        'locality_id': 1,
+        'name': 'town_square',
+        'path_id': None,
+        'start': None,
     }
 ]
+
+PATHS = []
+
+JUNCTIONS = []

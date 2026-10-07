@@ -8,7 +8,7 @@ from sqlalchemy import (
     ForeignKey,
     UniqueConstraint,
 )
-from .base import Base
+from db.models.base import Base
 
 
 class PlayerAttr(Base):

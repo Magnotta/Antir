@@ -22,6 +22,7 @@ from core.formulas.sleep_cycle import (
     wakeup_thresholds,
 )
 from core.formulas.contexts import SleepContext
+from core.time import Time
 
 
 def fmt_minutes(total_minutes: int) -> str:
@@ -29,7 +30,7 @@ def fmt_minutes(total_minutes: int) -> str:
     (e.g. -734) are hard to sanity-check by eye."""
     sign = "-" if total_minutes < 0 else ""
     total_minutes = abs(total_minutes)
-    h, m = divmod(total_minutes, 60)
+    h, m = divmod(total_minutes, Time.TICKS_PER_HOUR)
     return f"{sign}{h}h{m:02d}m"
 
 

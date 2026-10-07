@@ -7,9 +7,11 @@ from db.models.player_stat import (
     StatThreshold,
     HistoricalStat,
 )
-from db.models.item_slot_occupancy import ItemSlotOccupancy
-from db.models.body_node import BodyNode
-from db.models.equipment_slot import EquipmentSlot
+from db.models.player_body import (
+    BodyNode,
+    EquipmentSlot,
+    ItemSlotOccupancy,
+)
 from db.models.item import Item
 from core.defs import (
     SLOT_MAX_INDEX,
@@ -174,14 +176,17 @@ class PlayerRepository:
     ):
         if parent_id == -1:
             new_node = BodyNode(
-                broken_bone=False,
-                torn_ligament=False,
-                dislocated_joint=False,
-                severed=False,
-                venomous_bite=False,
-                insect_bite=False,
-                poison_sting=False,
-                swollen_joint=False,
+                broken_bone=0,
+                torn_ligament=0,
+                muscle_strain=0,
+                dislocated_joint=0,
+                severed=0,
+                venomous_bite=0,
+                insect_bite=0,
+                poison_sting=0,
+                swollen_joint=0,
+                sunburn=0,
+                dermatitis=0,
                 sliced=0,
                 pierced=0,
                 bludgeoned=0,
@@ -191,14 +196,17 @@ class PlayerRepository:
             )
         else:
             new_node = BodyNode(
-                broken_bone=False,
-                torn_ligament=False,
-                dislocated_joint=False,
-                severed=False,
-                venomous_bite=False,
-                insect_bite=False,
-                poison_sting=False,
-                swollen_joint=False,
+                broken_bone=0,
+                torn_ligament=0,
+                muscle_strain=0,
+                dislocated_joint=0,
+                severed=0,
+                venomous_bite=0,
+                insect_bite=0,
+                poison_sting=0,
+                swollen_joint=0,
+                sunburn=0,
+                dermatitis=0,
                 sliced=0,
                 pierced=0,
                 bludgeoned=0,
@@ -248,7 +256,7 @@ class PlayerRepository:
             .filter(
                 EquipmentSlot.body_node_id == body_node.id,
                 EquipmentSlot.slot_type == slot,
-                EquipmentSlot.item_id is None,
+                EquipmentSlot.item_id.is_not(None),
             )
             .first()
         )

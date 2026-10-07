@@ -1,5 +1,5 @@
 from core.defs import INJURY_TYPES
-from db.models.body_node import BodyNode, EquipmentSlot
+from db.models.player_body import BodyNode, EquipmentSlot
 from db.repository.player import PlayerRepository
 
 

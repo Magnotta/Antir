@@ -4,13 +4,17 @@ from core.game_state import GameState
 from core.rules import Rule, RULES
 from core.events import Event
 from db.repository.event import EventRepository
-from systems.command_service import CommandService
-from systems.signal_service import (
+from systems.command_service.command_service import (
+    CommandService,
+)
+from systems.signal_service.signal_service import (
     SignalBus,
     Signal,
     SignalType,
 )
-from systems.summary_service import Summarizer
+from systems.signal_service.summary_service import (
+    Summarizer,
+)
 
 
 class Engine:

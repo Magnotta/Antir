@@ -12,11 +12,11 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 from db.repository.location import LocationRepository
 from core.game_state import GameState
-from ..dialogs.locality_editor import LocalityEditorDialog
-from ..dialogs.path_condition_editor import (
+from ui.dialogs.locality_editor import LocalityEditorDialog
+from ui.dialogs.path_condition_editor import (
     ConditionEditorDialog,
 )
-from ..dialogs.path_editor import PathEditorDialog
+from ui.dialogs.path_editor import PathEditorDialog
 
 
 class LocalityTab(QWidget):
@@ -27,7 +27,48 @@ class LocalityTab(QWidget):
         self.repo = repo
         self.game_state = state
         self.setWindowTitle("Locality Viewer")
-        self.resize(800, 500)
+        self.resize(800, 700)
+
+        # ------------------------------------------------------------
+        # Localities (browse all, double-click to edit / add sites)
+        # ------------------------------------------------------------
+        localities_label = QLabel("Localities")
+        localities_label.setAlignment(
+            Qt.AlignmentFlag.AlignCenter
+        )
+        self.localities_table = QTableWidget()
+        self.localities_table.setColumnCount(3)
+        self.localities_table.setHorizontalHeaderLabels(
+            ["ID", "Name", "Description"]
+        )
+        self.localities_table.itemDoubleClicked.connect(
+            self.edit_selected_locality
+        )
+        loc_header = (
+            self.localities_table.horizontalHeader()
+        )
+        loc_header.setSectionResizeMode(
+            0, QHeaderView.ResizeMode.ResizeToContents
+        )
+        loc_header.setSectionResizeMode(
+            1, QHeaderView.ResizeMode.ResizeToContents
+        )
+        loc_header.setSectionResizeMode(
+            2, QHeaderView.ResizeMode.Stretch
+        )
+        self.new_locality_btn = QPushButton("New Locality")
+        self.new_locality_btn.clicked.connect(
+            self.create_locality
+        )
+        localities_btn_layout = QHBoxLayout()
+        localities_btn_layout.addWidget(
+            self.new_locality_btn
+        )
+        localities_btn_layout.addStretch()
+
+        # ------------------------------------------------------------
+        # Current locality: its outgoing paths + a path's conditions
+        # ------------------------------------------------------------
         self.locality_label = QLabel()
         self.locality_label.setAlignment(
             Qt.AlignmentFlag.AlignCenter
@@ -42,7 +83,7 @@ class LocalityTab(QWidget):
             [
                 "ID",
                 "Destination",
-                "Distance (km)",
+                "Length (m)",
                 "Description",
             ]
         )
@@ -110,10 +151,6 @@ class LocalityTab(QWidget):
         tables_layout.addLayout(right)
         self.add_path_btn = QPushButton("New Path")
         self.add_path_btn.clicked.connect(self.add_path)
-        self.new_locality_btn = QPushButton("New Locality")
-        self.new_locality_btn.clicked.connect(
-            self.create_locality
-        )
         self.add_cond_btn = QPushButton("Add Condition")
         self.add_cond_btn.clicked.connect(
             self.add_condition
@@ -125,13 +162,22 @@ class LocalityTab(QWidget):
         )
         self.del_cond_btn.setEnabled(False)
         button_layout = QHBoxLayout()
-        button_layout.addWidget(self.new_locality_btn)
         button_layout.addWidget(self.add_path_btn)
         button_layout.addWidget(self.add_cond_btn)
+        button_layout.addWidget(self.del_cond_btn)
+
+        # ------------------------------------------------------------
+        # Assemble
+        # ------------------------------------------------------------
         self.layout = QVBoxLayout(self)
+        self.layout.addWidget(localities_label)
+        self.layout.addWidget(self.localities_table)
+        self.layout.addLayout(localities_btn_layout)
+        self.layout.addWidget(self.locality_label)
         self.layout.addLayout(tables_layout)
         self.layout.addLayout(button_layout)
-        self.layout.addWidget(self.locality_label)
+
+        self.refresh_localities_table()
         self.refresh()
 
     def keyPressEvent(self, event):
@@ -154,50 +200,80 @@ class LocalityTab(QWidget):
         path_id = int(self.paths_table.item(row, 0).text())
         return self.repo.get_path_by_id(path_id)
 
+    def get_selected_locality(self):
+        selected = self.localities_table.selectedItems()
+        if not selected:
+            return None
+        row = selected[0].row()
+        locality_id = int(
+            self.localities_table.item(row, 0).text()
+        )
+        return self.repo.get_locality_by_id(locality_id)
+
+    def refresh_localities_table(self):
+        localities = self.repo.get_all_localities()
+        self.localities_table.setRowCount(len(localities))
+        for row, locality in enumerate(localities):
+            self.localities_table.setItem(
+                row, 0, QTableWidgetItem(str(locality.id))
+            )
+            self.localities_table.setItem(
+                row, 1, QTableWidgetItem(locality.name)
+            )
+            self.localities_table.setItem(
+                row,
+                2,
+                QTableWidgetItem(
+                    locality.description or ""
+                ),
+            )
+        self.localities_table.resizeColumnsToContents()
+
     def create_locality(self):
+        # LocalityEditorDialog persists via its own Save button now (it
+        # has to, so Sites can be added before the dialog closes) --
+        # nothing to do here but open it and refresh afterward.
         dialog = LocalityEditorDialog(
             self.repo, parent=self
         )
-        if dialog.exec():
-            data = dialog.get_data()
-            if not data["name"]:
-                QMessageBox.warning(
-                    self, "Error", "Name cannot be empty."
-                )
-                return
-            locality = self.repo.add_locality(
-                name=data["name"],
-                description=data["description"],
-                data=None,
-            )
-            self.locality_id = locality.id
-            self.refresh()
+        dialog.exec()
+        self.refresh_localities_table()
+
+    def edit_selected_locality(self):
+        locality = self.get_selected_locality()
+        if not locality:
+            return
+        dialog = LocalityEditorDialog(
+            self.repo, locality=locality, parent=self
+        )
+        dialog.exec()
+        self.refresh_localities_table()
+        # Cheap either way, and picks up a name change if this was the
+        # locality currently shown in the paths panel below.
+        self.refresh()
 
     def edit_selected_path(self):
         path = self.get_selected_path()
         if not path:
             return
+        # PathEditorDialog persists via its own Save button now, same as
+        # LocalityEditorDialog -- don't call repo.update_path again here.
         dialog = PathEditorDialog(
             self.repo,
             self.game_state.locality,
             path=path,
             parent=self,
         )
-        if dialog.exec():
-            data = dialog.get_data()
-            self.repo.update_path(
-                path.id,
-                destination_id=data["destination_id"],
-                distance_km=data["distance_km"],
-                description=data["description"],
-            )
-            self.refresh()
+        dialog.exec()
+        self.refresh()
 
     def refresh(self):
         if self.game_state.locality is None:
             self.locality_label.setText(
                 "Current Locality: None"
             )
+            self.paths_table.setRowCount(0)
+            self.conditions_table.setRowCount(0)
             return
         self.locality_label.setText(
             f"Current Locality: {self.game_state.locality.name}"
@@ -218,7 +294,7 @@ class LocalityTab(QWidget):
             self.paths_table.setItem(
                 row,
                 2,
-                QTableWidgetItem(str(path.distance_km)),
+                QTableWidgetItem(str(path.length_m)),
             )
             self.paths_table.setItem(
                 row,
@@ -299,18 +375,13 @@ class LocalityTab(QWidget):
         self.conditions_table.resizeColumnsToContents()
 
     def add_path(self):
+        # PathEditorDialog persists via its own Save button now -- don't
+        # call repo.add_path again here.
         dialog = PathEditorDialog(
             self.repo, self.game_state.locality, parent=self
         )
-        if dialog.exec():
-            data = dialog.get_data()
-            self.repo.add_path(
-                data["origin"],
-                data["destination"],
-                distance_km=data["distance_km"],
-                description=data["description"],
-            )
-            self.refresh()
+        dialog.exec()
+        self.refresh()
 
     def add_condition(self):
         path = self.get_selected_path()

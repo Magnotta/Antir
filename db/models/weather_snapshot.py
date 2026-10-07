@@ -3,7 +3,7 @@ from sqlalchemy.orm import (
     mapped_column,
 )
 from sqlalchemy import Integer
-from .base import Base
+from db.models.base import Base
 
 
 class WeatherSnapshot(Base):

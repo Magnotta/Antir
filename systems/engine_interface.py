@@ -1,7 +1,9 @@
 from typing import Protocol, Any
 from core.game_state import GameState
-from systems.signal_service import SignalBus
-from systems.summary_service import Summarizer
+from systems.signal_service.signal_service import SignalBus
+from systems.signal_service.summary_service import (
+    Summarizer,
+)
 
 
 class EngineProtocol(Protocol):

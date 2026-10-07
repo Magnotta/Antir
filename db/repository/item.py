@@ -3,12 +3,21 @@ from random import randint
 from typing import Optional
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
-from db.models.item import Mold, ParamSpec, Item, ItemParam
+from db.models.item import (
+    Mold,
+    ToolActivityProfile,
+    ParamSpec,
+    Item,
+    ItemParam,
+)
 from core.defs import (
     TAG_TO_PARAMS,
     ITEM_PARAM_MAXES,
     ITEM_PARAM_MODES,
     ITEM_PARAM_DEFAULTS,
+)
+from systems.task_service.physical_activities import (
+    CoefficientMatrix,
 )
 
 
@@ -205,3 +214,17 @@ class ItemRepository:
                     f"Param '{spec.param}' not implied by tags"
                 )
         return errors
+
+    def get_activity_profile(
+        self, mold_id: int, activity: str
+    ) -> CoefficientMatrix | None:
+        row = (
+            self.session.query(ToolActivityProfile)
+            .filter_by(mold_id=mold_id, activity=activity)
+            .first()
+        )
+        return (
+            CoefficientMatrix.from_json(row.coefficients)
+            if row
+            else None
+        )

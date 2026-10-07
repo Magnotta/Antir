@@ -22,3 +22,8 @@
 <a href="https://www.flaticon.com/free-icons/depression" title="depression icons">Depression icons created by kornkun - Flaticon</a>
 <a href="https://www.flaticon.com/free-icons/breathing" title="breathing icons">Breathing icons created by Dewi Sari - Flaticon</a>
 <a href="https://www.flaticon.com/free-icons/sweat" title="sweat icons">Sweat icons created by Iconjam - Flaticon</a>
+<a href="https://www.flaticon.com/free-icons/muscle" title="muscle icons">Muscle icons created by Magnific - Flaticon</a>
+<a href="https://www.flaticon.com/free-icons/sunburn" title="sunburn icons">Sunburn icons created by kornkun - Flaticon</a>
+Victor Matheus Sobreira Teixeira pela ajuda com definições atividades físicas
+Rafael Cascado Campos pelo acompanhamento do projeto, sugestões sobre bancos de dados e talvez a dica mais importante que já me deram: deixa o código chamar código
+Manoel Vieira Coelho Neto pelas ajudas arquiteturais com o código

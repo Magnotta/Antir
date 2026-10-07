@@ -1,3 +1,12 @@
+from enum import Enum
+
+
+class StateProperties:
+    LAST_SIMULATED_TICK = "last_simulated_tick"
+    TEMPERATURE = "temperature"
+    NEXT_EVENT_TAG = "next_event_tag"
+
+
 MOLD_TAG_DICTS = [
     {
         "tag_name": "we",
@@ -43,6 +52,7 @@ MOLD_TAG_DICTS = [
             "formality",
             "charm",
             "cleanliness",
+            "smell",
             "wet",
             "insulation",
         ],
@@ -70,7 +80,12 @@ MOLD_TAG_DICTS = [
     {
         "tag_name": "to",
         "text": "ferramenta",
-        "params": ["durability", "quality", "wet"],
+        "params": [
+            "durability",
+            "quality",
+            "wet",
+            "balance",
+        ],
     },
     {
         "tag_name": "mt",
@@ -169,7 +184,7 @@ TAG_TO_PARAMS = {
 TAG_NAMES = [t["tag_name"] for t in MOLD_TAG_DICTS]
 
 
-ITEM_PARAMS = [
+ITEM_PARAM_DICTS = [
     {
         "param_name": "durability",
         "param_range": 1000,
@@ -262,6 +277,15 @@ ITEM_PARAMS = [
         "param_range": 5,
         "param_mode": "semi",
         "default_distribution": {"base": 2, "variance": 1},
+    },
+    {
+        "param_name": "smell",
+        "param_range": 1000,
+        "param_mode": "auto",
+        "default_distribution": {
+            "base": 100,
+            "variance": 100,
+        },
     },
     {
         "param_name": "balance",
@@ -405,34 +429,42 @@ ITEM_PARAMS = [
 
 
 ITEM_PARAM_MAXES = {
-    p["param_name"]: p["param_range"] for p in ITEM_PARAMS
+    p["param_name"]: p["param_range"]
+    for p in ITEM_PARAM_DICTS
 }
 
 
 ITEM_PARAM_MODES = {
-    p["param_name"]: p["param_mode"] for p in ITEM_PARAMS
+    p["param_name"]: p["param_mode"]
+    for p in ITEM_PARAM_DICTS
 }
 
 
 ITEM_PARAM_DEFAULTS = {
     p["param_name"]: p["default_distribution"]
-    for p in ITEM_PARAMS
+    for p in ITEM_PARAM_DICTS
 }
 
 
-CHARACTER_ATTRIBUTES = [
-    "height",
-    "weight",
-    "arm_strength",
-    "leg_strength",
-    "dexterity",
-    "agility",
-    "vitality",
-    "cognitive_flexibility",
-    "holistic_thought",
-    "emotional_regulation",
-    "emotional_camouflage",
-]
+class PlayerAttribute(str, Enum):
+    HEIGHT = "height"
+    WEIGHT = "weight"
+    ARM_STRENGTH = "arm_strength"
+    CORE_STRENGTH = "core_strength"
+    DEXTERITY = "dexterity"
+    AGILITY = "agility"
+    VITALITY = "vitality"
+    COGNITIVE_FLEXIBILITY = "cognitive_flexibility"
+    HOLISTIC_THOUGHT = "holistic_thought"
+    EMOTIONAL_REGULATION = "emotional_regulation"
+    EMOTIONAL_CAMOUFLAGE = "emotional_camouflage"
+
+
+class PhysicalAspect(str, Enum):
+    INTENSITY = "intensity"
+    EFFICIENCY = "efficiency"
+    QUALITY = "quality"
+    SAFETY = "safety"
 
 
 CHARACTER_STATS = [
@@ -659,6 +691,15 @@ BASE_PLAYER_ATTRIBUTES = {
 }
 
 
+PLAYERS_SCHEMA = {
+    "0": {"name": "Joao"},
+    "1": {"name": "Jose"},
+    "2": {"name": "Malina"},
+    "3": {"name": "Estranha"},
+    "4": {"name": "Ricardo"},
+}
+
+
 SLOT_MAX_INDEX = {
     "earring": 6,
     "hat": 1,
@@ -669,28 +710,20 @@ SLOT_MAX_INDEX = {
     "back": 1,
     "shirt": 2,
     "bag": 2,
+    "pauldron": 1,
     "armband": 2,
     "bracelet": 6,
     "ring": 9,
     "glove": 1,
-    "belt": 2,
+    "belt": 1,
     "underpants": 1,
     "holster": 1,
     "pants": 2,
     "skirt": 1,
     "armor": 1,
-    "anklet": 3,
+    "anklet": 2,
     "sock": 1,
     "shoe": 1,
-}
-
-
-PLAYERS_SCHEMA = {
-    "0": {"name": "Joao"},
-    "1": {"name": "Jose"},
-    "2": {"name": "Malina"},
-    "3": {"name": "Estranha"},
-    "4": {"name": "Ricardo"},
 }
 
 
@@ -717,7 +750,10 @@ BODY_SCHEMA = {
                                 "depth": 7,
                                 "children": {
                                     "right_shoulder": {
-                                        "slots": ["bag"],
+                                        "slots": [
+                                            "bag",
+                                            "pauldron",
+                                        ],
                                         "depth": 3,
                                         "children": {
                                             "right_arm": {
@@ -747,7 +783,10 @@ BODY_SCHEMA = {
                                         },
                                     },
                                     "left_shoulder": {
-                                        "slots": ["bag"],
+                                        "slots": [
+                                            "bag",
+                                            "pauldron",
+                                        ],
                                         "depth": 3,
                                         "children": {
                                             "left_arm": {
@@ -891,13 +930,15 @@ INJURY_TYPES = [
     "insect_bite",
     "poison_sting",
     "swollen_joint",
+    "muscle_strain",
     "sliced",
     "pierced",
     "bludgeoned",
+    "sunburn",
 ]
 
 
-PATH_CONDITION_KINDS = {
+PATH_CONDITION_KINDS_DICT = {
     "fallen_tree": ["width", "hardness"],
     "muddy": ["depth"],
     "washout": ["traceability"],
@@ -920,7 +961,7 @@ PATH_CONDITION_KINDS = {
 
 def get_path_cond_params():
     aux = []
-    for param_list in PATH_CONDITION_KINDS.values():
+    for param_list in PATH_CONDITION_KINDS_DICT.values():
         aux.extend(param_list)
     return set(aux)
 
@@ -937,7 +978,6 @@ STR_PATH_COND_PARAMS = {
         "wooded",
         "bouldery",
         "sandy",
-        "talus",
         "scree",
         "snow",
         "slush",
@@ -959,3 +999,81 @@ SEGM_COND_KINDS = [
     "washout",
     "muddy",
 ]
+
+
+SWEAT_ABSORPTION_BY_NODE = {
+    "torso": 300,
+    "hips": 400,
+    "right_shoulder": 50,
+    "left_shoulder": 50,
+    "right_foot": 100,
+    "left_foot": 100,
+}
+
+
+class SkillTrack(str, Enum):
+    # --- Extraction & Gathering ---
+    WOODCUTTING = "woodcutting"
+    MINING = "mining"
+    QUARRYING = "quarrying"
+    FORAGING = "foraging"
+    HERBALISM = "herbalism"
+    FISHING = "fishing"
+    HUNTING = "hunting"
+    TRAPPING = "trapping"
+
+    # --- Agriculture & Animal Husbandry ---
+    FARMING = "farming"
+    ANIMAL_HUSBANDRY = "animal_husbandry"
+    MILKING = "milking"
+    SHEARING = "shearing"
+    BEEKEEPING = "beekeeping"
+
+    # --- Food Production ---
+    BUTCHERY = "butchery"
+    COOKING = "cooking"
+    BAKING = "baking"
+    BREWING = "brewing"
+    PRESERVING = "preserving"
+
+    # --- Textiles & Leather ---
+    SPINNING = "spinning"
+    WEAVING = "weaving"
+    TAILORING = "tailoring"
+    DYEING = "dyeing"
+    TANNING = "tanning"
+    LEATHERWORKING = "leatherworking"
+
+    # --- Construction & Woodcraft ---
+    CARPENTRY = "carpentry"
+    COOPERING = "coopering"
+    MASONRY = "masonry"
+    THATCHING = "thatching"
+    WOODCARVING = "woodcarving"
+
+    # --- Metal & Fine Crafts ---
+    SMITHING = "smithing"
+    SMELTING = "smelting"
+    BOWYER = "bowyer"
+    FLETCHING = "fletching"
+    POTTERY = "pottery"
+    BASKETRY = "basketry"
+    GEM_CUTTING = "gem_cutting"
+    GLASS_BLOWING = "glass_blowing"
+
+    # --- Domestic & General Labor ---
+    DOMESTIC_LABOR = "domestic_labor"
+    FIREMAKING = "firemaking"
+
+    # --- Body & Movement ---
+    ATHLETICS = "athletics"
+    ACCROBATICS = "accrobatics"
+
+    # --- Medicine ---
+    HERBLORE = "herblore"
+    FIRST_AID = "first_aid"
+
+    # --- Combat (kept here since it shares the attribute/exertion machinery) ---
+    MELEE_COMBAT = "melee_combat"
+    ARCHERY = "archery"
+    UNARMED_COMBAT = "unarmed_combat"

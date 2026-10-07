@@ -4,7 +4,7 @@ from sqlalchemy.orm import (
 )
 from sqlalchemy import Integer, String, JSON
 from sqlalchemy.ext.mutable import MutableDict
-from .base import Base
+from db.models.base import Base
 
 
 class PlayerRecord(Base):

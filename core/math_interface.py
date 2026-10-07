@@ -7,6 +7,7 @@ if TYPE_CHECKING:
 import math
 from core.formulas.contexts import *
 from core.formulas.coefficients import *
+from core.time import Time
 
 
 def gather_sleep_context(player: Player) -> SleepContext:
@@ -92,9 +93,6 @@ def calculate_weather_coeffs(
         -math.pi / 2  # Daily temperature oscillation
     )
 
-    TICKS_PER_DAY = 1440
-    TICKS_PER_YEAR = 525600
-
     temp_mu = (
         base_temp
         + annual_temp_ampl
@@ -102,12 +100,12 @@ def calculate_weather_coeffs(
             2
             * math.pi
             * (sim_time + annual_temp_phase)
-            / TICKS_PER_YEAR
+            / Time.TICKS_PER_YEAR
         )
         + daily_temp_ampl
         * math.sin(
             daily_temp_phase
-            + 2 * math.pi * sim_time / TICKS_PER_DAY
+            + 2 * math.pi * sim_time / Time.TICKS_PER_DAY
         )
     )
 
@@ -125,7 +123,7 @@ def calculate_weather_coeffs(
         base_precip_mu
         + annual_precip_ampl
         * math.sin(
-            2 * math.pi * sim_time / TICKS_PER_YEAR
+            2 * math.pi * sim_time / Time.TICKS_PER_YEAR
             + annual_precip_phase
         )
     )

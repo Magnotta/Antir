@@ -3,6 +3,7 @@ import numpy as np
 from core.formulas.math import clamp
 from core.formulas.coefficients import WeatherCoefficients
 from core.formulas.contexts import WeatherContext
+from core.time import Time
 
 
 def weather_noise(step: int) -> tuple[float, float, float]:
@@ -47,7 +48,7 @@ def derive_weather(
     ctx: WeatherContext, coeffs: WeatherCoefficients
 ):
     sim_time = ctx.sim_time
-    day_time = sim_time % 1440
+    day_time = sim_time % Time.TICKS_PER_DAY
     intensity = (
         (day_time - coeffs.sunlight_offset)
         * coeffs.sunlight_duration
