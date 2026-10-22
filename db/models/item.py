@@ -12,10 +12,12 @@ from sqlalchemy import (
     UniqueConstraint,
 )
 from db.models.base import Base
+from core.defs.task import ToolProfile
 
 
 class ItemParam(Base):
     __tablename__ = "item_params"
+    __table_args__ = (UniqueConstraint("item_id", "name"),)
     id: Mapped[int] = mapped_column(
         Integer, primary_key=True
     )
@@ -28,7 +30,7 @@ class ItemParam(Base):
     value: Mapped[int] = mapped_column(
         Integer, nullable=False
     )
-    parent_item: Mapped["Item"] = relationship(
+    item: Mapped["Item"] = relationship(
         back_populates="param_list"
     )
 
@@ -52,20 +54,20 @@ class Item(Base):
         String, nullable=True
     )
     destroyed: Mapped[bool] = mapped_column(
-        Boolean, nullable=False
+        Boolean, nullable=False, default=False
     )
     param_list: Mapped[list[ItemParam]] = relationship(
         cascade="all, delete-orphan",
-        back_populates="parent_item",
+        back_populates="item",
     )
     container_item_id: Mapped[int | None] = mapped_column(
         Integer, ForeignKey("items.id"), nullable=True
     )
-    container_item: Mapped["Item"] = relationship(
-        back_populates="contained_items"
+    container_item: Mapped["Item | None"] = relationship(
+        back_populates="contained_items", remote_side=[id]
     )
     contained_items: Mapped[list["Item"]] = relationship(
-        back_populates="container_item", remote_side=[id]
+        back_populates="container_item"
     )
     mold: Mapped["Mold"] = relationship(
         back_populates="spawned_items"
@@ -76,6 +78,25 @@ class Item(Base):
             f"<Item id={self.id} mold={self.original_mold_id} "
             f"owner={self.owner_id} "
             f"container={self.container_item}>"
+        )
+
+    def get_param(
+        self,
+        name: "str",
+        default: int | None = None,
+    ) -> int | None:
+        for param in self.param_list:
+            if param.name == name:
+                return param.value
+        return default
+
+    def set_param(self, name: "str", value: int) -> None:
+        for param in self.param_list:
+            if param.name == name:
+                param.value = value
+                return
+        self.param_list.append(
+            ItemParam(name=name, value=value)
         )
 
 
@@ -102,55 +123,6 @@ class ParamSpec(Base):
     __table_args__ = (UniqueConstraint("mold_id", "param"),)
 
 
-class ToolActivityProfile(Base):
-    __tablename__ = "mold_activity_profiles"
-    id: Mapped[int] = mapped_column(
-        Integer, primary_key=True
-    )
-    mold_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("molds.id"), nullable=False
-    )
-    activity: Mapped[str] = mapped_column(
-        String, nullable=False
-    )
-    coefficients: Mapped[dict] = mapped_column(
-        JSON, nullable=False
-    )
-    mold: Mapped["Mold"] = relationship(
-        back_populates="activity_profiles",
-        foreign_keys=[mold_id],
-    )
-    __table_args__ = (
-        UniqueConstraint("mold_id", "activity"),
-    )
-
-
-class LightSourceProfile(Base):
-    __tablename__ = "mold_light_profiles"
-    id: Mapped[int] = mapped_column(
-        Integer, primary_key=True
-    )
-    mold_id: Mapped[int] = mapped_column(
-        ForeignKey("molds.id"), unique=True
-    )
-    light_output: Mapped[int] = mapped_column(
-        Integer, nullable=False
-    )
-    fuel_capacity: Mapped[int] = mapped_column(
-        Integer, nullable=False
-    )
-    burn_rate: Mapped[int] = mapped_column(
-        Integer, nullable=False
-    )
-    refillable: Mapped[bool] = mapped_column(
-        Boolean, nullable=False
-    )
-    mold: Mapped["Mold"] = relationship(
-        back_populates="lighting_profile",
-        foreign_keys=[mold_id],
-    )
-
-
 class Mold(Base):
     __tablename__ = "molds"
     id: Mapped[int] = mapped_column(
@@ -162,7 +134,10 @@ class Mold(Base):
     )
     description: Mapped[str | None] = mapped_column(String)
     occupied_slots: Mapped[dict | None] = mapped_column(
-        JSON, nullable=True
+        JSON
+    )
+    tool_profile: Mapped[ToolProfile | None] = (
+        mapped_column(JSON)
     )
     param_specs: Mapped[list[ParamSpec]] = relationship(
         back_populates="mold", cascade="all, delete-orphan"
@@ -170,18 +145,3 @@ class Mold(Base):
     spawned_items: Mapped[list[Item]] = relationship(
         back_populates="mold", cascade="all, delete-orphan"
     )
-    activity_profiles: Mapped[
-        list["ToolActivityProfile"]
-    ] = relationship(
-        back_populates="mold", cascade="all, delete-orphan"
-    )
-    lighting_profile: Mapped[LightSourceProfile] = (
-        relationship(
-            back_populates="mold",
-            cascade="all, delete-orphan",
-        )
-    )
-
-    def is_tool_or_weapon(self) -> bool:
-        tag_set = {t.strip() for t in self.tags.split(",")}
-        return bool(tag_set & {"to", "we"})

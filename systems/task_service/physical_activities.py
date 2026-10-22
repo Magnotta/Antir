@@ -1,108 +1,15 @@
 from dataclasses import dataclass
-from core.defs import PlayerAttribute, PhysicalAspect
+from core.defs.player import PlayerAttribute
+from core.defs.task import PhysicalAspect
+from core.defs.task import CoefficientMatrix
 
 
 @dataclass(frozen=True)
-class CoefficientMatrix:
-    """4x6 grid: PhysicalAspect rows x PlayerAttribute columns."""
-
-    values: dict[
-        PhysicalAspect, dict[PlayerAttribute, float]
-    ]
-
-    @classmethod
-    def zero(cls) -> "CoefficientMatrix":
-        return cls(
-            {
-                p: {a: 0.0 for a in PlayerAttribute}
-                for p in PhysicalAspect
-            }
-        )
-
-    @classmethod
-    def identity(cls) -> "CoefficientMatrix":
-        """Neutral element for tool matrices — combining with this changes nothing."""
-        return cls(
-            {
-                p: {a: 1.0 for a in PlayerAttribute}
-                for p in PhysicalAspect
-            }
-        )
-
-    @classmethod
-    def sparse(
-        cls,
-        entries: dict[str, dict[str, float]],
-        base: "CoefficientMatrix | None" = None,
-    ) -> "CoefficientMatrix":
-        """Build from only the nonzero/non-identity cells, e.g.
-        {"intensity": {"arm_strength": 0.8}, "safety": {"dexterity": 0.5, "arm_strength": 0.2}}
-        """
-        grid = {
-            p: dict(row)
-            for p, row in (
-                base or cls.zero()
-            ).values.items()
-        }
-        for aspect_name, attrs in entries.items():
-            aspect = PhysicalAspect(aspect_name)
-            for attr_name, val in attrs.items():
-                grid[aspect][
-                    PlayerAttribute(attr_name)
-                ] = val
-        return cls(grid)
-
-    def get(
-        self, aspect: PhysicalAspect, attr: PlayerAttribute
-    ) -> float:
-        return self.values[aspect][attr]
-
-    def row(
-        self, aspect: PhysicalAspect
-    ) -> dict[PlayerAttribute, float]:
-        """All attribute coefficients contributing to a single aspect —
-        exactly what upper layers need when computing task intensity/efficiency/etc.
-        """
-        return self.values[aspect]
-
-    def combine(
-        self,
-        other: "CoefficientMatrix",
-        op=lambda a, b: a * b,
-    ) -> "CoefficientMatrix":
-        """Elementwise combine two matrices of the same shape — used to layer a
-        tool's matrix on top of an activity's base matrix.
-        """
-        return CoefficientMatrix(
-            {
-                aspect: {
-                    attr: op(
-                        self.values[aspect][attr],
-                        other.values[aspect][attr],
-                    )
-                    for attr in PlayerAttribute
-                }
-                for aspect in PhysicalAspect
-            }
-        )
-
-    def to_json(self) -> dict:
-        return {
-            p.value: {a.value: v for a, v in row.items()}
-            for p, row in self.values.items()
-        }
-
-    @classmethod
-    def from_json(cls, data: dict) -> "CoefficientMatrix":
-        return cls(
-            {
-                PhysicalAspect(p): {
-                    PlayerAttribute(a): v
-                    for a, v in row.items()
-                }
-                for p, row in data.items()
-            }
-        )
+class Accident:
+    key: str
+    targets: list[str]
+    threshold: int
+    weight: float
 
 
 @dataclass(frozen=True)
@@ -110,15 +17,7 @@ class PhysicalActivityDefinition:
     name: str
     attr_coeffs: CoefficientMatrix
     exp_coeffs: dict[PhysicalAspect, float]
-    accidents: list
-
-
-@dataclass(frozen=True)
-class Accident:
-    type: str
-    targets: list[str]
-    threshold: int
-    weight: float
+    accidents: list[Accident]
 
 
 PHYSICAL_ACTIVITIES_DICT: dict[
@@ -163,14 +62,14 @@ PHYSICAL_ACTIVITIES_DICT: dict[
             ),
             Accident(
                 "slip",
+                ["material", "bystander", "tool"],
                 3500,
                 0.1,
-                ["material", "bystander", "tool"],
             ),
         ],
     ),
     "heavy_tool_use": PhysicalActivityDefinition(
-        name="heay_tool_use",
+        name="heavy_tool_use",
         attr_coeffs=CoefficientMatrix.sparse(
             {
                 PhysicalAspect.INTENSITY: {
@@ -197,7 +96,7 @@ PHYSICAL_ACTIVITIES_DICT: dict[
             PhysicalAspect.SAFETY: 0.6,
         },
         accidents=[
-            Accident("slip", 5000, 1, ["material"]),
+            Accident("slip", ["material"], 5000, 1),
         ],
     ),
     "light_tool_use": PhysicalActivityDefinition(
@@ -226,8 +125,8 @@ PHYSICAL_ACTIVITIES_DICT: dict[
             PhysicalAspect.SAFETY: 0.0,
         },
         accidents=[
-            Accident("pinch", 2000, 0.6, ["player_body"]),
-            Accident("slip", 3000, 0.1, ["material"]),
+            Accident("pinch", ["player_body"], 2000, 0.6),
+            Accident("slip", ["material"], 3000, 0.1),
         ],
     ),
     "workstation_use": PhysicalActivityDefinition(
@@ -277,7 +176,7 @@ PHYSICAL_ACTIVITIES_DICT: dict[
         },
         accidents=[
             Accident(
-                "slip", 1500, 1, ["material", "bystander"]
+                "slip", ["material", "bystander"], 1500, 1
             )
         ],
     ),
@@ -307,7 +206,7 @@ PHYSICAL_ACTIVITIES_DICT: dict[
             PhysicalAspect.SAFETY: 0.5,
         },
         accidents=[
-            Accident("slip", 3000, 0.5, ["tool"]),
+            Accident("slip", ["tool"], 3000, 0.5),
         ],
     ),
     "hauling": PhysicalActivityDefinition(
@@ -341,9 +240,9 @@ PHYSICAL_ACTIVITIES_DICT: dict[
         accidents=[
             Accident(
                 "stumble",
+                ["player_body", "material"],
                 2500,
                 1,
-                ["player_body", "material"],
             ),
         ],
     ),
@@ -377,7 +276,7 @@ PHYSICAL_ACTIVITIES_DICT: dict[
         },
         accidents=[
             Accident(
-                "slip", 2000, 1, ["material", "player_body"]
+                "slip", ["material", "player_body"], 2000, 1
             )
         ],
     ),
@@ -410,9 +309,9 @@ PHYSICAL_ACTIVITIES_DICT: dict[
         accidents=[
             Accident(
                 "miss",
+                ["material", "player_body"],
                 700,
                 0.7,
-                ["material", "player_body"],
             ),
         ],
     ),
@@ -440,7 +339,7 @@ PHYSICAL_ACTIVITIES_DICT: dict[
             PhysicalAspect.SAFETY: 0.3,
         },
         accidents=[
-            Accident("stumble", 3500, 1, ["player_body"]),
+            Accident("stumble", ["player_body"], 3500, 1),
         ],
     ),
     "sprinting": PhysicalActivityDefinition(
@@ -469,7 +368,7 @@ PHYSICAL_ACTIVITIES_DICT: dict[
             PhysicalAspect.SAFETY: 0.3,
         },
         accidents=[
-            Accident("stumble", 2000, 1, ["player_body"]),
+            Accident("stumble", ["player_body"], 2000, 1),
         ],
     ),
     "jumping": PhysicalActivityDefinition(
@@ -496,7 +395,7 @@ PHYSICAL_ACTIVITIES_DICT: dict[
             PhysicalAspect.SAFETY: 0.1,
         },
         accidents=[
-            Accident("slip", 4500, 1, ["player_body"])
+            Accident("slip", ["player_body"], 4500, 1)
         ],
     ),
     "climbing": PhysicalActivityDefinition(
@@ -528,7 +427,7 @@ PHYSICAL_ACTIVITIES_DICT: dict[
             PhysicalAspect.SAFETY: 0.8,
         },
         accidents=[
-            Accident("slip", 1200, 1, ["player_body"])
+            Accident("slip", ["player_body"], 1200, 1)
         ],
     ),
     "kneading": PhysicalActivityDefinition(
@@ -578,7 +477,7 @@ PHYSICAL_ACTIVITIES_DICT: dict[
             PhysicalAspect.QUALITY: 0.7,
             PhysicalAspect.SAFETY: 0.0,
         },
-        accidents=[Accident("miss", 400, 1, ["bystander"])],
+        accidents=[Accident("miss", ["bystander"], 400, 1)],
     ),
 }
 """

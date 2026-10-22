@@ -9,7 +9,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtGui import QPixmap
 import os
 from player.stats import Stats
-from core.defs import CHARACTER_STATS
+from core.defs.player import CHARACTER_STATS
 
 
 ICON_COLUMNS = 4

@@ -4,13 +4,13 @@ from sqlalchemy.orm import (
     scoped_session,
     Session,
 )
-from core.defs import (
+from core.defs.player import (
     BASE_PLAYER_STATS,
     BASE_PLAYER_ATTRIBUTES,
     SLOT_MAX_INDEX,
     CHARACTER_STAT_BASE_THRESHOLDS,
-    StateProperties,
 )
+from core.defs.game_state import StateProperties
 from db.models.base import Base
 import db.models.global_var as globals
 import db.models.player_body as body

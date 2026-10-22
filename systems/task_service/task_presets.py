@@ -6,27 +6,9 @@ hand-editing while the app is running, the next save() overwrites
 this file.
 """
 
-from core.defs import SkillTrack
 from systems.task_service.task import (
-    Interruptibility,
     TaskPreset,
 )
 
 
-TASK_PRESETS_DICT: dict[str, TaskPreset] = {
-    'chop tree': TaskPreset(
-        name='chop tree',
-        skill_track=SkillTrack.WOODCUTTING,
-        task_components={'heavy_tool_swing': 1.0},
-        exp_effect=(
-            -0.04799999999999993,
-            0.09600000000000009,
-            0.252,
-            0.39600000000000013,
-        ),
-        metabolic_mult=700,
-        notes='axe only',
-        interruptibility=Interruptibility.FREE,
-        min_lighting=1500,
-    ),
-}
+TASK_PRESETS_DICT: dict[str, TaskPreset] = {}

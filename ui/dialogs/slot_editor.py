@@ -5,7 +5,7 @@ from PyQt6.QtWidgets import (
     QDialog,
     QListWidget,
 )
-from core.defs import (
+from core.defs.player import (
     SLOTS_LIST,
 )
 

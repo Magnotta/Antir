@@ -1,8 +1,6 @@
 from sqlalchemy.orm import Session
-from core.defs import (
-    BASE_PLAYER_ATTRIBUTES,
-    StateProperties,
-)
+from core.defs.player import BASE_PLAYER_ATTRIBUTES
+from core.defs.game_state import StateProperties
 from core.time import Time
 from core.weather import Weather
 from core.math_interface import calculate_weather_coeffs

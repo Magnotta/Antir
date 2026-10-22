@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from core.defs import CHARACTER_STAT_MAX_RATES
+from core.defs.player import CHARACTER_STAT_MAX_RATES
 from core.game_state import GameState
 from core.time import Time
 from core.formulas.sleep_cycle import *

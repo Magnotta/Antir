@@ -12,7 +12,7 @@ from PyQt6.QtGui import (
     QPen,
 )
 from PyQt6.QtCore import QRect, QRectF, Qt
-from core.defs import INJURY_TYPES
+from core.defs.player import INJURY_TYPES
 from db.repository.player import PlayerRepository
 
 

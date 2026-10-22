@@ -1,4 +1,4 @@
-from core.defs import INJURY_TYPES
+from core.defs.player import INJURY_TYPES
 from db.models.player_body import BodyNode, EquipmentSlot
 from db.repository.player import PlayerRepository
 

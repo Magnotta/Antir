@@ -13,7 +13,7 @@ from db.models.player_body import (
     ItemSlotOccupancy,
 )
 from db.models.item import Item
-from core.defs import (
+from core.defs.player import (
     SLOT_MAX_INDEX,
     BODY_SCHEMA,
 )

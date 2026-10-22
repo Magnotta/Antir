@@ -23,7 +23,7 @@ from PyQt6.QtCore import (
 )
 from db.models.item import Mold
 from db.repository.item import ItemRepository
-from core.defs import (
+from core.defs.item import (
     MOLD_TAG_DICTS,
     TAG_NAMES,
 )

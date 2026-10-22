@@ -16,7 +16,7 @@ from db.models.world import (
     PointCondition,
     SegmentCondition,
 )
-from core.defs import (
+from core.defs.world import (
     PATH_CONDITION_KINDS_DICT,
     STR_PATH_COND_PARAMS,
     SEGM_COND_KINDS,

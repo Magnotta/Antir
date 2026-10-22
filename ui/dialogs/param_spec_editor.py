@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import (
     QDoubleSpinBox,
 )
 from db.models.item import ParamSpec
-from core.defs import (
+from core.defs.item import (
     ITEM_PARAM_MAXES,
 )
 
