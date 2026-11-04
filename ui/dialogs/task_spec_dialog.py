@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # """
 # TaskSpecDialog: builds a task.TaskSpec.
 
@@ -527,6 +528,8 @@
 #         return None
 
 
+=======
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
 """
 TaskSpecDialog: builds a task.TaskSpec (and the per-participant tool
 assignments that go with it).
@@ -540,6 +543,7 @@ Sections:
   - Editable TaskSpec fields: total workload, cooperation profile,
     workstation, duration override, technicalities (remove-only, pre-filled
     from the preset), output (mold + quantity + quality mapping), notes.
+<<<<<<< HEAD
   - Participants/tools: one ToolAssignmentWidget per participant. These are
     NOT part of TaskSpec (a spec is a reusable template); they are returned
     separately as ParticipantAssignments for whoever creates the
@@ -548,6 +552,16 @@ Sections:
 
 from dataclasses import asdict
 
+=======
+  - Participants/tools: one ToolAssignmentWidget per participant. A preset
+    has a single physical activity, so each widget is just a tool list for
+    that activity; selecting a preset tells every widget which activity to
+    filter tools by. These are NOT part of TaskSpec (a spec is a reusable
+    template); build_assignments() returns them separately for whoever
+    creates the TaskInstance. Use get_task_setup() to get both at once.
+"""
+
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
 from PyQt6.QtWidgets import (
     QDialog,
     QHBoxLayout,
@@ -571,10 +585,16 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt
 
+<<<<<<< HEAD
 from core.defs.task import TaskOutput
 from systems.task_service.task import (
     Technicality,
     ParticipantAssignment,
+=======
+from systems.task_service.classes import (
+    TaskOutput,
+    Technicality,
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
 )
 from systems.task_service.task_preset_repository import (
     load_presets,
@@ -671,6 +691,7 @@ class TaskSpecDialog(QDialog):
             "Skill track", self.preset_skill_track_label
         )
 
+<<<<<<< HEAD
         self.preset_components_label = QLabel("—")
         self.preset_components_label.setWordWrap(True)
         form.addRow(
@@ -682,6 +703,15 @@ class TaskSpecDialog(QDialog):
         form.addRow(
             "Exp effect", self.preset_exp_effect_label
         )
+=======
+        self.preset_activity_label = QLabel("—")
+        form.addRow(
+            "Physical activity", self.preset_activity_label
+        )
+
+        self.preset_tool_label = QLabel("—")
+        form.addRow("Tool mode", self.preset_tool_label)
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
 
         self.preset_metabolic_mult_label = QLabel("—")
         form.addRow(
@@ -755,9 +785,21 @@ class TaskSpecDialog(QDialog):
 
         # --- Technicalities: pre-filled from preset, remove-only ---------
         form.addRow(QLabel("<b>Technicalities</b>"))
+<<<<<<< HEAD
         self.technicalities_table = QTableWidget(0, 3)
         self.technicalities_table.setHorizontalHeaderLabels(
             ["key", "explanation", "trigger"]
+=======
+        self.technicalities_table = QTableWidget(0, 5)
+        self.technicalities_table.setHorizontalHeaderLabels(
+            [
+                "key",
+                "explanation",
+                "trigger",
+                "policy",
+                "at",
+            ]
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         )
         self.technicalities_table.horizontalHeader().setSectionResizeMode(
             1, QHeaderView.ResizeMode.Stretch
@@ -829,6 +871,16 @@ class TaskSpecDialog(QDialog):
         buttons.rejected.connect(self.reject)
         form.addRow(buttons)
 
+<<<<<<< HEAD
+=======
+        # SearchablePresetList highlights its first row while it is being
+        # built, before we connected to its signal, so that selection never
+        # reached us. Sync with it now that everything exists.
+        initial = self.preset_list.selected_preset()
+        if initial is not None:
+            self._on_preset_selected(initial)
+
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
     # --- Preset handling -------------------------------------------------
 
     def _on_accept(self):
@@ -850,6 +902,7 @@ class TaskSpecDialog(QDialog):
             preset.skill_track.value
         )
 
+<<<<<<< HEAD
         components_text = ", ".join(
             f"{name}: {weight:g}"
             for name, weight in preset.task_components.items()
@@ -866,6 +919,12 @@ class TaskSpecDialog(QDialog):
         )
         self.preset_exp_effect_label.setText(
             exp_text or "—"
+=======
+        self.preset_activity_label.setText(preset.activity)
+
+        self.preset_tool_label.setText(
+            preset.tool_mode.value
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         )
 
         self.preset_metabolic_mult_label.setText(
@@ -885,6 +944,14 @@ class TaskSpecDialog(QDialog):
             self._spec_technicalities
         )
 
+<<<<<<< HEAD
+=======
+        # Tool eligibility depends on the preset's activity; widgets clear
+        # their tools only if the activity actually changed.
+        for widget in self._participant_widgets:
+            widget.set_activity(preset.activity)
+
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
     def _open_create_preset_dialog(self):
         preset = CreateTaskPresetDialog.get_task_preset(
             self
@@ -907,6 +974,16 @@ class TaskSpecDialog(QDialog):
                     technicality.key,
                     technicality.explanation,
                     technicality.trigger_handle,
+<<<<<<< HEAD
+=======
+                    technicality.trigger_policy.value,
+                    (
+                        f"{technicality.trigger_time:g}"
+                        if technicality.trigger_policy.value
+                        == "once"
+                        else "—"
+                    ),
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
                 )
             ):
                 item = QTableWidgetItem(text)
@@ -946,6 +1023,11 @@ class TaskSpecDialog(QDialog):
                 quality_mapping=self.quality_mapping_edit.text().strip(),
                 quantity=self.quantity_spin.value(),
             ).to_json()
+<<<<<<< HEAD
+=======
+        if self._selected_preset is None:
+            raise (ValueError("No preset selected!"))
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
 
         return TaskSpec(
             task_preset=self._selected_preset.name,
@@ -962,14 +1044,20 @@ class TaskSpecDialog(QDialog):
                 if self.duration_override_check.isChecked()
                 else None
             ),
+<<<<<<< HEAD
             # JSON column: store plain dicts, not Technicality objects.
             technicalities={
                 key: asdict(technicality)
+=======
+            technicalities={
+                key: technicality.to_json()
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
                 for key, technicality in self._spec_technicalities.items()
             },
             notes=self.notes_edit.toPlainText() or None,
         )
 
+<<<<<<< HEAD
     def build_assignments(
         self,
     ) -> list[ParticipantAssignment]:
@@ -977,6 +1065,18 @@ class TaskSpecDialog(QDialog):
             widget.build_assignment()
             for widget in self._participant_widgets
         ]
+=======
+    def build_assignments(self) -> dict[int, list[int]]:
+        """participant_id -> equipped tool item ids.
+
+        Stopgap: swap for ParticipantAssignment objects once that class is
+        redefined for the single-activity model.
+        """
+        return {
+            widget.participant_id: widget.equipped_tool_item_ids()
+            for widget in self._participant_widgets
+        }
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
 
     @classmethod
     def get_task_spec(
@@ -1004,7 +1104,11 @@ class TaskSpecDialog(QDialog):
         parent=None,
         cooperation_profiles=None,
     ):
+<<<<<<< HEAD
         """Returns (TaskSpec, list[ParticipantAssignment]) or None."""
+=======
+        """Returns (TaskSpec, {participant_id: [tool item ids]}) or None."""
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         dialog = cls(
             item_repository,
             participant_ids,

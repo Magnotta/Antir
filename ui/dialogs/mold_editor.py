@@ -23,7 +23,11 @@ from PyQt6.QtCore import (
 )
 from db.models.item import Mold
 from db.repository.item import ItemRepository
+<<<<<<< HEAD
 from core.defs.item import (
+=======
+from systems.item_service.item import (
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
     MOLD_TAG_DICTS,
     TAG_NAMES,
 )
@@ -156,8 +160,13 @@ class MoldEditor(QDialog):
                 setattr(spec, k, v)
             self.spec_model.layoutChanged.emit()
 
+<<<<<<< HEAD
     def _tag_list_keypress(self, event):
         if event.key() in (
+=======
+    def _tag_list_keypress(self, e):
+        if e.key() in (
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
             Qt.Key.Key_Delete,
             Qt.Key.Key_Backspace,
         ):
@@ -166,7 +175,11 @@ class MoldEditor(QDialog):
                     self.tag_list.row(item)
                 )
         else:
+<<<<<<< HEAD
             QListWidget.keyPressEvent(self.tag_list, event)
+=======
+            QListWidget.keyPressEvent(self.tag_list, e)
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
 
     def _load_item(self):
         self.name_edit.setText(self.mold.name)
@@ -175,10 +188,23 @@ class MoldEditor(QDialog):
             self.tag_list.addItem(tag.strip())
 
     def get_tag_list(self):
+<<<<<<< HEAD
         return [
             self.tag_list.item(i).text().split(" - ")[0]
             for i in range(self.tag_list.count())
         ]
+=======
+        tags = []
+        for i in range(self.tag_list.count()):
+            item = self.tag_list.item(i)
+            if item is not None:
+                tags.append(item.text().split(" - ")[0])
+            else:
+                print(
+                    f"Warning: Item at index {i} is None!"
+                )
+        return tags
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
 
     def remove_spec(self):
         idx = self.spec_table.currentIndex()

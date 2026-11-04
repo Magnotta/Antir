@@ -8,10 +8,22 @@ DB table. Each concrete repository supplies its own PRESETS_PATH, the name
 of the dict variable in that file, and a file header (docstring + whatever
 imports its preset type's constructor call needs) -- everything else
 (load/save/add/search) is generic and lives here.
+<<<<<<< HEAD
+=======
+
+Saving is verified: the new file is written next to the real one, loaded
+back, and compared with the presets it was generated from. Only if they are
+equal does it replace the registry file, so a formatting or missing-import
+problem raises an error instead of leaving an unloadable file behind.
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
 """
 
 from __future__ import annotations
 import importlib.util
+<<<<<<< HEAD
+=======
+import os
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
 from dataclasses import fields, is_dataclass
 from enum import Enum
 from pathlib import Path
@@ -47,6 +59,13 @@ def load_presets(
     spec = importlib.util.spec_from_file_location(
         path.stem, path
     )
+<<<<<<< HEAD
+=======
+    if spec is None:
+        raise ValueError(
+            f"Path {path} for presets location is wrong!"
+        )
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return dict(getattr(module, dict_name))
@@ -70,20 +89,73 @@ def search_presets(
     ]
 
 
+<<<<<<< HEAD
 def _format_value(value: object) -> str:
     if isinstance(value, Enum):
         return f"{type(value).__name__}.{value.name}"
+=======
+_INDENT = "    "
+
+
+def _format_value(value: object, level: int = 0) -> str:
+    """Render `value` as Python source that evaluates back to an equal value.
+
+    Recursive, so enums and dataclasses nested inside dicts, tuples or other
+    dataclasses are written as `EnumType.MEMBER` / `Type(field=...)`, never
+    as their repr() (which for an enum is `<Type.MEMBER: 'x'>` -- not valid
+    source). Anything else (str, int, float, bool, None, ...) uses repr().
+    The names it writes must be imported by the repository's header.
+    """
+    pad = _INDENT * level
+    if isinstance(value, Enum):
+        return f"{type(value).__name__}.{value.name}"
+    if is_dataclass(value) and not isinstance(value, type):
+        lines = [f"{type(value).__name__}("]
+        for f in fields(value):
+            if not f.init:
+                continue
+            rendered = _format_value(
+                getattr(value, f.name), level + 1
+            )
+            lines.append(
+                f"{pad}{_INDENT}{f.name}={rendered},"
+            )
+        lines.append(f"{pad})")
+        return "\n".join(lines)
+    if isinstance(value, dict):
+        if not value:
+            return "{}"
+        lines = ["{"]
+        for k, v in value.items():
+            lines.append(
+                f"{pad}{_INDENT}{_format_value(k, level + 1)}: "
+                f"{_format_value(v, level + 1)},"
+            )
+        lines.append(f"{pad}}}")
+        return "\n".join(lines)
+    if isinstance(value, (list, tuple)):
+        items = [_format_value(v, level + 1) for v in value]
+        if isinstance(value, list):
+            return "[" + ", ".join(items) + "]"
+        trailing = "," if len(items) == 1 else ""
+        return "(" + ", ".join(items) + trailing + ")"
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
     return repr(value)
 
 
 def _format_instance(key: str, preset: T) -> str:
     """Render one `key: PresetType(field=value, ...)` entry, in
+<<<<<<< HEAD
     declaration-field order, with Enum fields written as
     `EnumType.MEMBER_NAME` and everything else as repr()."""
+=======
+    declaration-field order."""
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
     if not is_dataclass(preset):
         raise TypeError(
             f"preset_file formatting only supports dataclasses, got {type(preset)!r}"
         )
+<<<<<<< HEAD
     lines = [f"    {key!r}: {type(preset).__name__}("]
     for f in fields(preset):
         value = getattr(preset, f.name)
@@ -92,6 +164,11 @@ def _format_instance(key: str, preset: T) -> str:
         )
     lines.append("    ),")
     return "\n".join(lines) + "\n"
+=======
+    return (
+        f"{_INDENT}{key!r}: {_format_value(preset, 1)},\n"
+    )
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
 
 
 def save_presets(
@@ -102,14 +179,45 @@ def save_presets(
     value_type: str = "object",
 ) -> None:
     """Regenerate `path` wholesale from `presets`. `header` must include
+<<<<<<< HEAD
     the file's module docstring plus any imports the preset type's
     constructor call and its enum fields (if any) need."""
+=======
+    the file's module docstring plus every name the generated constructor
+    calls use (the preset type, its enums, nested dataclasses).
+
+    The text is checked before it replaces `path`: it must compile, import,
+    and load back equal to `presets`. On any failure `path` is untouched.
+    """
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
     body = "".join(
         _format_instance(key, preset)
         for key, preset in presets.items()
     )
     text = f"{header}{dict_name}: dict[str, {value_type}] = {{\n{body}}}\n"
+<<<<<<< HEAD
     path.write_text(text, encoding="utf-8")
+=======
+    compile(text, str(path), "exec")
+
+    pending = path.with_name(f"_{path.stem}_pending.py")
+    try:
+        pending.write_text(text, encoding="utf-8")
+        loaded = load_presets(pending, dict_name)
+        bad = [
+            key
+            for key in presets
+            if loaded.get(key) != presets[key]
+        ]
+        if bad or loaded.keys() != presets.keys():
+            raise ValueError(
+                f"generated {path.name} does not load back equal to the "
+                f"presets it was written from (differs: {bad or 'keys'})"
+            )
+        os.replace(pending, path)
+    finally:
+        pending.unlink(missing_ok=True)
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
 
 
 def add_preset(

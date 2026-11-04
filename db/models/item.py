@@ -12,7 +12,11 @@ from sqlalchemy import (
     UniqueConstraint,
 )
 from db.models.base import Base
+<<<<<<< HEAD
 from core.defs.task import ToolProfile
+=======
+from systems.item_service.tools import ToolName
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
 
 
 class ItemParam(Base):
@@ -136,8 +140,13 @@ class Mold(Base):
     occupied_slots: Mapped[dict | None] = mapped_column(
         JSON
     )
+<<<<<<< HEAD
     tool_profile: Mapped[ToolProfile | None] = (
         mapped_column(JSON)
+=======
+    tool_name: Mapped[ToolName | None] = mapped_column(
+        String
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
     )
     param_specs: Mapped[list[ParamSpec]] = relationship(
         back_populates="mold", cascade="all, delete-orphan"

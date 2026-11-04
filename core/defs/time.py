@@ -1,0 +1,103 @@
+from __future__ import annotations
+
+
+class Time:
+    TICKS_PER_HOUR = 60
+    TICKS_PER_DAY = 1440
+    TICKS_PER_YEAR = 525600
+
+    def __init__(self, tm: int = 0) -> None:
+        self.tick = tm
+        self.d = tm // self.TICKS_PER_DAY
+        self.h = (
+            tm % self.TICKS_PER_DAY // self.TICKS_PER_HOUR
+        )
+        self.m = tm % self.TICKS_PER_HOUR
+        self.day_change = True if self.tick == 0 else False
+        self.hour_change = True if self.tick == 0 else False
+
+    def __add__(self, other):
+        if isinstance(other, Time):
+            __r = Time(self.tick + other.tick)
+        elif isinstance(other, int):
+            __r = Time(self.tick + other)
+        else:
+            raise TypeError(
+                "unsupported operand types for +:"
+                f"{type(self)} and {type(other)}"
+            )
+        __r._day_change(self)
+        __r._hour_change(self)
+        return __r
+
+    def __sub__(self, other):
+        if isinstance(other, Time):
+            __r = Time(self.tick - other.tick)
+        elif isinstance(other, int):
+            __r = Time(self.tick - other)
+        else:
+            raise TypeError(
+                "unsupported operand types for +:"
+                f"{type(self)} and {type(other)}"
+            )
+        return __r
+
+    def __str__(self) -> str:
+        if self.h < 10:
+            if self.m < 10:
+                return f"Dia {self.d}   0{self.h}:0{self.m}"
+            else:
+                return f"Dia {self.d}   0{self.h}:{self.m}"
+        else:
+            if self.m < 10:
+                return f"Dia {self.d}   {self.h}:0{self.m}"
+            else:
+                return f"Dia {self.d}   {self.h}:{self.m}"
+
+    def __eq__(self, other) -> bool:
+        if isinstance(other, Time):
+            return self.tick == other.tick
+        elif isinstance(other, int):
+            return self.tick == other
+        else:
+            raise TypeError
+
+    def __lt__(self, other):
+        if isinstance(other, Time):
+            return self.tick < other.tick
+        elif isinstance(other, int):
+            return self.tick < other
+        else:
+            raise TypeError
+
+    def __gt__(self, other):
+        if isinstance(other, Time):
+            return self.tick > other.tick
+        elif isinstance(other, int):
+            return self.tick > other
+        else:
+            raise TypeError
+
+    def __ge__(self, other):
+        if isinstance(other, Time):
+            return self.tick >= other.tick
+        elif isinstance(other, int):
+            return self.tick >= other
+        else:
+            raise TypeError
+
+    def __le__(self, other):
+        if isinstance(other, Time):
+            return self.tick <= other.tick
+        elif isinstance(other, int):
+            return self.tick <= other
+        else:
+            raise TypeError
+
+    def _hour_change(self, other: Time):
+        if self.h != other.h:
+            self.hour_change = True
+
+    def _day_change(self, other: Time):
+        if self.d != other.d:
+            self.day_change = True

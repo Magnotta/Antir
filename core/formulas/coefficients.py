@@ -1,5 +1,9 @@
 from dataclasses import dataclass
+<<<<<<< HEAD
 from core.time import Time
+=======
+from core.defs.time import Time
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
 
 
 @dataclass(frozen=True)

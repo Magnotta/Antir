@@ -1,0 +1,104 @@
+Phase 0: model and UI fallout
+
+
+Remove exp_coeffs from PhysicalActivityDefinition. Keep attr_coeffs and leave accidents alone for now.
+Update TaskPreset (activity, exp_coeffs) and the Technicality fields you already added (trigger_time, trigger_policy).
+Update the preset-writer HEADER so generated files import the new enums (TriggerPolicy). Without that, the first save produces a broken file.
+Preset editor: replace the components table and the weight-sum check with one activity dropdown, and add trigger_policy and trigger_time to the technicality form. The time field is enabled only for once.
+ToolAssignmentWidget collapses to a single tool list, with no “Add Component”. It filters tools by usable_for(preset.activity) and clears its list when the preset changes.
+Update the diagram.
+
+
+Phase 1: item side
+
+
+Delete the duplicate ItemParamName in item.py and import yours from item_defs.py.
+Rewrite ToolProfile:
+A rule is (aspect, best, driver, worst, exponent) plus an optional raw-unit window (low/high).
+Normalization comes from ITEM_PARAM_MAXES, and a missing param uses ITEM_PARAM_DEFAULTS[name]["base"].
+The output is one multiplier per aspect, so I’ll add a small AspectVector type for the four numbers.
+Validate that each driver is in ITEM_PARAM_MAXES, and at mold-save time that it’s allowed by the mold’s tags (TAG_TO_PARAMS).
+Add a PlayerToolExp(player_id, mold_id, xp) table with a unique constraint, plus get and add methods. I’m assuming experience is per mold, as discussed.
+Define the axe mold: tags cu and to, with rules mapping sharpness to efficiency, and durability and wet to safety.
+
+
+Phase 2: aspect calculation (pure functions, no DB)
+
+
+New module aspects.py:
+
+Experience levels. level(xp, K) = xp / (xp + K) with a K per skill track and a default for tools.
+Formula. final[a] = base[a] × attribute[a] × tool[a] × exp[a].
+Intensity’s base is metabolic_mult and the other three start at 1.0.
+exp[a] = max(floor, 1 + exp_coeffs[a] × skill_level).
+Tool realization.
+tool_level = max(familiarity, transfer × skill_level).
+Only the favorable part of a tool multiplier is scaled by floor + (1 − floor) × tool_level. Penalties from a worn tool aren’t softened by familiarity.
+“Favorable” depends on direction: for intensity, lower is better, and for the others, higher. Keep a single shared ASPECT_DIRECTION constant.
+Multiple tools. Enforce a single tool in the UI for now. The aggregator takes the best per aspect, so a list works later without redesign.
+Output. An AspectBreakdown with base, attribute, tool, exp and final per aspect, with to_json. It’s stored in snapshots so the GM can see why safety was low.
+Tests. Same axe, novice versus expert. Blunt versus sharp. No tool. Monotonicity in sharpness and skill. Direction sanity for intensity.
+
+
+Phase 3: contexts (chopping slice only)
+
+
+TaskContext contains task facts (preset name, activity, skill track, progress fraction, min_lighting), a SiteContext, a ParticipantContext and misfortune.
+ParticipantContext holds the AspectBreakdown, the skill level, an optional ToolContext (condition, wet, familiarity), and the stats and attributes as mappings.
+SiteContext for now has illumination and clearance (0 to 1, open to cramped), plus a lighting_deficit helper in the same units as min_lighting.
+Misfortune convention. misfortune ∈ [0, 1), higher is worse, and a technicality fires when misfortune ≥ 1 − p. It comes from a deterministic keyed roll over (seed, task, participant, tick, technicality key), and the machine injects it with dataclasses.replace.
+Gatherers. gather_task_shared runs once per task per tick and resolves the preset once. gather_participant runs per participant. Both read from state and take fakes in tests.
+Every snapshot type gets to_json, and items carry a kind tag.
+
+
+Phase 4: triggers (technicalities.py)
+
+
+A registry decorator @trigger(handle) that rejects duplicate handles and exposes list_handles() for the UI dropdown.
+The core function is fire_probability(base_risk, k, safety, exposure):
+odds = base_risk / (1 − base_risk), scaled by exposure / max(safety, floor) ** k, then p = odds / (1 + odds).
+The safety floor avoids infinity as safety approaches 0.
+Each handle is registered from a factory that fixes base_risk, k and the exposure terms (clearance, lighting deficit). These are per-profile handles, which is the price of not having params. Name them by mechanism and profile, such as safety_gated_clearance_strong.
+Each registry entry holds an explain(ctx) function that returns (fired, p, factors). The public trigger is its boolean, so your signature is unchanged, and the machine stores the factors in context_snapshot.
+Tests. Print a table of p over skill and clearance and assert it’s monotonic. Check the roll is deterministic. Check the empirical fire rate over many seeds is close to p.
+
+
+Phase 5: the chopping preset
+
+
+chop_tree with the woodcutting skill track and the chopping activity.
+metabolic_mult from the compendium. You pick the entry, and I can look it up if you want.
+exp_coeffs as placeholders to tune: intensity negative, the other three positive.
+RESUMABLE interruptibility and a min_lighting.
+Technicality falling_trunk_strike, with policy once, trigger_time 1.0 (completion), and the Phase 4 handle.
+Create it through add_preset, so the save and load round trip with the new fields is exercised. This needs the _search_key fix from earlier.
+
+
+Phase 6: integration test, still without events
+
+
+A script builds an axe with params, a player with skill and tool experience, a site and the preset. It gathers the context, computes the aspects, and runs the trigger over many seeds. Acceptance: aspects match hand calculations, fire rates track p, and a novice with a bad tool in a cramped site fires far more than an expert in a clearing.
+
+Describing the progress event (not implemented)
+
+A TaskProgressEvent handles one active task per tick, in one transaction:
+
+Load the task and participations, and skip participants blocked by a complication.
+Recompute each participant’s AspectBreakdown.
+Convert efficiency into workload for the tick. Contributions accumulate in workload_buffer and merge into workload_done at the end of the tick, so every participant sees the same “before” value for crossing checks. This is my assumption about workload_buffer, so correct me if it means something else.
+Append contribution_ledger entries (amount and quality contribution).
+Apply side effects: fatigue from intensity, tool wear on durability and sharpness, and experience gain for skill and tool.
+Evaluate due technicalities (crossing detection for once, rate-normalized for constant), with one keyed roll per participant and technicality. A hit creates a ProblemFiring plus a Complication and sets the participant’s blocked_by.
+If workload_done ≥ total, run the once checks at 1.0 first, then move the task to an “awaiting GM” status, not “done”. The GM’s quality mapping creates the output, and then the task closes and the tools are released.
+Emit follow-up events (TaskCompleted, ComplicationRaised) and reschedule itself while the task is active.
+
+Because rolls are keyed and deterministic, retrying a failed tick gives the same outcome.
+
+
+Decisions I need from you
+attr_coeffs to multiplier. You haven’t defined how the matrix turns attributes into a per-aspect multiplier. My suggestion is to treat each row as normalized weights over attributes expressed relative to the average, with direction from ASPECT_DIRECTION. That needs your attribute scale.
+Clearance. Where does it come from: a site field, or derived from path conditions?
+The tree. Is it an item, or just site and task context?
+Accidents versus technicalities. PhysicalActivity.accidents overlaps with technicalities. Should the safety-gating also drive Accidents, or do accidents go away?
+Consequences. What does falling_trunk_strike do, and is it blocking?
+Tool markers. Does to or a non-null tool_profile mean “this is a tool”?

@@ -3,7 +3,11 @@ import numpy as np
 from core.formulas.math import clamp
 from core.formulas.coefficients import WeatherCoefficients
 from core.formulas.contexts import WeatherContext
+<<<<<<< HEAD
 from core.time import Time
+=======
+from core.defs.time import Time
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
 
 
 def weather_noise(step: int) -> tuple[float, float, float]:

@@ -2,7 +2,11 @@ import matplotlib.pyplot as plt
 from core.math_interface import calculate_weather_coeffs
 from core.formulas.contexts import WeatherContext
 from core.formulas.weather import step_weather
+<<<<<<< HEAD
 from core.time import Time
+=======
+from core.defs.time import Time
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
 import numpy as np
 
 
@@ -32,6 +36,10 @@ def simulate_and_plot(
     # We'll simulate every 5 ticks, but step by 5.
     # To keep the plot size manageable, we'll sample every 5 ticks (which matches the call frequency).
     steps = range(init_time, total_ticks + init_time, 5)
+<<<<<<< HEAD
+=======
+    coeffs = calculate_weather_coeffs(init_time)
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
 
     for t in steps:
         # 1. Get coefficients for this exact sim_time.

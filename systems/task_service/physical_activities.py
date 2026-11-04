@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from dataclasses import dataclass
 from core.defs.player import PlayerAttribute
 from core.defs.task import PhysicalAspect
@@ -18,12 +19,26 @@ class PhysicalActivityDefinition:
     attr_coeffs: CoefficientMatrix
     exp_coeffs: dict[PhysicalAspect, float]
     accidents: list[Accident]
+=======
+from .classes import (
+    PhysicalActivityDefinition,
+    PhysicalActivityName,
+    CoefficientMatrix,
+    PhysicalAspect,
+    Accident,
+)
+from core.defs.player import PlayerAttribute
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
 
 
 PHYSICAL_ACTIVITIES_DICT: dict[
     str, PhysicalActivityDefinition
 ] = {
+<<<<<<< HEAD
     "heavy_tool_swing": PhysicalActivityDefinition(
+=======
+    PhysicalActivityName.HEAVY_TOOL_SWING: PhysicalActivityDefinition(
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         name="heavy_tool_swing",
         attr_coeffs=CoefficientMatrix.sparse(
             {
@@ -47,12 +62,15 @@ PHYSICAL_ACTIVITIES_DICT: dict[
                 },
             }
         ),
+<<<<<<< HEAD
         exp_coeffs={
             PhysicalAspect.INTENSITY: -0.1,
             PhysicalAspect.EFFICIENCY: 0.5,
             PhysicalAspect.QUALITY: 0.6,
             PhysicalAspect.SAFETY: 0.8,
         },
+=======
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         accidents=[
             Accident(
                 "miss",
@@ -68,7 +86,11 @@ PHYSICAL_ACTIVITIES_DICT: dict[
             ),
         ],
     ),
+<<<<<<< HEAD
     "heavy_tool_use": PhysicalActivityDefinition(
+=======
+    PhysicalActivityName.HEAVY_TOOL_USE: PhysicalActivityDefinition(
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         name="heavy_tool_use",
         attr_coeffs=CoefficientMatrix.sparse(
             {
@@ -89,17 +111,24 @@ PHYSICAL_ACTIVITIES_DICT: dict[
                 },
             }
         ),
+<<<<<<< HEAD
         exp_coeffs={
             PhysicalAspect.INTENSITY: -0.2,
             PhysicalAspect.EFFICIENCY: 0.3,
             PhysicalAspect.QUALITY: 0.8,
             PhysicalAspect.SAFETY: 0.6,
         },
+=======
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         accidents=[
             Accident("slip", ["material"], 5000, 1),
         ],
     ),
+<<<<<<< HEAD
     "light_tool_use": PhysicalActivityDefinition(
+=======
+    PhysicalActivityName.LIGHT_TOOL_USE: PhysicalActivityDefinition(
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         name="light_tool_use",
         attr_coeffs=CoefficientMatrix.sparse(
             {
@@ -118,18 +147,25 @@ PHYSICAL_ACTIVITIES_DICT: dict[
                 },
             }
         ),
+<<<<<<< HEAD
         exp_coeffs={
             PhysicalAspect.INTENSITY: 0.0,
             PhysicalAspect.EFFICIENCY: 0.0,
             PhysicalAspect.QUALITY: 0.0,
             PhysicalAspect.SAFETY: 0.0,
         },
+=======
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         accidents=[
             Accident("pinch", ["player_body"], 2000, 0.6),
             Accident("slip", ["material"], 3000, 0.1),
         ],
     ),
+<<<<<<< HEAD
     "workstation_use": PhysicalActivityDefinition(
+=======
+    PhysicalActivityName.WORKSTATION_USE: PhysicalActivityDefinition(
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         name="workstation_use",
         attr_coeffs=CoefficientMatrix.sparse(
             {
@@ -139,6 +175,7 @@ PHYSICAL_ACTIVITIES_DICT: dict[
                 PhysicalAspect.SAFETY: {},
             }
         ),
+<<<<<<< HEAD
         exp_coeffs={
             PhysicalAspect.INTENSITY: 0.5,
             PhysicalAspect.EFFICIENCY: 1.0,
@@ -148,6 +185,11 @@ PHYSICAL_ACTIVITIES_DICT: dict[
         accidents=[],
     ),
     "animal_handling": PhysicalActivityDefinition(
+=======
+        accidents=[],
+    ),
+    PhysicalActivityName.ANIMAL_HANDLING: PhysicalActivityDefinition(
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         name="animal_handling",
         attr_coeffs=CoefficientMatrix.sparse(
             {
@@ -168,19 +210,26 @@ PHYSICAL_ACTIVITIES_DICT: dict[
                 },
             }
         ),
+<<<<<<< HEAD
         exp_coeffs={
             PhysicalAspect.INTENSITY: -0.3,
             PhysicalAspect.EFFICIENCY: 0.3,
             PhysicalAspect.QUALITY: 0.5,
             PhysicalAspect.SAFETY: 0.8,
         },
+=======
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         accidents=[
             Accident(
                 "slip", ["material", "bystander"], 1500, 1
             )
         ],
     ),
+<<<<<<< HEAD
     "pumping": PhysicalActivityDefinition(
+=======
+    PhysicalActivityName.PUMPING: PhysicalActivityDefinition(
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         name="pumping",
         attr_coeffs=CoefficientMatrix.sparse(
             {
@@ -199,17 +248,24 @@ PHYSICAL_ACTIVITIES_DICT: dict[
                 },
             }
         ),
+<<<<<<< HEAD
         exp_coeffs={
             PhysicalAspect.INTENSITY: 0.0,
             PhysicalAspect.EFFICIENCY: 0.4,
             PhysicalAspect.QUALITY: 0.0,
             PhysicalAspect.SAFETY: 0.5,
         },
+=======
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         accidents=[
             Accident("slip", ["tool"], 3000, 0.5),
         ],
     ),
+<<<<<<< HEAD
     "hauling": PhysicalActivityDefinition(
+=======
+    PhysicalActivityName.HAULING: PhysicalActivityDefinition(
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         name="hauling",
         attr_coeffs=CoefficientMatrix.sparse(
             {
@@ -231,12 +287,15 @@ PHYSICAL_ACTIVITIES_DICT: dict[
                 },
             }
         ),
+<<<<<<< HEAD
         exp_coeffs={
             PhysicalAspect.INTENSITY: 0.0,
             PhysicalAspect.EFFICIENCY: 0.1,
             PhysicalAspect.QUALITY: 0.0,
             PhysicalAspect.SAFETY: 0.5,
         },
+=======
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         accidents=[
             Accident(
                 "stumble",
@@ -246,7 +305,11 @@ PHYSICAL_ACTIVITIES_DICT: dict[
             ),
         ],
     ),
+<<<<<<< HEAD
     "loading": PhysicalActivityDefinition(
+=======
+    PhysicalActivityName.LOADING: PhysicalActivityDefinition(
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         name="loading",
         attr_coeffs=CoefficientMatrix.sparse(
             {
@@ -268,19 +331,26 @@ PHYSICAL_ACTIVITIES_DICT: dict[
                 },
             }
         ),
+<<<<<<< HEAD
         exp_coeffs={
             PhysicalAspect.INTENSITY: -0.1,
             PhysicalAspect.EFFICIENCY: 0.3,
             PhysicalAspect.QUALITY: 0.0,
             PhysicalAspect.SAFETY: 0.6,
         },
+=======
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         accidents=[
             Accident(
                 "slip", ["material", "player_body"], 2000, 1
             )
         ],
     ),
+<<<<<<< HEAD
     "precision_strike": PhysicalActivityDefinition(
+=======
+    PhysicalActivityName.PRECISION_STRIKE: PhysicalActivityDefinition(
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         name="precision_strike",
         attr_coeffs=CoefficientMatrix.sparse(
             {
@@ -300,12 +370,15 @@ PHYSICAL_ACTIVITIES_DICT: dict[
                 },
             }
         ),
+<<<<<<< HEAD
         exp_coeffs={
             PhysicalAspect.INTENSITY: 0.0,
             PhysicalAspect.EFFICIENCY: 0.1,
             PhysicalAspect.QUALITY: 0.8,
             PhysicalAspect.SAFETY: 0.7,
         },
+=======
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         accidents=[
             Accident(
                 "miss",
@@ -315,7 +388,11 @@ PHYSICAL_ACTIVITIES_DICT: dict[
             ),
         ],
     ),
+<<<<<<< HEAD
     "locomotion": PhysicalActivityDefinition(
+=======
+    PhysicalActivityName.LOCOMOTION: PhysicalActivityDefinition(
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         name="locomotion",
         attr_coeffs=CoefficientMatrix.sparse(
             {
@@ -332,17 +409,24 @@ PHYSICAL_ACTIVITIES_DICT: dict[
                 },
             }
         ),
+<<<<<<< HEAD
         exp_coeffs={
             PhysicalAspect.INTENSITY: 0.0,
             PhysicalAspect.EFFICIENCY: 0.1,
             PhysicalAspect.QUALITY: 0.0,
             PhysicalAspect.SAFETY: 0.3,
         },
+=======
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         accidents=[
             Accident("stumble", ["player_body"], 3500, 1),
         ],
     ),
+<<<<<<< HEAD
     "sprinting": PhysicalActivityDefinition(
+=======
+    PhysicalActivityName.SPRINTING: PhysicalActivityDefinition(
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         name="sprinting",
         attr_coeffs=CoefficientMatrix.sparse(
             {
@@ -361,17 +445,24 @@ PHYSICAL_ACTIVITIES_DICT: dict[
                 },
             }
         ),
+<<<<<<< HEAD
         exp_coeffs={
             PhysicalAspect.INTENSITY: 0.0,
             PhysicalAspect.EFFICIENCY: 0.2,
             PhysicalAspect.QUALITY: 0.0,
             PhysicalAspect.SAFETY: 0.3,
         },
+=======
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         accidents=[
             Accident("stumble", ["player_body"], 2000, 1),
         ],
     ),
+<<<<<<< HEAD
     "jumping": PhysicalActivityDefinition(
+=======
+    PhysicalActivityName.JUMPING: PhysicalActivityDefinition(
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         name="jumping",
         attr_coeffs=CoefficientMatrix.sparse(
             {
@@ -388,17 +479,24 @@ PHYSICAL_ACTIVITIES_DICT: dict[
                 },
             }
         ),
+<<<<<<< HEAD
         exp_coeffs={
             PhysicalAspect.INTENSITY: -0.1,
             PhysicalAspect.EFFICIENCY: 0.0,
             PhysicalAspect.QUALITY: 0.0,
             PhysicalAspect.SAFETY: 0.1,
         },
+=======
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         accidents=[
             Accident("slip", ["player_body"], 4500, 1)
         ],
     ),
+<<<<<<< HEAD
     "climbing": PhysicalActivityDefinition(
+=======
+    PhysicalActivityName.CLIMBING: PhysicalActivityDefinition(
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         name="climbing",
         attr_coeffs=CoefficientMatrix.sparse(
             {
@@ -420,17 +518,24 @@ PHYSICAL_ACTIVITIES_DICT: dict[
                 },
             }
         ),
+<<<<<<< HEAD
         exp_coeffs={
             PhysicalAspect.INTENSITY: 0.0,
             PhysicalAspect.EFFICIENCY: 0.2,
             PhysicalAspect.QUALITY: 0.0,
             PhysicalAspect.SAFETY: 0.8,
         },
+=======
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         accidents=[
             Accident("slip", ["player_body"], 1200, 1)
         ],
     ),
+<<<<<<< HEAD
     "kneading": PhysicalActivityDefinition(
+=======
+    PhysicalActivityName.KNEADING: PhysicalActivityDefinition(
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         name="kneading",
         attr_coeffs=CoefficientMatrix.sparse(
             {
@@ -448,6 +553,7 @@ PHYSICAL_ACTIVITIES_DICT: dict[
                 PhysicalAspect.SAFETY: {},
             }
         ),
+<<<<<<< HEAD
         exp_coeffs={
             PhysicalAspect.INTENSITY: 0.0,
             PhysicalAspect.EFFICIENCY: 0.5,
@@ -457,6 +563,11 @@ PHYSICAL_ACTIVITIES_DICT: dict[
         accidents=[],
     ),
     "throwing": PhysicalActivityDefinition(
+=======
+        accidents=[],
+    ),
+    PhysicalActivityName.THROWING: PhysicalActivityDefinition(
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         name="throwing",
         attr_coeffs=CoefficientMatrix.sparse(
             {
@@ -471,6 +582,7 @@ PHYSICAL_ACTIVITIES_DICT: dict[
                 PhysicalAspect.SAFETY: {},
             }
         ),
+<<<<<<< HEAD
         exp_coeffs={
             PhysicalAspect.INTENSITY: -0.25,
             PhysicalAspect.EFFICIENCY: 0.0,
@@ -579,3 +691,8 @@ PHYSICAL_ACTIVITIES_DICT: dict[
         ],
         gear=["shovel"]
 """
+=======
+        accidents=[Accident("miss", ["bystander"], 400, 1)],
+    ),
+}
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)

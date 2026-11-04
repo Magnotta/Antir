@@ -1,7 +1,11 @@
 from collections import defaultdict
 from db.models.player_stat import HistoricalStat
 from core.game_state import GameState
+<<<<<<< HEAD
 from core.time import Time
+=======
+from core.defs.time import Time
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
 
 
 class Summarizer:
@@ -166,9 +170,15 @@ class Summarizer:
         for player in self.state.players:
             player_stats = {
                 name: current_statvals.get(
+<<<<<<< HEAD
                     (player.player_rec.id, name), 0
                 )
                 for name, _ in current_statvals
+=======
+                    (player.player_rec.id, name)
+                )
+                for _, name in current_statvals.keys()
+>>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
                 if _[0] == player.player_rec.id
             }
             self.state.player_repo.update_historical_stats(

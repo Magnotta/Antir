@@ -14,6 +14,36 @@ select = [
 
 exclude = [
     "db/schemas.py",
+    "systems/task_service/task_presets.py",
+    "systems/location_service/site_presets.py",
+]
+
+ignore = [
+    "N999",
+    "N802",
+    "F841",
+    "F405",
+    "F403",
+    "E501",
+    "N806",
+]
+
+[tool.black]
+line-length = 60
+skip-string-normalization = true
+
+[tool.ruff]
+line-length = 60
+target-version = "py312"
+
+select = [
+    "E",    # pycodestyle errors
+    "F",    # pyflakes
+    "N",    # pep8-naming
+]
+
+exclude = [
+    "db/schemas.py",
 ]
 
 ignore = [
