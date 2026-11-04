@@ -8,11 +8,7 @@ from PyQt6.QtWidgets import (
     QDoubleSpinBox,
 )
 from db.models.item import ParamSpec
-<<<<<<< HEAD
-from core.defs.item import (
-=======
 from systems.item_service.item import (
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
     ITEM_PARAM_MAXES,
 )
 

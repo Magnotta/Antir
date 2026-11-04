@@ -33,15 +33,6 @@ class PneumaContext:
 
 @dataclass(frozen=True)
 class WeatherContext:
-<<<<<<< HEAD
-    sim_time: int = 0
-    temperature: int = 0
-    wind_latent: int = 0
-    precip_latent: int = 0
-
-
-@dataclass
-=======
     sim_time: int
     temperature: int
     wind_latent: int
@@ -49,15 +40,12 @@ class WeatherContext:
 
 
 @dataclass(frozen=True)
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
 class LightingContext:
     enclosure: float
     weather_sunlight: int
     active_sources: list[
         tuple[int, int]
     ]  # (light_output, fuel_remaining) per lit source
-<<<<<<< HEAD
-=======
 
 
 @dataclass(frozen=True)
@@ -86,4 +74,3 @@ class TaskContext:
     task_preset: str
     progress_frac: float
     site_context: SiteContext
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)

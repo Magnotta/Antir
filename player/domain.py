@@ -7,11 +7,7 @@ from player.anatomy import Anatomy
 from player.inventory import Inventory
 from player.stats import Stats
 from player.location import Location
-<<<<<<< HEAD
-from core.time import Time
-=======
 from core.defs.time import Time
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
 
 
 class PlayerProperty:

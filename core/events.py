@@ -1,11 +1,7 @@
 from abc import ABC, abstractmethod
 from core.defs.player import CHARACTER_STAT_MAX_RATES
 from core.game_state import GameState
-<<<<<<< HEAD
-from core.time import Time
-=======
 from core.defs.time import Time
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
 from core.formulas.sleep_cycle import *
 from core.formulas.contexts import *
 from core.math_interface import *
@@ -53,13 +49,9 @@ class Event(ABC):
 class PlayerStatCheckEvent(Event, ABC):
     type = "recurring check"
 
-<<<<<<< HEAD
-    def begin(self, state):
-=======
     def begin(
         self, state: GameState
     ) -> tuple[bool, list[Event]]:
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         player = state.get_player_by_id(
             self.payload["target"]
         )
@@ -90,11 +82,7 @@ class WakeUpCheck(PlayerStatCheckEvent):
         """
         super().__init__(due_time, payload, tag)
 
-<<<<<<< HEAD
-    def apply(self, state):
-=======
     def apply(self, state: GameState) -> list["Event"]:
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         return [
             WakeUpEvent(
                 state.time,
@@ -116,13 +104,9 @@ class StatEvent(Event):
         """
         super().__init__(due_time, payload, tag)
 
-<<<<<<< HEAD
-    def begin(self, state):
-=======
     def begin(
         self, state: GameState
     ) -> tuple[bool, list[Event]]:
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         return (True, [])
 
     def apply(self, state):
@@ -179,13 +163,9 @@ class EquipItemEvent(Event):
         """
         super().__init__(due_time, payload, tag)
 
-<<<<<<< HEAD
-    def begin(self, state) -> list:
-=======
     def begin(
         self, state: GameState
     ) -> tuple[bool, list[Event]]:
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         item = state.item_repo.get_item_by_id(
             self.payload["item_id"]
         )
@@ -202,11 +182,7 @@ class EquipItemEvent(Event):
             ],
         )
 
-<<<<<<< HEAD
-    def apply(self, state):
-=======
     def apply(self, state: GameState) -> list["Event"]:
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         item = state.item_repo.get_item_by_id(
             self.payload["item_id"]
         )
@@ -230,19 +206,12 @@ class ItemOwnershipEvent(Event):
         """
         super().__init__(due_time, payload, tag)
 
-<<<<<<< HEAD
-    def begin(self, state) -> list:
-        return (True, [])
-
-    def apply(self, state):
-=======
     def begin(
         self, state: GameState
     ) -> tuple[bool, list[Event]]:
         return (True, [])
 
     def apply(self, state: GameState) -> list["Event"]:
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         state.item_repo.item_chown(
             self.payload["item_id"],
             self.payload["new_owner_id"],
@@ -262,19 +231,12 @@ class SleepEvent(Event):
         """
         super().__init__(due_time, payload, tag)
 
-<<<<<<< HEAD
-    def begin(self, state):
-        return (True, [])
-
-    def apply(self, state):
-=======
     def begin(
         self, state: GameState
     ) -> tuple[bool, list[Event]]:
         return (True, [])
 
     def apply(self, state: GameState) -> list["Event"]:
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         player = state.get_player_by_id(
             self.payload["target"]
         )
@@ -344,22 +306,14 @@ class WakeUpEvent(Event):
         """
         super().__init__(due_time, payload, tag)
 
-<<<<<<< HEAD
-    def begin(self, state):
-=======
     def begin(
         self, state: GameState
     ) -> tuple[bool, list[Event]]:
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         player = state.get_player_by_id(
             self.payload["target"]
         )
         sleepyness, tiredness, anxiety = wakeup_replenish(
-<<<<<<< HEAD
-            AsleepContext.gather(state, player),
-=======
             gather_asleep_context(state, player),
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         )
         return (
             True,
@@ -394,11 +348,7 @@ class WakeUpEvent(Event):
             ],
         )
 
-<<<<<<< HEAD
-    def apply(self, state):
-=======
     def apply(self, state: GameState) -> list["Event"]:
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         player = state.get_player_by_id(
             self.payload["target"]
         )
@@ -418,19 +368,12 @@ class BoneBreakEvent(Event):
         """
         super().__init__(due_time, payload, tag)
 
-<<<<<<< HEAD
-    def begin(self, state):
-        return (True, [])
-
-    def apply(self, state):
-=======
     def begin(
         self, state: GameState
     ) -> tuple[bool, list[Event]]:
         return (True, [])
 
     def apply(self, state: GameState) -> list["Event"]:
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         player = state.get_player_by_id(
             self.payload["target"]
         )

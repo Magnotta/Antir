@@ -61,11 +61,7 @@ class StatThreshold(Base):
     critical_high: Mapped[int] = mapped_column(
         Integer, nullable=False
     )
-<<<<<<< HEAD
-    lose_control_high: Mapped[int | None] = mapped_column(
-=======
     lose_control_high: Mapped[int] = mapped_column(
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         Integer, nullable=False
     )
 

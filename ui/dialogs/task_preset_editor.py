@@ -21,11 +21,6 @@ from PyQt6.QtWidgets import (
     QTableWidget,
     QComboBox,
     QHBoxLayout,
-<<<<<<< HEAD
-    QVBoxLayout,
-    QLabel,
-=======
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
     QPlainTextEdit,
     QSpinBox,
     QDoubleSpinBox,
@@ -36,20 +31,6 @@ from PyQt6.QtWidgets import (
     QAbstractItemView,
     QHeaderView,
 )
-<<<<<<< HEAD
-from core.defs.task import SkillTrack
-from systems.task_service.task import (
-    Interruptibility,
-    Technicality,
-)
-from systems.task_service.task_presets import TaskPreset
-from systems.task_service.physical_activities import (
-    PHYSICAL_ACTIVITIES_DICT,
-)
-from ui.widgets.float_slider import FloatSlider
-
-EXP_EFFECT_LABELS = [
-=======
 from systems.task_service.classes import (
     SkillTrack,
     Interruptibility,
@@ -63,35 +44,25 @@ from systems.task_service.physical_activities import (
 )
 
 EXP_COEFFS_LABELS = [
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
     "Intensity",
     "Efficiency",
     "Quality",
     "Safety",
 ]
 
-<<<<<<< HEAD
-=======
 # The only TriggerPolicy member whose trigger_time matters.
 _ONCE = TriggerPolicy.ONCE
 
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
 
 class TechnicalityFormDialog(QDialog):
     """Small popup form for creating or editing a single Technicality.
 
-<<<<<<< HEAD
-    A Technicality is (key, explanation, trigger_handle). The handle is the
-    name under which the trigger function is registered (see
-    technicalities.py); the function itself isn't built here.
-=======
     A Technicality is (key, explanation, trigger_handle, trigger_policy,
     trigger_time). The handle is the name under which the trigger function
     is registered (see technicalities.py); the function itself isn't built
     here. trigger_time is an int: the percent (0-100) of task progress at
     which a "once" trigger is checked. It only applies to that policy, so
     the field is disabled for the others.
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
     """
 
     def __init__(
@@ -121,8 +92,6 @@ class TechnicalityFormDialog(QDialog):
         )
         form.addRow("Trigger handle", self.trigger_edit)
 
-<<<<<<< HEAD
-=======
         self.trigger_policy_combo = QComboBox()
         for option in TriggerPolicy:
             self.trigger_policy_combo.addItem(
@@ -149,7 +118,6 @@ class TechnicalityFormDialog(QDialog):
             self._sync_trigger_time_enabled
         )
 
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         if existing is not None:
             self.key_edit.setText(existing.key)
             self.explanation_edit.setPlainText(
@@ -158,8 +126,6 @@ class TechnicalityFormDialog(QDialog):
             self.trigger_edit.setText(
                 existing.trigger_handle
             )
-<<<<<<< HEAD
-=======
             self.trigger_policy_combo.setCurrentIndex(
                 self.trigger_policy_combo.findData(
                     existing.trigger_policy.value
@@ -169,7 +135,6 @@ class TechnicalityFormDialog(QDialog):
                 existing.trigger_time
             )
         self._sync_trigger_time_enabled()
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
 
         buttons = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Ok
@@ -179,8 +144,6 @@ class TechnicalityFormDialog(QDialog):
         buttons.rejected.connect(self.reject)
         form.addRow(buttons)
 
-<<<<<<< HEAD
-=======
     def _selected_policy(self) -> TriggerPolicy:
         return TriggerPolicy(
             self.trigger_policy_combo.currentData()
@@ -191,7 +154,6 @@ class TechnicalityFormDialog(QDialog):
             self._selected_policy() is _ONCE
         )
 
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
     def _on_accept(self):
         if not self.key_edit.text().strip():
             QMessageBox.warning(
@@ -214,11 +176,8 @@ class TechnicalityFormDialog(QDialog):
             key=self.key_edit.text().strip(),
             explanation=self.explanation_edit.toPlainText(),
             trigger_handle=self.trigger_edit.text().strip(),
-<<<<<<< HEAD
-=======
             trigger_policy=self._selected_policy(),
             trigger_time=self.trigger_time_spin.value(),
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         )
 
     @classmethod
@@ -246,63 +205,6 @@ class CreateTaskPresetDialog(QDialog):
             )
         form.addRow("Skill track", self.skill_track_combo)
 
-<<<<<<< HEAD
-        # --- task_components: dict[str, float] --------------------------
-        self.components_table = QTableWidget(0, 2)
-        self.components_table.setHorizontalHeaderLabels(
-            ["component", "weight"]
-        )
-        self.components_table.horizontalHeader().setSectionResizeMode(
-            0, QHeaderView.ResizeMode.Stretch
-        )
-        self.components_table.setMaximumHeight(120)
-        form.addRow(
-            "Task components", self.components_table
-        )
-
-        component_buttons = QHBoxLayout()
-        add_component_button = QPushButton(
-            "+ Add Component"
-        )
-        add_component_button.clicked.connect(
-            self._add_component_row
-        )
-        remove_component_button = QPushButton(
-            "Remove Selected"
-        )
-        remove_component_button.clicked.connect(
-            self._remove_component_row
-        )
-        component_buttons.addWidget(add_component_button)
-        component_buttons.addWidget(remove_component_button)
-        form.addRow("", component_buttons)
-
-        # --- exp_effect: tuple[float, float, float, float] ---------------
-        self.exp_effect_sliders = []
-        exp_col = QVBoxLayout()
-        for label in EXP_EFFECT_LABELS:
-            slider = FloatSlider(
-                minimum=-1.0,
-                maximum=10.0,
-                step=0.004,
-                value=0.0,
-                decimals=2,
-            )
-            self.exp_effect_sliders.append(slider)
-            exp_row = QHBoxLayout()
-            label_widget = QLabel(label)
-            label_widget.setFixedWidth(70)
-            exp_row.addWidget(label_widget)
-            exp_row.addWidget(slider, stretch=1)
-            exp_col.addLayout(exp_row)
-        form.addRow("Exp effect", exp_col)
-
-        # --- technicalities: dict[str, Technicality] ----------------------
-        self.technicalities: dict[str, Technicality] = {}
-        self.technicalities_table = QTableWidget(0, 3)
-        self.technicalities_table.setHorizontalHeaderLabels(
-            ["key", "explanation", "trigger"]
-=======
         # --- activity: one physical activity per preset -----------------
         # TaskPreset.activity is a PhysicalActivityName, not free text, so
         # remember each dict key itself and hand that back from
@@ -337,7 +239,6 @@ class CreateTaskPresetDialog(QDialog):
                 "policy",
                 "at",
             ]
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         )
         self.technicalities_table.horizontalHeader().setSectionResizeMode(
             1, QHeaderView.ResizeMode.Stretch
@@ -396,13 +297,10 @@ class CreateTaskPresetDialog(QDialog):
         self.min_lighting_spin.setRange(0, 10_000)
         form.addRow("Min lighting", self.min_lighting_spin)
 
-<<<<<<< HEAD
-=======
         self.notes_edit = QPlainTextEdit()
         self.notes_edit.setMaximumHeight(60)
         form.addRow("Notes", self.notes_edit)
 
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         buttons = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Ok
             | QDialogButtonBox.StandardButton.Cancel
@@ -420,66 +318,16 @@ class CreateTaskPresetDialog(QDialog):
             )
             return
 
-<<<<<<< HEAD
-        try:
-            components = self._task_components()
-        except ValueError:
-            QMessageBox.warning(
-                self,
-                "Invalid weight",
-                "Task component weights must be numbers.",
-            )
-            return
-
-        total_weight = sum(components.values())
-        if not abs(total_weight - 1.0) < 1e-6:
-            QMessageBox.warning(
-                self,
-                "Weights must sum to 1.0",
-                "Task component weights must add up to 1.0 "
-                f"(currently {total_weight:.4f}).",
-=======
         if not self.activity_combo.currentText():
             QMessageBox.warning(
                 self,
                 "Activity required",
                 "Choose the physical activity this preset performs.",
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
             )
             return
 
         self.accept()
 
-<<<<<<< HEAD
-    def _add_component_row(self):
-        row = self.components_table.rowCount()
-        self.components_table.insertRow(row)
-
-        name_combo = QComboBox()
-        for (
-            activity_name
-        ) in PHYSICAL_ACTIVITIES_DICT.keys():
-            name_combo.addItem(activity_name)
-        self.components_table.setCellWidget(
-            row, 0, name_combo
-        )
-
-        self.components_table.setItem(
-            row, 1, QTableWidgetItem("1.0")
-        )
-
-    def _remove_component_row(self):
-        for row in sorted(
-            {
-                i.row()
-                for i in self.components_table.selectedIndexes()
-            },
-            reverse=True,
-        ):
-            self.components_table.removeRow(row)
-
-=======
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
     def _add_technicality(self):
         technicality = (
             TechnicalityFormDialog.get_technicality(self)
@@ -556,8 +404,6 @@ class CreateTaskPresetDialog(QDialog):
                     technicality.key,
                     technicality.explanation,
                     technicality.trigger_handle,
-<<<<<<< HEAD
-=======
                     technicality.trigger_policy.value,
                     (
                         f"{technicality.trigger_time}%"
@@ -565,67 +411,27 @@ class CreateTaskPresetDialog(QDialog):
                         is _ONCE
                         else "—"
                     ),
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
                 )
             ):
                 self.technicalities_table.setItem(
                     row, col, QTableWidgetItem(text)
                 )
 
-<<<<<<< HEAD
-    def _task_components(self) -> dict[str, float]:
-        """Raises ValueError if a weight cell isn't a number."""
-        components = {}
-        for row in range(self.components_table.rowCount()):
-            name_combo = self.components_table.cellWidget(
-                row, 0
-            )
-            weight_item = self.components_table.item(row, 1)
-            name = (
-                name_combo.currentText().strip()
-                if name_combo
-                else ""
-            )
-            if not name:
-                continue
-            weight_text = (
-                weight_item.text() if weight_item else ""
-            )
-            components[name] = (
-                float(weight_text) if weight_text else 0.0
-            )
-        return components
-
-=======
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
     def build_task_preset(self) -> TaskPreset:
         return TaskPreset(
             name=self.name_edit.text().strip(),
             skill_track=self.skill_track_combo.currentData(),
-<<<<<<< HEAD
-            task_components=self._task_components(),
-            # Rounded so slider float noise (0.30000000000000004) doesn't
-            # end up in the generated task_presets.py file.
-            exp_effect=tuple(
-                round(slider.value(), 4)
-                for slider in self.exp_effect_sliders
-            ),
-=======
             activity=self._activities[
                 self.activity_combo.currentText()
             ],
             # Rounded so slider float noise (0.30000000000000004) doesn't
             # end up in the generated task_presets.py file.
             tool_mode=self.tool_mode_combo.currentData(),
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
             metabolic_mult=self.metabolic_mult_spin.value(),
             min_lighting=self.min_lighting_spin.value(),
             technicalities=dict(self.technicalities),
             interruptibility=self.interruptibility_combo.currentData(),
-<<<<<<< HEAD
-=======
             notes=self.notes_edit.toPlainText(),
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         )
 
     @classmethod

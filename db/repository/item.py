@@ -9,11 +9,7 @@ from db.models.item import (
     Item,
     ItemParam,
 )
-<<<<<<< HEAD
-from core.defs.item import (
-=======
 from systems.item_service.item import (
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
     TAG_TO_PARAMS,
     ITEM_PARAM_MAXES,
     ITEM_PARAM_MODES,
@@ -53,11 +49,7 @@ class ItemRepository:
 
     def get_manual_param_defaults(
         self, mold: Mold
-<<<<<<< HEAD
-    ) -> dict[str:int]:
-=======
     ) -> list[dict]:
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         params = []
         for spec in mold.param_specs:
             if ITEM_PARAM_MODES[spec.param] != "manual":
@@ -87,11 +79,7 @@ class ItemRepository:
         a = self.session.scalars(
             stmt.where(Item.destroyed.is_(False))
         ).all()
-<<<<<<< HEAD
-        return a
-=======
         return list(a)
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
 
     def get_item_by_id(self, item_id: int) -> Item:
         return self.session.get(Item, item_id)
@@ -126,11 +114,7 @@ class ItemRepository:
             stmt = stmt.where(
                 Mold.name.ilike(f"%{search}%")
             )
-<<<<<<< HEAD
-        return self.session.scalars(stmt).all()
-=======
         return list(self.session.scalars(stmt).all())
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
 
     def item_chown(self, item_id, new_owner_id):
         item = self.get_item_by_id(item_id)
@@ -143,13 +127,8 @@ class ItemRepository:
         self,
         mold: Mold,
         item: Item,
-<<<<<<< HEAD
-        manual_values: dict[str, float],
-    ) -> list[ItemParam]:
-=======
         manual_values: dict[str, int],
     ):
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         for spec in mold.param_specs:
             base = spec.base
             var = spec.variance
@@ -163,12 +142,8 @@ class ItemRepository:
                     new_value = base + var
                 else:
                     new_value = base
-<<<<<<< HEAD
-            elif ITEM_PARAM_MODES[spec.param] == "auto":
-=======
             else:
                 # ITEM_PARAM_MODES[spec.param] == "auto"
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
                 new_value = randint(
                     base - 3 * var // 4, base + var // 4
                 )
@@ -184,11 +159,7 @@ class ItemRepository:
         for tag in tags:
             candidates = TAG_TO_PARAMS[tag]
             for param in candidates:
-<<<<<<< HEAD
-                params.add(param)
-=======
                 params.add(param.value)
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
         return params
 
     def default_spec_for_param(self, param: str) -> dict:

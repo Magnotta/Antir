@@ -144,11 +144,7 @@ class PlayerRepository:
             setattr(node, stat, old_val + val)
 
     def add_to_stat(
-<<<<<<< HEAD
-        self, player_id: int, stat: str, delta: float
-=======
         self, player_id: int, stat: str, delta: int
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
     ):
         row = (
             self.session.query(PlayerStat)
@@ -255,11 +251,7 @@ class PlayerRepository:
             )
             .one()
         )
-<<<<<<< HEAD
-        return (
-=======
         catch = (
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
             self.session.query(EquipmentSlot)
             .filter(
                 EquipmentSlot.body_node_id == body_node.id,
@@ -268,11 +260,8 @@ class PlayerRepository:
             )
             .first()
         )
-<<<<<<< HEAD
-=======
         assert catch is not None
         return catch
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
 
     def occupy_equipment_slot(
         self, slot: EquipmentSlot, item: Item
@@ -291,8 +280,4 @@ class PlayerRepository:
         stmt = select(BodyNode).where(
             BodyNode.owner_id == player_id
         )
-<<<<<<< HEAD
-        return self.session.scalars(stmt).all()
-=======
         return list(self.session.scalars(stmt).all())
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)

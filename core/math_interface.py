@@ -7,11 +7,7 @@ if TYPE_CHECKING:
 import math
 from core.formulas.contexts import *
 from core.formulas.coefficients import *
-<<<<<<< HEAD
-from core.time import Time
-=======
 from core.defs.time import Time
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
 
 
 def gather_sleep_context(player: Player) -> SleepContext:
@@ -26,13 +22,10 @@ def gather_sleep_context(player: Player) -> SleepContext:
 def gather_asleep_context(
     state: GameState, player: Player
 ) -> AsleepContext:
-<<<<<<< HEAD
-=======
     if not player.sleeping_since or not player.sleep_ref:
         raise ValueError(
             f"Player {player.player_rec.id} is not sleeping!"
         )
->>>>>>> 0f59876 (Added foundation for task execution. Reorganized systems into classes files)
     return AsleepContext(
         tiredness=player.stats.get("tiredness"),
         sleepyness=player.stats.get("sleepyness"),
